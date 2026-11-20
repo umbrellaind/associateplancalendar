@@ -95,7 +95,7 @@
               <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900">UMBRELLA HEALTHCARE CONSULTANCY</h1>
               <span id="navRoleBadge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 rounded-full">AUTHORIZED SESSION</span>
             </div>
-            <p class="text-xs text-slate-500 font-medium">Ultrafast Live Sync • Master Sheet Linked • Server-Side Privacy Shield</p>
+            <p class="text-xs text-slate-500 font-medium">Multi-Target Live Sync • Master Sheet Linked • Server-Side Privacy Shield</p>
           </div>
         </div>
 
@@ -122,7 +122,7 @@
             <span>+ Add Hospital (Master Sheet)</span>
           </button>
           <button id="btnAuditLog" onclick="openAuditLogModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition cursor-pointer">
-            <span>Reschedule Proof & Kachha Chithha (<span id="auditCountBadge">0</span>)</span>
+            <span>Reschedule Proof & Old Records (<span id="auditCountBadge">0</span>)</span>
           </button>
         </div>
       </div>
@@ -146,7 +146,7 @@
         <div class="bg-slate-900 text-white px-4 py-2 text-center text-xs font-bold tracking-widest uppercase border-b border-slate-700 flex items-center justify-between">
           <span class="text-slate-400 hidden sm:inline">WORKING TARGETS + MASTER SHEET</span>
           <span class="mx-auto">ALL PROJECTS EXECUTED BY UMBRELLA OPERATIONS</span>
-          <span class="text-amber-300 text-[11px] font-medium hidden xl:inline">Server-Side Security Active</span>
+          <span class="text-amber-300 text-[11px] font-medium hidden xl:inline">Multi-Target Per Slot Active</span>
         </div>
         <div class="table-container overflow-x-auto max-h-[68vh]">
           <table class="w-full border-collapse text-left">
@@ -203,8 +203,8 @@
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fade">
       <div class="bg-gradient-to-r from-red-600 to-red-700 px-5 py-4 text-white flex items-center justify-between gap-2">
         <div>
-          <h3 class="text-base font-bold">Assign / Add Hospital</h3>
-          <p class="text-[11px] text-red-100">Search Master Sheet or add a brand-new hospital directly</p>
+          <h3 class="text-base font-bold">Assign / Add Hospital Target</h3>
+          <p class="text-[11px] text-red-100">Add 1st, 2nd, or 3rd hospital on the same date</p>
         </div>
         <div class="flex items-center gap-2">
           <a href="https://docs.google.com/spreadsheets/d/1F2DLZOdMUmjUSIpOR-16F2Bq3SSeu-zC176BqoGZTbM/edit?usp=sharing" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold transition">
@@ -258,7 +258,7 @@
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fade">
       <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
         <div>
-          <h3 class="text-base font-bold">Ops Reschedule & Back-Data Logger</h3>
+          <h3 class="text-base font-bold">Ops Reschedule & Audit Logger</h3>
           <p class="text-[11px] text-slate-300">Logs delay count & reason into RESCHEDULE_AUDIT_LOG tab</p>
         </div>
         <button onclick="closeModal('opsRescheduleModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
@@ -323,12 +323,12 @@
     </div>
   </div>
 
-  <!-- HOSPITAL-WISE CONSOLIDATED AUDIT & ASSOCIATE KACHHA CHITHHA MODAL (ADMIN/OPS ONLY) -->
+  <!-- HOSPITAL-WISE CONSOLIDATED AUDIT & OLD RECORDS MODAL (ADMIN/OPS ONLY) -->
   <div id="auditLogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full overflow-hidden animate-fade">
       <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
         <div>
-          <h3 class="text-base font-bold">Hospital-Wise Audit & Associate Kachha Chithha</h3>
+          <h3 class="text-base font-bold">Hospital-Wise Audit & Old Records</h3>
           <p class="text-[11px] text-slate-300">Consolidated hospital delay count, timeline & Umbrella letterhead print</p>
         </div>
         <button onclick="closeModal('auditLogModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
@@ -337,13 +337,13 @@
       <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-2.5 flex-wrap">
-            <label class="text-xs font-extrabold text-slate-700 uppercase">Associate Kachha Chithha:</label>
+            <label class="text-xs font-extrabold text-slate-700 uppercase">Associate Old Records:</label>
             <select id="auditAssociateFilter" onchange="renderAuditModalContent()" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-red-500">
               <option value="ALL">ALL ASSOCIATES (All Hospitals)</option>
             </select>
           </div>
-          <button onclick="printAssociateKachhaChithha()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
-            <span>🖨️ Print Selected Associate Kachha Chithha</span>
+          <button onclick="printAssociateOldRecords()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+            <span>🖨️ Print Selected Associate Old Records</span>
           </button>
         </div>
 
@@ -380,7 +380,7 @@
       </div>
       <div>
         <label class="block text-xs font-bold text-slate-700 mb-1.5">Remark / Status Update</label>
-        <input type="text" id="remarkInput" placeholder="Enter status remark..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none" />
+        <textarea id="remarkInput" rows="3" placeholder="Enter status remark..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none"></textarea>
       </div>
       <div id="statusColorSelectorWrap" class="hidden">
         <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Color (Ops / Admin Only)</label>
@@ -412,7 +412,7 @@
     }
 
     function getCacheKey() {
-      return currentUserObj ? `umbrella_dash_cache_${currentUserObj.mobile}` : 'umbrella_dash_cache';
+      return currentUserObj ? `umbrella_dash_cache_v3_${currentUserObj.mobile}` : 'umbrella_dash_cache_v3';
     }
 
     function saveLocalDashboardCache() {
@@ -626,9 +626,9 @@
       }
 
       if (currentUserObj.role === 'ADMIN') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Kachha Chithha</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users, add/search hospitals from Master Sheet, and print hospital/associate audit proofs.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Old Records</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users, assign multiple hospitals per date, and print hospital/associate audit records.</p></div>`;
       } else if (currentUserObj.role === 'OPERATOR') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Can Add & Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">All projects belong to Umbrella. Search Master Sheet, add targets, and reschedule slots with audit proof.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Multi-Target & Reschedule Control</span></div><p class="text-xs text-slate-500 mt-0.5">Assign multiple targets per slot, view Master Sheet links, and reschedule slots with audit proof.</p></div>`;
       } else {
         banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">${currentUserObj.sheetCol.charAt(0)}</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ASSOCIATE: <span class="text-red-600">${currentUserObj.sheetCol}</span></span><span class="px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Your Schedule & Hospital Issue Escalation</span></div><p class="text-xs text-slate-500 mt-0.5">Only your hospitals & % completion are visible. Use <strong>"Contact Hospital / Flag Issue"</strong> if hospital delays work.</p></div>`;
       }
@@ -644,14 +644,14 @@
         const remarkHighlight = col.isMyCol ? 'bg-red-900 text-red-100' : 'bg-neutral-900 text-slate-300';
 
         html += `
-          <th class="${thHighlight} font-bold px-3 py-3 border-r border-slate-700 min-w-[215px] text-center">
+          <th class="${thHighlight} font-bold px-3 py-3 border-r border-slate-700 min-w-[235px] text-center">
             <div class="flex flex-col items-center justify-center gap-0.5">
               <span class="${isMaskedHeader ? 'font-mono tracking-wider text-slate-300 select-none' : ''}">${col.displayName}</span>
               ${col.isMyCol ? '<span class="text-[9px] bg-white text-red-700 px-1.5 rounded-full font-extrabold">YOUR HOSPITALS</span>' : ''}
               ${col.isOpsCol ? '<span class="text-[9px] bg-slate-800 text-amber-300 px-1.5 rounded-full font-semibold">UMBRELLA DIRECT</span>' : ''}
             </div>
           </th>
-          <th class="${remarkHighlight} font-semibold px-3 py-3 border-r border-slate-700 min-w-[140px] text-center text-[11px]">REMARK</th>
+          <th class="${remarkHighlight} font-semibold px-3 py-3 border-r border-slate-700 min-w-[155px] text-center text-[11px]">REMARK</th>
         `;
       });
 
@@ -670,28 +670,44 @@
         let rowHTML = `<td class="sticky-col bg-black text-white font-bold px-3.5 py-3 border-r border-b border-slate-800 text-xs text-center whitespace-nowrap"><span>${row.date}</span></td>`;
 
         dashboardState.columns.forEach(col => {
-          const cell = row.entries[col.actualName] || { text: '', status: 'none', remark: '', masked: false };
+          const cell = row.entries[col.actualName] || { items: [], status: 'none', remark: '', masked: false };
+          const items = cell.items || [];
           const colBgTint = col.isMyCol ? 'bg-red-50/40' : 'bg-white';
 
-          if (cell.text) {
-            const statusClasses = getCellStyle(cell.status);
-            rowHTML += `
-              <td class="${colBgTint} p-1.5 border-r border-b border-slate-200 align-middle text-center">
-                <div class="px-2.5 py-2 rounded-lg text-xs leading-snug ${statusClasses} ${cell.masked ? 'font-mono tracking-wider select-none' : 'space-y-1.5 text-left'}">
+          if (items.length > 0) {
+            const cardsHtml = items.map((item, idx) => {
+              const statusClasses = getCellStyle(item.status);
+              const safeItemText = item.text.replace(/'/g, "\\'");
+              return `
+                <div class="px-2.5 py-2 rounded-lg text-xs leading-snug ${statusClasses} ${item.masked ? 'font-mono tracking-wider select-none' : 'space-y-1.5 text-left'}">
                   <div class="flex items-start justify-between gap-1.5">
-                    <span class="font-bold">${cell.text}</span>
-                    ${!cell.masked && cell.reschedCount > 0 ? `<button onclick="${isAdminOrOps() ? 'openAuditLogModal()' : ''}" class="shrink-0 px-1.5 py-0.5 text-[9px] font-extrabold rounded bg-slate-900 text-amber-300 border border-slate-700 ${isAdminOrOps() ? 'cursor-pointer hover:bg-red-700 hover:text-white' : ''}">${cell.reschedCount}x Delayed</button>` : ''}
+                    <span class="font-bold">${items.length > 1 && !item.masked ? `<span class="opacity-60 mr-1">${idx + 1}.</span>` : ''}${item.text}</span>
+                    ${!item.masked && item.reschedCount > 0 ? `<button onclick="${isAdminOrOps() ? 'openAuditLogModal()' : ''}" class="shrink-0 px-1.5 py-0.5 text-[9px] font-extrabold rounded bg-slate-900 text-amber-300 border border-slate-700 ${isAdminOrOps() ? 'cursor-pointer hover:bg-red-700 hover:text-white' : ''}">${item.reschedCount}x Delayed</button>` : ''}
                   </div>
-                  ${!cell.masked && cell.completion ? `
+                  ${!item.masked && item.completion ? `
                     <div class="flex items-center justify-between text-[10px] pt-0.5">
-                      <span class="px-1.5 py-0.5 rounded bg-white/80 text-slate-800 font-bold border border-black/10">Master: ${cell.completion}</span>
-                      ${isAdminOrOps() ? `<div class="flex items-center gap-1">${cell.sheetUrl ? `<a href="${cell.sheetUrl}" target="_blank" class="px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold hover:bg-blue-700">Sheet</a>` : ''}${cell.driveUrl ? `<a href="${cell.driveUrl}" target="_blank" class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold hover:bg-slate-900">Drive</a>` : ''}</div>` : ''}
+                      <span class="px-1.5 py-0.5 rounded bg-white/80 text-slate-800 font-bold border border-black/10">Master: ${item.completion}</span>
+                      ${isAdminOrOps() ? `<div class="flex items-center gap-1">${item.sheetUrl ? `<a href="${item.sheetUrl}" target="_blank" class="px-1.5 py-0.5 rounded bg-blue-600 text-white font-bold hover:bg-blue-700">Sheet</a>` : ''}${item.driveUrl ? `<a href="${item.driveUrl}" target="_blank" class="px-1.5 py-0.5 rounded bg-slate-800 text-white font-bold hover:bg-slate-900">Drive</a>` : ''}</div>` : ''}
                     </div>
                   ` : ''}
-                  ${!cell.masked && cell.status !== 'shifted' ? (
-                    isAdminOrOps() ? `<button onclick="openOpsRescheduleModal(${rowIndex}, '${col.actualName}')" class="w-full mt-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wide rounded-md bg-white/95 hover:bg-slate-900 text-slate-900 hover:text-white border border-slate-300 transition cursor-pointer"><span>↻ Ops Reschedule (Log Proof)</span></button>`
-                    : `<button onclick="openAssociateIssueModal(${rowIndex}, '${col.actualName}')" class="w-full mt-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wide rounded-md bg-white/95 hover:bg-red-600 text-red-700 hover:text-white border border-red-300 transition cursor-pointer"><span>☎ Contact Hospital / Flag Issue</span></button>`
+                  ${!item.masked && item.status !== 'shifted' ? (
+                    isAdminOrOps() ? `<button onclick="openOpsRescheduleModal(${rowIndex}, '${col.actualName}', ${idx})" class="w-full mt-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wide rounded-md bg-white/95 hover:bg-slate-900 text-slate-900 hover:text-white border border-slate-300 transition cursor-pointer"><span>↻ Ops Reschedule (Log Proof)</span></button>`
+                    : `<button onclick="openAssociateIssueModal(${rowIndex}, '${col.actualName}', '${safeItemText}')" class="w-full mt-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wide rounded-md bg-white/95 hover:bg-red-600 text-red-700 hover:text-white border border-red-300 transition cursor-pointer"><span>☎ Contact Hospital / Flag Issue</span></button>`
                   ) : ''}
+                </div>
+              `;
+            }).join('');
+
+            // Admin & Ops can ALWAYS add a 2nd, 3rd, or 4th target in the same slot!
+            const addMoreBtn = isAdminOrOps()
+              ? `<button onclick="openAddHospitalModal(${rowIndex}, '${col.actualName}')" class="w-full py-1 rounded-md border border-dashed border-slate-300 hover:border-red-500 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-50/70 hover:bg-red-50/60 transition cursor-pointer">+ Add Another Target</button>`
+              : '';
+
+            rowHTML += `
+              <td class="${colBgTint} p-1.5 border-r border-b border-slate-200 align-top text-center">
+                <div class="space-y-1.5">
+                  ${cardsHtml}
+                  ${addMoreBtn}
                 </div>
               </td>
             `;
@@ -700,10 +716,11 @@
           }
 
           const canEditRemark = isAdminOrOps() || col.isMyCol;
+          const formattedRemark = cell.remark ? cell.remark.replace(/\n/g, '<br/>') : '';
           if (canEditRemark) {
-            rowHTML += `<td onclick="openRemarkModal(${rowIndex}, '${col.actualName}')" class="${colBgTint} p-2 border-r border-b border-slate-200 align-middle text-center cursor-pointer group hover:bg-red-50 transition">${cell.remark ? `<span class="text-xs text-slate-700 font-medium group-hover:text-red-700">${cell.remark}</span>` : `<span class="text-[11px] text-slate-400 opacity-70 group-hover:opacity-100 group-hover:text-red-600">+ Note</span>`}</td>`;
+            rowHTML += `<td onclick="openRemarkModal(${rowIndex}, '${col.actualName}')" class="${colBgTint} p-2 border-r border-b border-slate-200 align-top text-left cursor-pointer group hover:bg-red-50 transition">${formattedRemark ? `<span class="text-xs text-slate-700 font-medium group-hover:text-red-700 leading-relaxed">${formattedRemark}</span>` : `<div class="text-center pt-1"><span class="text-[11px] text-slate-400 opacity-70 group-hover:opacity-100 group-hover:text-red-600">+ Note</span></div>`}</td>`;
           } else {
-            rowHTML += `<td class="bg-slate-50/50 p-2 border-r border-b border-slate-200 align-middle text-center text-xs text-slate-400 font-mono select-none">${cell.remark || ''}</td>`;
+            rowHTML += `<td class="bg-slate-50/50 p-2 border-r border-b border-slate-200 align-top text-center text-xs text-slate-400 font-mono select-none">${formattedRemark}</td>`;
           }
         });
 
@@ -848,19 +865,27 @@
       const colName = document.getElementById('addTargetColSelect').value;
       const remark = document.getElementById('addHospitalRemark').value.trim() || `Scheduled (${completionVal} done)`;
 
+      // OPTIMISTIC UI UPDATE (Appends to existing items array for that date/column!)
       closeModal('addHospitalModal');
       const targetRow = dashboardState.rows.find(r => r.sheetRowNumber === sheetRowNumber);
       if (targetRow) {
-        targetRow.entries[colName] = {
+        if (!targetRow.entries[colName]) {
+          targetRow.entries[colName] = { items: [], remark: '', status: 'yellow', masked: false };
+        }
+        targetRow.entries[colName].items.push({
+          itemIndex: targetRow.entries[colName].items.length,
           text: finalName,
-          remark: remark,
           status: 'yellow',
           masked: false,
           reschedCount: 0,
           completion: completionVal,
           sheetUrl: existingHosp ? existingHosp.sheetUrl : null,
           driveUrl: existingHosp ? existingHosp.driveUrl : null
-        };
+        });
+        const prefix = targetRow.entries[colName].items.length > 1 ? `[${finalName}] ` : '';
+        targetRow.entries[colName].remark = targetRow.entries[colName].remark
+          ? `${targetRow.entries[colName].remark}\n${prefix}${remark}`
+          : `${prefix}${remark}`;
         renderTableBody();
       }
       showToast(addToMaster ? `Adding "${finalName}" to Master Sheet & Schedule...` : `Added ${finalName} — saving...`);
@@ -880,12 +905,13 @@
       } catch (err) { showToast(err.message); }
     }
 
-    function openOpsRescheduleModal(rowIndex, colName) {
+    function openOpsRescheduleModal(rowIndex, colName, itemIndex = 0) {
       if (!isAdminOrOps()) return;
       const row = dashboardState.rows[rowIndex];
       const entry = row.entries[colName];
-      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName };
-      document.getElementById('reschedHospitalName').textContent = entry.text;
+      const item = (entry.items && entry.items[itemIndex]) || { text: '' };
+      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName, itemIndex };
+      document.getElementById('reschedHospitalName').textContent = item.text;
       document.getElementById('reschedCurrentSlot').textContent = `${row.date} (${colName})`;
       document.getElementById('reschedExactReason').value = '';
       document.getElementById('reschedNewDateSelect').innerHTML = dashboardState.rows.filter((_, idx) => idx !== rowIndex).map(r => `<option value="${r.sheetRowNumber}">${r.date}</option>`).join('');
@@ -902,7 +928,17 @@
       showToast('Rescheduling & logging proof in background...');
 
       try {
-        const res = await apiCall({ action: 'OPS_RESCHEDULE', mobile: sessionCreds.mobile, password: sessionCreds.password, oldRowNumber: activeTarget.sheetRowNumber, newRowNumber, colName: activeTarget.colName, faultSide, reason }, 'Saving...', true);
+        const res = await apiCall({
+          action: 'OPS_RESCHEDULE',
+          mobile: sessionCreds.mobile,
+          password: sessionCreds.password,
+          oldRowNumber: activeTarget.sheetRowNumber,
+          newRowNumber,
+          colName: activeTarget.colName,
+          itemIndex: activeTarget.itemIndex,
+          faultSide,
+          reason
+        }, 'Saving...', true);
         if (res.success) {
           await refreshDashboard(false, true);
           showToast(res.message);
@@ -910,10 +946,10 @@
       } catch (err) { showToast(err.message); }
     }
 
-    function openAssociateIssueModal(rowIndex, colName) {
+    function openAssociateIssueModal(rowIndex, colName, hospitalName) {
       const row = dashboardState.rows[rowIndex];
-      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName };
-      document.getElementById('issueHospitalName').textContent = row.entries[colName].text;
+      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName, hospitalName };
+      document.getElementById('issueHospitalName').textContent = hospitalName;
       document.getElementById('issueNoteInput').value = '';
       openModal('associateIssueModal');
     }
@@ -927,19 +963,29 @@
       closeModal('associateIssueModal');
       const row = dashboardState.rows[activeTarget.rowIndex];
       if (row && row.entries[activeTarget.colName]) {
-        row.entries[activeTarget.colName].status = 'red';
-        row.entries[activeTarget.colName].remark = `[Hospital Issue] ${issueText}`;
+        const prefix = activeTarget.hospitalName ? `[${activeTarget.hospitalName} Issue] ` : `[Hospital Issue] `;
+        row.entries[activeTarget.colName].remark = row.entries[activeTarget.colName].remark
+          ? `${row.entries[activeTarget.colName].remark}\n${prefix}${issueText}`
+          : `${prefix}${issueText}`;
         renderTableBody();
       }
       showToast('Issue flagged! Syncing with Ops Team...');
 
       try {
-        const res = await apiCall({ action: 'FLAG_ISSUE', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber: activeTarget.sheetRowNumber, colName: activeTarget.colName, issueText }, 'Saving...', true);
+        const res = await apiCall({
+          action: 'FLAG_ISSUE',
+          mobile: sessionCreds.mobile,
+          password: sessionCreds.password,
+          sheetRowNumber: activeTarget.sheetRowNumber,
+          colName: activeTarget.colName,
+          hospitalName: activeTarget.hospitalName,
+          issueText
+        }, 'Saving...', true);
         if (res.success) await refreshDashboard(false, true);
       } catch (err) { showToast(err.message); }
     }
 
-    // HOSPITAL-WISE GROUPED AUDIT & UMBRELLA LETTERHEAD PRINT (ADMIN & OPERATORS ONLY)
+    // HOSPITAL-WISE GROUPED AUDIT & OLD RECORDS (ADMIN & OPERATORS ONLY)
     function getGroupedHospitalAudits(filterAssociate = 'ALL') {
       if (!isAdminOrOps()) return [];
       const logs = dashboardState.auditLogs || [];
@@ -1178,14 +1224,14 @@
       );
     }
 
-    function printAssociateKachhaChithha() {
+    function printAssociateOldRecords() {
       const selectedAssoc = document.getElementById('auditAssociateFilter').value;
       const grouped = getGroupedHospitalAudits(selectedAssoc);
       const totalHosp = grouped.length;
       const totalResched = grouped.reduce((s, g) => s + g.totalCount, 0);
       const totalHospEnd = grouped.reduce((s, g) => s + g.hospEndCount, 0);
 
-      const titleLabel = selectedAssoc === 'ALL' ? 'ALL ASSOCIATES — CONSOLIDATED KACHHA CHITHHA' : `ASSOCIATE KACHHA CHITHHA: ${selectedAssoc}`;
+      const titleLabel = selectedAssoc === 'ALL' ? 'ALL ASSOCIATES — CONSOLIDATED OLD RECORDS STATEMENT' : `ASSOCIATE OLD RECORDS STATEMENT: ${selectedAssoc}`;
 
       const summaryHtml = `
         <div class="sum-card"><span>Associate / Filter</span><strong>${selectedAssoc}</strong></div>
@@ -1236,7 +1282,7 @@
       document.getElementById('modalSubTitle').textContent = `${colName} • ${row.date}`;
       document.getElementById('remarkInput').value = entry.remark || '';
       const statusWrap = document.getElementById('statusColorSelectorWrap');
-      if (isAdminOrOps() && entry.text) {
+      if (isAdminOrOps() && entry.items && entry.items.length > 0) {
         statusWrap.classList.remove('hidden');
         document.getElementById('remarkStatusSelect').value = entry.status === 'none' ? 'yellow' : entry.status;
       } else { statusWrap.classList.add('hidden'); }
@@ -1252,7 +1298,12 @@
       const row = dashboardState.rows[activeTarget.rowIndex];
       if (row && row.entries[activeTarget.colName]) {
         row.entries[activeTarget.colName].remark = remark;
-        if (status) row.entries[activeTarget.colName].status = status;
+        if (status) {
+          row.entries[activeTarget.colName].status = status;
+          (row.entries[activeTarget.colName].items || []).forEach(it => {
+            if (it.status !== 'shifted') it.status = status;
+          });
+        }
         renderTableBody();
       }
       showToast('Saved! Syncing with sheet...');
