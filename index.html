@@ -303,24 +303,50 @@
   </div>
 
   <div id="auditLogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full overflow-hidden animate-fade">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full overflow-hidden animate-fade">
       <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
-        <div><h3 class="text-base font-bold">Back-Data: RESCHEDULE_AUDIT_LOG</h3><p class="text-[11px] text-slate-300">Accountability proof of hospital reschedules</p></div>
+        <div>
+          <h3 class="text-base font-bold">Hospital-Wise Audit & Associate Kachha Chithha</h3>
+          <p class="text-[11px] text-slate-300">Consolidated hospital delay count, timeline & Umbrella letterhead print</p>
+        </div>
         <button onclick="closeModal('auditLogModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
       </div>
-      <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+
+      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        <!-- Filter & Print Toolbar -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <label class="text-xs font-extrabold text-slate-700 uppercase">Associate Kachha Chithha:</label>
+            <select id="auditAssociateFilter" onchange="renderAuditModalContent()" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-red-500">
+              <option value="ALL">ALL ASSOCIATES (All Hospitals)</option>
+            </select>
+          </div>
+          <button onclick="printAssociateKachhaChithha()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
+            <span>🖨️ Print Selected Associate Kachha Chithha</span>
+          </button>
+        </div>
+
         <div id="auditSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+
+        <!-- Hospital-Wise Consolidated Table -->
         <div class="overflow-x-auto border border-slate-200 rounded-xl">
           <table class="w-full text-left border-collapse text-xs">
             <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
-              <tr><th class="p-3">Hospital</th><th class="p-3">Source</th><th class="p-3">Count</th><th class="p-3">Date Shift</th><th class="p-3">Fault Side</th><th class="p-3">Exact Proof</th><th class="p-3 text-right">Action</th></tr>
+              <tr>
+                <th class="p-3">Hospital Name</th>
+                <th class="p-3">Associate / Source</th>
+                <th class="p-3 text-center">Total Reschedules</th>
+                <th class="p-3">Date Shifts & Exact Proofs (Timeline)</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
             </thead>
             <tbody id="auditTableBody" class="divide-y divide-slate-200"></tbody>
           </table>
         </div>
       </div>
+
       <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-between items-center">
-        <span class="text-xs text-slate-500">Click <strong>"Copy Proof"</strong> to copy WhatsApp-ready proof</span>
+        <span class="text-xs text-slate-500">Click <strong>"Print History"</strong> for official Umbrella Healthcare PDF proof</span>
         <button onclick="closeModal('auditLogModal')" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg cursor-pointer">Close</button>
       </div>
     </div>
