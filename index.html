@@ -807,6 +807,25 @@
       banner.classList.remove('hidden'); clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(() => banner.classList.add('hidden'), 4000);
     }
+    window.addEventListener('DOMContentLoaded', async () => {
+      const saved = localStorage.getItem('umbrella_session');
+      if (!saved) return;
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.mobile && parsed.password && parsed.user) {
+          sessionCreds = { mobile: parsed.mobile, password: parsed.password };
+          currentUserObj = parsed.user;
+          document.getElementById('authScreen').classList.add('hidden');
+          document.getElementById('portalApp').classList.remove('hidden');
+          document.getElementById('loggedInUserName').textContent = currentUserObj.name;
+          document.getElementById('loggedInUserMeta').textContent = `${currentUserObj.mobile} • Role: ${currentUserObj.role}`;
+          document.getElementById('navRoleBadge').textContent = `${currentUserObj.role} ACCESS`;
+          await refreshDashboard();
+        }
+      } catch (e) {
+        localStorage.removeItem('umbrella_session');
+      }
+    });
   </script>
 </body>
 </html>
