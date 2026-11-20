@@ -425,6 +425,9 @@
         errBox.classList.add('hidden');
         sessionCreds = { mobile, password };
         currentUserObj = res.user;
+        sessionCreds = { mobile, password };
+        currentUserObj = res.user;
+        localStorage.setItem('umbrella_session', JSON.stringify({ mobile, password, user: res.user }));
 
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('portalApp').classList.remove('hidden');
@@ -459,7 +462,9 @@
     }
 
     function logoutUser() {
-      sessionCreds = null; currentUserObj = null;
+      localStorage.removeItem('umbrella_session');
+      sessionCreds = null;
+      currentUserObj = null;
       document.getElementById('portalApp').classList.add('hidden');
       document.getElementById('authScreen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
