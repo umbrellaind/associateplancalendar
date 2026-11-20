@@ -16,7 +16,7 @@
     .sticky-header th { position: sticky; top: 0; z-index: 30; }
     .sticky-corner { position: sticky; left: 0; top: 0; z-index: 40 !important; box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade { animation: fadeIn 0.25s ease-out forwards; }
+    .animate-fade { animation: fadeIn 0.2s ease-out forwards; }
   </style>
 </head>
 <body class="text-slate-800 antialiased selection:bg-red-100 selection:text-red-800">
@@ -95,7 +95,7 @@
               <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900">UMBRELLA HEALTHCARE CONSULTANCY</h1>
               <span id="navRoleBadge" class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 rounded-full">AUTHORIZED SESSION</span>
             </div>
-            <p class="text-xs text-slate-500 font-medium">Live Google Sheet Sync • Master Sheet Linked • Hospital-End Reschedule Audit Proof</p>
+            <p class="text-xs text-slate-500 font-medium">Ultrafast Live Sync • Master Sheet Linked • Server-Side Privacy Shield</p>
           </div>
         </div>
 
@@ -104,7 +104,7 @@
             <p id="loggedInUserName" class="text-xs sm:text-sm font-extrabold text-slate-900"></p>
             <p id="loggedInUserMeta" class="text-[11px] font-medium text-slate-500"></p>
           </div>
-          <button onclick="refreshDashboard()" title="Sync Latest Sheet Data" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer">↻ Sync</button>
+          <button onclick="refreshDashboard(true, false)" title="Force Sync Latest Sheet & Master Data" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer">↻ Sync</button>
           <button onclick="logoutUser()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-red-600 text-slate-700 hover:text-white border border-slate-300 hover:border-red-600 text-xs font-bold transition cursor-pointer">Logout</button>
         </div>
       </div>
@@ -113,21 +113,27 @@
     <main class="max-w-[1650px] mx-auto px-4 sm:px-6 py-5 space-y-4">
       <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div id="modeBanner" class="flex items-start sm:items-center gap-3"></div>
-        <div class="flex flex-wrap items-center gap-2.5">
+        <!-- ONLY VISIBLE TO ADMIN & OPERATORS (COMPLETELY HIDDEN FOR ASSOCIATES) -->
+        <div id="adminOpsToolbar" class="hidden flex-wrap items-center gap-2.5">
           <button id="btnAdminUsers" onclick="openUserAuthModal()" class="hidden items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition cursor-pointer">
             <span>🔐 Authorize Users (<span id="pendingUsersBadge">0 Pending</span>)</span>
           </button>
-          <button id="btnAddHospital" onclick="openAddHospitalModal()" class="hidden items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-sm transition cursor-pointer">
+          <button id="btnAddHospital" onclick="openAddHospitalModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-sm transition cursor-pointer">
             <span>+ Add Hospital (Master Sheet)</span>
           </button>
-          <button id="btnAuditLog" onclick="openAuditLogModal()" class="hidden items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition cursor-pointer">
-            <span>Reschedule Proof Log (<span id="auditCountBadge">0</span>)</span>
+          <button id="btnAuditLog" onclick="openAuditLogModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition cursor-pointer">
+            <span>Reschedule Proof & Kachha Chithha (<span id="auditCountBadge">0</span>)</span>
           </button>
         </div>
       </div>
 
       <div class="flex items-center justify-between px-1 flex-wrap gap-2">
-        <span id="syncStatusLabel" class="text-xs font-semibold text-slate-500">Connected to Google Sheets</span>
+        <div class="flex items-center gap-2">
+          <span id="syncPill" class="hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">
+            <span class="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span> Updating live data...
+          </span>
+          <span id="syncStatusLabel" class="text-xs font-semibold text-slate-500">Ready</span>
+        </div>
         <div class="flex items-center gap-3 flex-wrap text-xs font-medium text-slate-600 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-2xs">
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Complete</span>
           <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span> In Progress</span>
@@ -152,11 +158,11 @@
     </main>
   </div>
 
-  <!-- Loading Overlay & Toast -->
+  <!-- Minimal Loading Overlay (Only shown on first login when no cache exists) -->
   <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-50 hidden items-center justify-center">
     <div class="bg-white px-5 py-3.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3">
       <div class="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-      <span id="loadingText" class="text-xs font-bold text-slate-800">Syncing with Google Sheet...</span>
+      <span id="loadingText" class="text-xs font-bold text-slate-800">Loading schedule...</span>
     </div>
   </div>
 
@@ -197,7 +203,7 @@
       <div class="bg-gradient-to-r from-red-600 to-red-700 px-5 py-4 text-white flex items-center justify-between">
         <div>
           <h3 class="text-base font-bold">Add Hospital from MASTER SHEET</h3>
-          <p class="text-[11px] text-red-100">Fetched live from your Master Spreadsheet</p>
+          <p class="text-[11px] text-red-100">Fetched from your Master Spreadsheet</p>
         </div>
         <button onclick="closeModal('addHospitalModal')" class="text-red-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
       </div>
@@ -298,7 +304,7 @@
     </div>
   </div>
 
-  <!-- HOSPITAL-WISE CONSOLIDATED AUDIT & ASSOCIATE KACHHA CHITHHA MODAL -->
+  <!-- HOSPITAL-WISE CONSOLIDATED AUDIT & ASSOCIATE KACHHA CHITHHA MODAL (ADMIN/OPS ONLY) -->
   <div id="auditLogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full overflow-hidden animate-fade">
       <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
@@ -379,18 +385,47 @@
     let sessionCreds = null;
     let currentUserObj = null;
     let dashboardState = { columns: [], rows: [], masterHospitals: [], auditLogs: [], usersList: [] };
-    let colorTheme = 'modern';
     let activeTarget = null;
 
     function isAdminOrOps() {
       return currentUserObj && (currentUserObj.role === 'ADMIN' || currentUserObj.role === 'OPERATOR');
     }
 
-    async function apiCall(payload, loadingMsg = 'Syncing with Google Sheet...') {
+    function getCacheKey() {
+      return currentUserObj ? `umbrella_dash_cache_${currentUserObj.mobile}` : 'umbrella_dash_cache';
+    }
+
+    function saveLocalDashboardCache() {
+      try {
+        localStorage.setItem(getCacheKey(), JSON.stringify(dashboardState));
+      } catch (e) {}
+    }
+
+    function loadLocalDashboardCache() {
+      try {
+        const raw = localStorage.getItem(getCacheKey());
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.columns && parsed.rows) {
+          dashboardState = parsed;
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    // silent = true avoids blocking spinner and uses top subtle sync badge
+    async function apiCall(payload, loadingMsg = 'Syncing...', silent = false) {
       if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT')) {
         throw new Error('Please paste your deployed Google Apps Script Web App URL in SCRIPT_URL inside index.html.');
       }
-      showLoading(loadingMsg);
+      const syncPill = document.getElementById('syncPill');
+      if (silent) {
+        if (syncPill) { syncPill.classList.remove('hidden'); syncPill.classList.add('inline-flex'); }
+      } else {
+        showLoading(loadingMsg);
+      }
+
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
@@ -399,7 +434,11 @@
         });
         return await res.json();
       } finally {
-        hideLoading();
+        if (silent) {
+          if (syncPill) { syncPill.classList.add('hidden'); syncPill.classList.remove('inline-flex'); }
+        } else {
+          hideLoading();
+        }
       }
     }
 
@@ -439,7 +478,7 @@
       const errBox = document.getElementById('loginErrorBox');
 
       try {
-        const res = await apiCall({ action: 'LOGIN', mobile, password }, 'Verifying credentials...');
+        const res = await apiCall({ action: 'LOGIN', mobile, password }, 'Verifying credentials...', false);
         if (!res.success) {
           errBox.textContent = res.message; errBox.classList.remove('hidden'); return;
         }
@@ -448,17 +487,26 @@
         currentUserObj = res.user;
         localStorage.setItem('umbrella_session', JSON.stringify({ mobile, password, user: res.user }));
 
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('portalApp').classList.remove('hidden');
-        document.getElementById('loggedInUserName').textContent = currentUserObj.name;
-        document.getElementById('loggedInUserMeta').textContent = `${currentUserObj.mobile} • Role: ${currentUserObj.role}`;
-        document.getElementById('navRoleBadge').textContent = `${currentUserObj.role} ACCESS`;
-
-        await refreshDashboard();
+        activatePortalUI();
+        const hasCache = loadLocalDashboardCache();
+        if (hasCache) {
+          renderApp();
+          await refreshDashboard(false, true); // Background silent sync
+        } else {
+          await refreshDashboard(false, false);
+        }
         showToast(`Welcome ${currentUserObj.name}!`);
       } catch (err) {
         errBox.textContent = err.message; errBox.classList.remove('hidden');
       }
+    }
+
+    function activatePortalUI() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('portalApp').classList.remove('hidden');
+      document.getElementById('loggedInUserName').textContent = currentUserObj.name;
+      document.getElementById('loggedInUserMeta').textContent = `${currentUserObj.mobile} • Role: ${currentUserObj.role}`;
+      document.getElementById('navRoleBadge').textContent = `${currentUserObj.role} ACCESS`;
     }
 
     async function handleSelfSignup(e) {
@@ -469,7 +517,7 @@
       const role = document.getElementById('regRole').value;
 
       try {
-        const res = await apiCall({ action: 'SIGNUP', name, mobile, password, role }, 'Submitting registration...');
+        const res = await apiCall({ action: 'SIGNUP', name, mobile, password, role }, 'Submitting registration...', false);
         if (!res.success) { showToast(res.message); return; }
         document.getElementById('signupForm').reset();
         switchAuthTab('login');
@@ -489,10 +537,16 @@
       document.getElementById('loginPassword').value = '';
     }
 
-    async function refreshDashboard() {
+    async function refreshDashboard(forceRefreshMaster = false, silent = false) {
       if (!sessionCreds) return;
       try {
-        const res = await apiCall({ action: 'GET_DASHBOARD', mobile: sessionCreds.mobile, password: sessionCreds.password }, 'Loading Working Targets & Master Sheet...');
+        const res = await apiCall({
+          action: 'GET_DASHBOARD',
+          mobile: sessionCreds.mobile,
+          password: sessionCreds.password,
+          forceRefreshMaster
+        }, 'Syncing schedule...', silent);
+
         if (!res.success) {
           showToast(res.message);
           if (res.message && res.message.toLowerCase().includes('unauthorized')) logoutUser();
@@ -501,14 +555,11 @@
 
         dashboardState.columns = res.columns;
         dashboardState.rows = res.rows;
-        dashboardState.masterHospitals = res.masterHospitals || [];
-        dashboardState.auditLogs = res.auditLogs || [];
+        dashboardState.masterHospitals = isAdminOrOps() ? (res.masterHospitals || []) : [];
+        dashboardState.auditLogs = isAdminOrOps() ? (res.auditLogs || []) : [];
+        dashboardState.usersList = (currentUserObj.role === 'ADMIN') ? (res.usersList || []) : [];
 
-        if (currentUserObj.role === 'ADMIN') {
-          const usersRes = await apiCall({ action: 'GET_USERS', mobile: sessionCreds.mobile, password: sessionCreds.password }, 'Checking user approvals...');
-          if (usersRes.success) dashboardState.usersList = usersRes.users;
-        }
-
+        saveLocalDashboardCache();
         document.getElementById('syncStatusLabel').textContent = `Last Synced: ${new Date().toLocaleTimeString()}`;
         renderApp();
       } catch (err) {
@@ -519,15 +570,9 @@
     function getCellStyle(status) {
       if (status === 'none') return '';
       if (status === 'shifted') return 'bg-indigo-50 text-indigo-800 border border-indigo-200 border-dashed font-medium';
-      if (colorTheme === 'sheet') {
-        if (status === 'green') return 'bg-[#00ff00] text-black font-semibold';
-        if (status === 'yellow') return 'bg-[#ffff00] text-black font-semibold';
-        if (status === 'red') return 'bg-[#ff0000] text-black font-semibold';
-      } else {
-        if (status === 'green') return 'bg-emerald-100/90 text-emerald-950 border border-emerald-300 font-semibold';
-        if (status === 'yellow') return 'bg-amber-100/90 text-amber-950 border border-amber-300 font-semibold';
-        if (status === 'red') return 'bg-red-100/90 text-red-950 border border-red-300 font-semibold';
-      }
+      if (status === 'green') return 'bg-emerald-100/90 text-emerald-950 border border-emerald-300 font-semibold';
+      if (status === 'yellow') return 'bg-amber-100/90 text-amber-950 border border-amber-300 font-semibold';
+      if (status === 'red') return 'bg-red-100/90 text-red-950 border border-red-300 font-semibold';
       return '';
     }
 
@@ -539,35 +584,36 @@
 
     function renderBannerAndControls() {
       const banner = document.getElementById('modeBanner');
-      const btnAdd = document.getElementById('btnAddHospital');
-      const btnAudit = document.getElementById('btnAuditLog');
+      const toolbar = document.getElementById('adminOpsToolbar');
       const btnAdminUsers = document.getElementById('btnAdminUsers');
 
-      const groupedHospitals = getGroupedHospitalAudits('ALL');
-      document.getElementById('auditCountBadge').textContent = groupedHospitals.length;
-
-      if (currentUserObj.role === 'ADMIN') {
-        const pendingCount = dashboardState.usersList.filter(u => !u.authorized).length;
-        document.getElementById('pendingUsersBadge').textContent = `${pendingCount} Pending`;
-        btnAdminUsers.classList.remove('hidden'); btnAdminUsers.classList.add('inline-flex');
-      } else {
-        btnAdminUsers.classList.add('hidden'); btnAdminUsers.classList.remove('inline-flex');
-      }
-
+      // STRICT VISIBILITY: Only Admin & Operators see Kachha Chithha / Add Hospital toolbar
       if (isAdminOrOps()) {
-        btnAdd.classList.remove('hidden'); btnAdd.classList.add('inline-flex');
-        btnAudit.classList.remove('hidden'); btnAudit.classList.add('inline-flex');
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('flex');
+        const groupedHospitals = getGroupedHospitalAudits('ALL');
+        document.getElementById('auditCountBadge').textContent = groupedHospitals.length;
+
+        if (currentUserObj.role === 'ADMIN') {
+          const pendingCount = dashboardState.usersList.filter(u => !u.authorized).length;
+          document.getElementById('pendingUsersBadge').textContent = `${pendingCount} Pending`;
+          btnAdminUsers.classList.remove('hidden'); btnAdminUsers.classList.add('inline-flex');
+        } else {
+          btnAdminUsers.classList.add('hidden'); btnAdminUsers.classList.remove('inline-flex');
+        }
       } else {
-        btnAdd.classList.add('hidden'); btnAdd.classList.remove('inline-flex');
-        btnAudit.classList.add('hidden'); btnAudit.classList.remove('inline-flex');
+        // Associate: completely hide Admin/Ops toolbar
+        toolbar.classList.add('hidden');
+        toolbar.classList.remove('flex');
+        btnAdminUsers.classList.add('hidden');
       }
 
       if (currentUserObj.role === 'ADMIN') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Master Links</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users (TRUE/FALSE), add hospitals from Master Sheet, and print hospital/associate audit proofs.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Kachha Chithha</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users, add hospitals from Master Sheet, and print hospital/associate audit proofs.</p></div>`;
       } else if (currentUserObj.role === 'OPERATOR') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Can Add & Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">All projects belong to Umbrella. View Master Sheet links, add targets, and reschedule slots with back-data logging.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Can Add & Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">All projects belong to Umbrella. View Master Sheet links, add targets, and reschedule slots with audit proof.</p></div>`;
       } else {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">${currentUserObj.sheetCol.charAt(0)}</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ASSOCIATE: <span class="text-red-600">${currentUserObj.sheetCol}</span></span><span class="px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Server-Side 75% Star Jumble • No External Links • No Self-Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">Only your hospitals & % completion are clear. Use <strong>"Contact Hospital / Flag Issue"</strong> if hospital delays work.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">${currentUserObj.sheetCol.charAt(0)}</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ASSOCIATE: <span class="text-red-600">${currentUserObj.sheetCol}</span></span><span class="px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Your Schedule & Hospital Issue Escalation</span></div><p class="text-xs text-slate-500 mt-0.5">Only your hospitals & % completion are visible. Use <strong>"Contact Hospital / Flag Issue"</strong> if hospital delays work.</p></div>`;
       }
     }
 
@@ -650,6 +696,7 @@
     }
 
     function openUserAuthModal() {
+      if (currentUserObj.role !== 'ADMIN') return;
       const tbody = document.getElementById('usersAuthTableBody');
       tbody.innerHTML = dashboardState.usersList.map(u => `
         <tr class="hover:bg-slate-50">
@@ -680,12 +727,17 @@
       try {
         const payload = { action: 'UPDATE_USER_AUTH', mobile: sessionCreds.mobile, password: sessionCreds.password, targetRowIndex };
         payload[field] = value;
-        const res = await apiCall(payload, 'Updating user authorization...');
-        if (res.success) { await refreshDashboard(); openUserAuthModal(); showToast(res.message); }
+        const res = await apiCall(payload, 'Updating access...', true);
+        if (res.success) {
+          await refreshDashboard(false, true);
+          openUserAuthModal();
+          showToast(res.message);
+        }
       } catch (err) { showToast(err.message); }
     }
 
     function openAddHospitalModal(preRowIdx = 0, preCol = 'UMBRELLA') {
+      if (!isAdminOrOps()) return;
       const hospSelect = document.getElementById('masterHospitalSelect');
       hospSelect.innerHTML = dashboardState.masterHospitals.length === 0 ? '<option value="">No hospitals found</option>' : dashboardState.masterHospitals.map((h, i) => `<option value="${i}">${h.name} (${h.completion})</option>`).join('');
       const dateSelect = document.getElementById('addTargetDateSelect');
@@ -708,15 +760,34 @@
       if (!hosp) return;
       const sheetRowNumber = parseInt(document.getElementById('addTargetDateSelect').value, 10);
       const colName = document.getElementById('addTargetColSelect').value;
-      const remark = document.getElementById('addHospitalRemark').value.trim();
+      const remark = document.getElementById('addHospitalRemark').value.trim() || `Scheduled (${hosp.completion} done)`;
+
+      // OPTIMISTIC UI UPDATE (Instant feedback)
+      closeModal('addHospitalModal');
+      const targetRow = dashboardState.rows.find(r => r.sheetRowNumber === sheetRowNumber);
+      if (targetRow) {
+        targetRow.entries[colName] = {
+          text: hosp.name,
+          remark: remark,
+          status: 'yellow',
+          masked: false,
+          reschedCount: 0,
+          completion: hosp.completion,
+          sheetUrl: hosp.sheetUrl,
+          driveUrl: hosp.driveUrl
+        };
+        renderTableBody();
+      }
+      showToast(`Added ${hosp.name} — saving to sheet...`);
 
       try {
-        const res = await apiCall({ action: 'ADD_HOSPITAL', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber, colName, hospitalName: hosp.name, remark: remark || `Scheduled (${hosp.completion} done)` }, 'Adding hospital to sheet...');
-        if (res.success) { closeModal('addHospitalModal'); await refreshDashboard(); showToast(res.message); }
+        const res = await apiCall({ action: 'ADD_HOSPITAL', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber, colName, hospitalName: hosp.name, remark }, 'Saving...', true);
+        if (res.success) await refreshDashboard(false, true);
       } catch (err) { showToast(err.message); }
     }
 
     function openOpsRescheduleModal(rowIndex, colName) {
+      if (!isAdminOrOps()) return;
       const row = dashboardState.rows[rowIndex];
       const entry = row.entries[colName];
       activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName };
@@ -732,9 +803,16 @@
       const newRowNumber = parseInt(document.getElementById('reschedNewDateSelect').value, 10);
       const faultSide = document.getElementById('reschedFaultSide').value;
       const reason = document.getElementById('reschedExactReason').value.trim() || 'Hospital end pending documents / approval';
+
+      closeModal('opsRescheduleModal');
+      showToast('Rescheduling & logging proof in background...');
+
       try {
-        const res = await apiCall({ action: 'OPS_RESCHEDULE', mobile: sessionCreds.mobile, password: sessionCreds.password, oldRowNumber: activeTarget.sheetRowNumber, newRowNumber, colName: activeTarget.colName, faultSide, reason }, 'Rescheduling & logging proof...');
-        if (res.success) { closeModal('opsRescheduleModal'); await refreshDashboard(); showToast(res.message); }
+        const res = await apiCall({ action: 'OPS_RESCHEDULE', mobile: sessionCreds.mobile, password: sessionCreds.password, oldRowNumber: activeTarget.sheetRowNumber, newRowNumber, colName: activeTarget.colName, faultSide, reason }, 'Saving...', true);
+        if (res.success) {
+          await refreshDashboard(false, true);
+          showToast(res.message);
+        }
       } catch (err) { showToast(err.message); }
     }
 
@@ -751,14 +829,26 @@
       const category = document.getElementById('issueCategorySelect').value;
       const note = document.getElementById('issueNoteInput').value.trim();
       const issueText = note ? `${category} — ${note}` : category;
+
+      // OPTIMISTIC UI UPDATE
+      closeModal('associateIssueModal');
+      const row = dashboardState.rows[activeTarget.rowIndex];
+      if (row && row.entries[activeTarget.colName]) {
+        row.entries[activeTarget.colName].status = 'red';
+        row.entries[activeTarget.colName].remark = `[Hospital Issue] ${issueText}`;
+        renderTableBody();
+      }
+      showToast('Issue flagged! Syncing with Ops Team...');
+
       try {
-        const res = await apiCall({ action: 'FLAG_ISSUE', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber: activeTarget.sheetRowNumber, colName: activeTarget.colName, issueText }, 'Flagging issue to Ops Team...');
-        if (res.success) { closeModal('associateIssueModal'); await refreshDashboard(); showToast(res.message); }
+        const res = await apiCall({ action: 'FLAG_ISSUE', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber: activeTarget.sheetRowNumber, colName: activeTarget.colName, issueText }, 'Saving...', true);
+        if (res.success) await refreshDashboard(false, true);
       } catch (err) { showToast(err.message); }
     }
 
-    // HOSPITAL-WISE GROUPED AUDIT & UMBRELLA LETTERHEAD PRINT
+    // HOSPITAL-WISE GROUPED AUDIT & UMBRELLA LETTERHEAD PRINT (ADMIN & OPERATORS ONLY)
     function getGroupedHospitalAudits(filterAssociate = 'ALL') {
+      if (!isAdminOrOps()) return [];
       const logs = dashboardState.auditLogs || [];
       const map = {};
 
@@ -783,6 +873,7 @@
     }
 
     function openAuditLogModal() {
+      if (!isAdminOrOps()) return;
       const filterSelect = document.getElementById('auditAssociateFilter');
       const allAssociates = new Set();
       (dashboardState.columns || []).forEach(c => allAssociates.add(c.actualName));
@@ -1063,24 +1154,21 @@
       if (!activeTarget) return;
       const remark = document.getElementById('remarkInput').value.trim();
       const status = isAdminOrOps() ? document.getElementById('remarkStatusSelect').value : null;
-      try {
-        const res = await apiCall({ action: 'UPDATE_REMARK', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber: activeTarget.sheetRowNumber, colName: activeTarget.colName, remark, status }, 'Saving remark...');
-        if (res.success) { closeModal('remarkModal'); await refreshDashboard(); showToast(res.message); }
-      } catch (err) { showToast(err.message); }
-    }
 
-    function setColorTheme(theme) {
-      colorTheme = theme;
-      const btnModern = document.getElementById('btnModernStyle');
-      const btnSheet = document.getElementById('btnSheetStyle');
-      if (theme === 'modern') {
-        btnModern.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-slate-900 shadow-sm transition cursor-pointer';
-        btnSheet.className = 'px-3 py-1.5 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
-      } else {
-        btnSheet.className = 'px-3 py-1.5 text-xs font-semibold rounded-md bg-white text-slate-900 shadow-sm transition cursor-pointer';
-        btnModern.className = 'px-3 py-1.5 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+      // OPTIMISTIC INSTANT UI UPDATE
+      closeModal('remarkModal');
+      const row = dashboardState.rows[activeTarget.rowIndex];
+      if (row && row.entries[activeTarget.colName]) {
+        row.entries[activeTarget.colName].remark = remark;
+        if (status) row.entries[activeTarget.colName].status = status;
+        renderTableBody();
       }
-      renderTableBody();
+      showToast('Saved! Syncing with sheet...');
+
+      try {
+        const res = await apiCall({ action: 'UPDATE_REMARK', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber: activeTarget.sheetRowNumber, colName: activeTarget.colName, remark, status }, 'Saving...', true);
+        if (res.success) await refreshDashboard(false, true);
+      } catch (err) { showToast(err.message); }
     }
 
     function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
@@ -1088,10 +1176,10 @@
     function showToast(msg) {
       const banner = document.getElementById('toastBanner'); document.getElementById('toastText').textContent = msg;
       banner.classList.remove('hidden'); clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => banner.classList.add('hidden'), 4000);
+      window._toastTimer = setTimeout(() => banner.classList.add('hidden'), 3500);
     }
 
-    // AUTO-RESTORE SESSION ON PAGE REFRESH
+    // 0.0-SECOND INSTANT CACHE RESTORE + SILENT BACKGROUND SYNC
     window.addEventListener('DOMContentLoaded', async () => {
       const saved = localStorage.getItem('umbrella_session');
       if (!saved) return;
@@ -1100,12 +1188,15 @@
         if (parsed && parsed.mobile && parsed.password && parsed.user) {
           sessionCreds = { mobile: parsed.mobile, password: parsed.password };
           currentUserObj = parsed.user;
-          document.getElementById('authScreen').classList.add('hidden');
-          document.getElementById('portalApp').classList.remove('hidden');
-          document.getElementById('loggedInUserName').textContent = currentUserObj.name;
-          document.getElementById('loggedInUserMeta').textContent = `${currentUserObj.mobile} • Role: ${currentUserObj.role}`;
-          document.getElementById('navRoleBadge').textContent = `${currentUserObj.role} ACCESS`;
-          await refreshDashboard();
+          activatePortalUI();
+
+          const hasCache = loadLocalDashboardCache();
+          if (hasCache) {
+            renderApp(); // Instant 0.0s render without blocking spinner
+            await refreshDashboard(false, true); // Silent background update
+          } else {
+            await refreshDashboard(false, false);
+          }
         }
       } catch (e) {
         localStorage.removeItem('umbrella_session');
