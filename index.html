@@ -158,7 +158,7 @@
     </main>
   </div>
 
-  <!-- Minimal Loading Overlay (Only shown on first login when no cache exists) -->
+  <!-- Loading Overlay & Toast -->
   <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-50 hidden items-center justify-center">
     <div class="bg-white px-5 py-3.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3">
       <div class="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
@@ -198,21 +198,38 @@
     </div>
   </div>
 
+  <!-- SEARCHABLE ADD HOSPITAL MODAL + DIRECT MASTER SHEET LINK -->
   <div id="addHospitalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fade">
-      <div class="bg-gradient-to-r from-red-600 to-red-700 px-5 py-4 text-white flex items-center justify-between">
+      <div class="bg-gradient-to-r from-red-600 to-red-700 px-5 py-4 text-white flex items-center justify-between gap-2">
         <div>
-          <h3 class="text-base font-bold">Add Hospital from MASTER SHEET</h3>
-          <p class="text-[11px] text-red-100">Fetched from your Master Spreadsheet</p>
+          <h3 class="text-base font-bold">Assign / Add Hospital</h3>
+          <p class="text-[11px] text-red-100">Search Master Sheet or add a brand-new hospital directly</p>
         </div>
-        <button onclick="closeModal('addHospitalModal')" class="text-red-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+        <div class="flex items-center gap-2">
+          <a href="https://docs.google.com/spreadsheets/d/1F2DLZOdMUmjUSIpOR-16F2Bq3SSeu-zC176BqoGZTbM/edit?usp=sharing" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold transition">
+            ↗ Master Sheet
+          </a>
+          <button onclick="closeModal('addHospitalModal')" class="text-red-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+        </div>
       </div>
+
       <div class="p-5 space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">1. Select Hospital (MASTER SHEET)</label>
-          <select id="masterHospitalSelect" onchange="previewSelectedMasterHospital()" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none"></select>
-          <div id="masterHospitalMeta" class="mt-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center justify-between"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-slate-700">1. Search Hospital (or Type New Hospital Name)</label>
+            <button type="button" onclick="refreshDashboard(true, false)" class="text-[11px] font-bold text-red-600 hover:underline cursor-pointer">↻ Refresh List</button>
+          </div>
+          <input type="text" id="hospitalSearchInput" oninput="filterMasterHospitalsList()" onfocus="filterMasterHospitalsList()" autocomplete="off" placeholder="🔍 Type hospital name (e.g. Balaganj, JD, Noor)..." class="w-full rounded-xl border-2 border-slate-300 focus:border-red-500 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 outline-none" />
+          <input type="hidden" id="selectedHospitalIndex" value="-1" />
+
+          <div id="hospitalSearchResults" class="hidden mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-300 bg-white shadow-xl divide-y divide-slate-100"></div>
+
+          <div id="masterHospitalMeta" class="mt-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+            <span class="text-slate-500">Type above to select from Master Sheet or create new</span>
+          </div>
         </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Target Date Slot</label>
@@ -223,11 +240,13 @@
             <select id="addTargetColSelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none"></select>
           </div>
         </div>
+
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1.5">4. Initial Remark</label>
           <input type="text" id="addHospitalRemark" placeholder="e.g., Document verification" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none" />
         </div>
       </div>
+
       <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex justify-end gap-2">
         <button onclick="closeModal('addHospitalModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg cursor-pointer">Cancel</button>
         <button onclick="confirmAddHospital()" class="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer">Add to Sheet</button>
@@ -386,6 +405,7 @@
     let currentUserObj = null;
     let dashboardState = { columns: [], rows: [], masterHospitals: [], auditLogs: [], usersList: [] };
     let activeTarget = null;
+    let isCreatingNewMasterHospital = false;
 
     function isAdminOrOps() {
       return currentUserObj && (currentUserObj.role === 'ADMIN' || currentUserObj.role === 'OPERATOR');
@@ -414,7 +434,6 @@
       return false;
     }
 
-    // silent = true avoids blocking spinner and uses top subtle sync badge
     async function apiCall(payload, loadingMsg = 'Syncing...', silent = false) {
       if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT')) {
         throw new Error('Please paste your deployed Google Apps Script Web App URL in SCRIPT_URL inside index.html.');
@@ -491,7 +510,7 @@
         const hasCache = loadLocalDashboardCache();
         if (hasCache) {
           renderApp();
-          await refreshDashboard(false, true); // Background silent sync
+          await refreshDashboard(false, true);
         } else {
           await refreshDashboard(false, false);
         }
@@ -587,7 +606,6 @@
       const toolbar = document.getElementById('adminOpsToolbar');
       const btnAdminUsers = document.getElementById('btnAdminUsers');
 
-      // STRICT VISIBILITY: Only Admin & Operators see Kachha Chithha / Add Hospital toolbar
       if (isAdminOrOps()) {
         toolbar.classList.remove('hidden');
         toolbar.classList.add('flex');
@@ -602,16 +620,15 @@
           btnAdminUsers.classList.add('hidden'); btnAdminUsers.classList.remove('inline-flex');
         }
       } else {
-        // Associate: completely hide Admin/Ops toolbar
         toolbar.classList.add('hidden');
         toolbar.classList.remove('flex');
         btnAdminUsers.classList.add('hidden');
       }
 
       if (currentUserObj.role === 'ADMIN') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Kachha Chithha</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users, add hospitals from Master Sheet, and print hospital/associate audit proofs.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">A</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ADMIN (All Control)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">100% Unmasked + User Authorization + Kachha Chithha</span></div><p class="text-xs text-slate-500 mt-0.5">Authorize self-registered users, add/search hospitals from Master Sheet, and print hospital/associate audit proofs.</p></div>`;
       } else if (currentUserObj.role === 'OPERATOR') {
-        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Can Add & Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">All projects belong to Umbrella. View Master Sheet links, add targets, and reschedule slots with audit proof.</p></div>`;
+        banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0">OP</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">OPERATOR (Umbrella Operations Team)</span><span class="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-900 rounded-full">All Projects Clear • Can Add & Reschedule</span></div><p class="text-xs text-slate-500 mt-0.5">All projects belong to Umbrella. Search Master Sheet, add targets, and reschedule slots with audit proof.</p></div>`;
       } else {
         banner.innerHTML = `<div class="w-9 h-9 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">${currentUserObj.sheetCol.charAt(0)}</div><div><div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-slate-900">ASSOCIATE: <span class="text-red-600">${currentUserObj.sheetCol}</span></span><span class="px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Your Schedule & Hospital Issue Escalation</span></div><p class="text-xs text-slate-500 mt-0.5">Only your hospitals & % completion are visible. Use <strong>"Contact Hospital / Flag Issue"</strong> if hospital delays work.</p></div>`;
       }
@@ -736,53 +753,130 @@
       } catch (err) { showToast(err.message); }
     }
 
+    // SEARCHABLE HOSPITAL MODAL + DIRECT MASTER SHEET COL-A APPEND
     function openAddHospitalModal(preRowIdx = 0, preCol = 'UMBRELLA') {
       if (!isAdminOrOps()) return;
-      const hospSelect = document.getElementById('masterHospitalSelect');
-      hospSelect.innerHTML = dashboardState.masterHospitals.length === 0 ? '<option value="">No hospitals found</option>' : dashboardState.masterHospitals.map((h, i) => `<option value="${i}">${h.name} (${h.completion})</option>`).join('');
+      isCreatingNewMasterHospital = false;
+      document.getElementById('hospitalSearchInput').value = '';
+      document.getElementById('selectedHospitalIndex').value = '-1';
+      document.getElementById('hospitalSearchResults').classList.add('hidden');
+      document.getElementById('masterHospitalMeta').innerHTML = `<span class="text-slate-500">Total <strong>${dashboardState.masterHospitals.length}</strong> hospitals loaded from Master Sheet</span>`;
+
       const dateSelect = document.getElementById('addTargetDateSelect');
       dateSelect.innerHTML = dashboardState.rows.map((r, i) => `<option value="${r.sheetRowNumber}" ${i === preRowIdx ? 'selected' : ''}>${r.date}</option>`).join('');
       const colSelect = document.getElementById('addTargetColSelect');
       colSelect.innerHTML = dashboardState.columns.map(c => `<option value="${c.actualName}" ${c.actualName === preCol ? 'selected' : ''}>${c.actualName}</option>`).join('');
       document.getElementById('addHospitalRemark').value = '';
-      previewSelectedMasterHospital();
       openModal('addHospitalModal');
+      setTimeout(() => document.getElementById('hospitalSearchInput').focus(), 100);
     }
 
-    function previewSelectedMasterHospital() {
-      const h = dashboardState.masterHospitals[document.getElementById('masterHospitalSelect').value];
+    function filterMasterHospitalsList() {
+      const query = document.getElementById('hospitalSearchInput').value.trim();
+      const resultsBox = document.getElementById('hospitalSearchResults');
+      document.getElementById('selectedHospitalIndex').value = '-1';
+      isCreatingNewMasterHospital = false;
+
+      const list = dashboardState.masterHospitals || [];
+      const matches = list
+        .map((h, idx) => ({ ...h, origIdx: idx }))
+        .filter(h => h.name.toLowerCase().includes(query.toLowerCase()));
+
+      let html = matches.slice(0, 30).map(h => `
+        <div onclick="selectMasterHospitalItem(${h.origIdx})" class="px-3.5 py-2.5 hover:bg-red-50 cursor-pointer flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900">${h.name}</span>
+          <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">${h.completion}</span>
+        </div>
+      `).join('');
+
+      if (query.length >= 2) {
+        const safeName = query.replace(/'/g, "\\'");
+        html += `
+          <div onclick="selectNewMasterHospital('${safeName}')" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 cursor-pointer flex items-center justify-between text-xs border-t border-amber-200">
+            <span class="font-extrabold text-amber-900">+ Add "${query}" as NEW Hospital in Master Sheet (Col A)</span>
+            <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-bold">New</span>
+          </div>
+        `;
+      }
+
+      if (!html) {
+        html = `<div class="p-3 text-xs text-slate-400 text-center">Start typing to search hospitals...</div>`;
+      }
+
+      resultsBox.innerHTML = html;
+      resultsBox.classList.remove('hidden');
+    }
+
+    function selectMasterHospitalItem(origIdx) {
+      const h = dashboardState.masterHospitals[origIdx];
       if (!h) return;
-      document.getElementById('masterHospitalMeta').innerHTML = `<span class="font-bold text-slate-700">Master Sheet Sync: <span class="text-emerald-700">${h.completion} Complete</span></span><span class="text-blue-600 font-semibold">Links Attached ✓</span>`;
+      isCreatingNewMasterHospital = false;
+      document.getElementById('selectedHospitalIndex').value = origIdx;
+      document.getElementById('hospitalSearchInput').value = h.name;
+      document.getElementById('hospitalSearchResults').classList.add('hidden');
+      document.getElementById('masterHospitalMeta').innerHTML = `
+        <span class="font-bold text-slate-700">Master Sheet: <span class="text-emerald-700">${h.completion} Complete</span></span>
+        <span class="text-blue-600 font-semibold">Existing Hospital ✓</span>
+      `;
+    }
+
+    function selectNewMasterHospital(newName) {
+      isCreatingNewMasterHospital = true;
+      document.getElementById('selectedHospitalIndex').value = '-1';
+      document.getElementById('hospitalSearchInput').value = newName;
+      document.getElementById('hospitalSearchResults').classList.add('hidden');
+      document.getElementById('masterHospitalMeta').innerHTML = `
+        <span class="font-bold text-amber-800">Will append to MASTER SHEET (Col A) & Schedule</span>
+        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">New</span>
+      `;
     }
 
     async function confirmAddHospital() {
-      const hosp = dashboardState.masterHospitals[document.getElementById('masterHospitalSelect').value];
-      if (!hosp) return;
+      const typedName = document.getElementById('hospitalSearchInput').value.trim();
+      const idx = parseInt(document.getElementById('selectedHospitalIndex').value, 10);
+      const existingHosp = idx >= 0 ? dashboardState.masterHospitals[idx] : null;
+
+      const finalName = existingHosp ? existingHosp.name : typedName;
+      if (!finalName) {
+        showToast('Please search or type a hospital name first.');
+        return;
+      }
+
+      const addToMaster = !existingHosp;
+      const completionVal = existingHosp ? existingHosp.completion : '0%';
       const sheetRowNumber = parseInt(document.getElementById('addTargetDateSelect').value, 10);
       const colName = document.getElementById('addTargetColSelect').value;
-      const remark = document.getElementById('addHospitalRemark').value.trim() || `Scheduled (${hosp.completion} done)`;
+      const remark = document.getElementById('addHospitalRemark').value.trim() || `Scheduled (${completionVal} done)`;
 
-      // OPTIMISTIC UI UPDATE (Instant feedback)
       closeModal('addHospitalModal');
       const targetRow = dashboardState.rows.find(r => r.sheetRowNumber === sheetRowNumber);
       if (targetRow) {
         targetRow.entries[colName] = {
-          text: hosp.name,
+          text: finalName,
           remark: remark,
           status: 'yellow',
           masked: false,
           reschedCount: 0,
-          completion: hosp.completion,
-          sheetUrl: hosp.sheetUrl,
-          driveUrl: hosp.driveUrl
+          completion: completionVal,
+          sheetUrl: existingHosp ? existingHosp.sheetUrl : null,
+          driveUrl: existingHosp ? existingHosp.driveUrl : null
         };
         renderTableBody();
       }
-      showToast(`Added ${hosp.name} — saving to sheet...`);
+      showToast(addToMaster ? `Adding "${finalName}" to Master Sheet & Schedule...` : `Added ${finalName} — saving...`);
 
       try {
-        const res = await apiCall({ action: 'ADD_HOSPITAL', mobile: sessionCreds.mobile, password: sessionCreds.password, sheetRowNumber, colName, hospitalName: hosp.name, remark }, 'Saving...', true);
-        if (res.success) await refreshDashboard(false, true);
+        const res = await apiCall({
+          action: 'ADD_HOSPITAL',
+          mobile: sessionCreds.mobile,
+          password: sessionCreds.password,
+          sheetRowNumber,
+          colName,
+          hospitalName: finalName,
+          remark,
+          addToMaster
+        }, 'Saving...', true);
+        if (res.success) await refreshDashboard(addToMaster, true);
       } catch (err) { showToast(err.message); }
     }
 
@@ -830,7 +924,6 @@
       const note = document.getElementById('issueNoteInput').value.trim();
       const issueText = note ? `${category} — ${note}` : category;
 
-      // OPTIMISTIC UI UPDATE
       closeModal('associateIssueModal');
       const row = dashboardState.rows[activeTarget.rowIndex];
       if (row && row.entries[activeTarget.colName]) {
@@ -1155,7 +1248,6 @@
       const remark = document.getElementById('remarkInput').value.trim();
       const status = isAdminOrOps() ? document.getElementById('remarkStatusSelect').value : null;
 
-      // OPTIMISTIC INSTANT UI UPDATE
       closeModal('remarkModal');
       const row = dashboardState.rows[activeTarget.rowIndex];
       if (row && row.entries[activeTarget.colName]) {
@@ -1179,7 +1271,6 @@
       window._toastTimer = setTimeout(() => banner.classList.add('hidden'), 3500);
     }
 
-    // 0.0-SECOND INSTANT CACHE RESTORE + SILENT BACKGROUND SYNC
     window.addEventListener('DOMContentLoaded', async () => {
       const saved = localStorage.getItem('umbrella_session');
       if (!saved) return;
@@ -1192,8 +1283,8 @@
 
           const hasCache = loadLocalDashboardCache();
           if (hasCache) {
-            renderApp(); // Instant 0.0s render without blocking spinner
-            await refreshDashboard(false, true); // Silent background update
+            renderApp();
+            await refreshDashboard(false, true);
           } else {
             await refreshDashboard(false, false);
           }
