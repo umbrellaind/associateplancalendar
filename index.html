@@ -15,6 +15,8 @@
     .sticky-col { position: sticky; left: 0; z-index: 20; box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.08); }
     .sticky-header { position: sticky; top: 0; z-index: 30; }
     .sticky-corner { position: sticky; left: 0; top: 0; z-index: 40; box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15); }
+    .sticky-header th { position: sticky; top: 0; z-index: 30; }
+    .sticky-corner { position: sticky; left: 0; top: 0; z-index: 40 !important; box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.15); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade { animation: fadeIn 0.25s ease-out forwards; }
   </style>
@@ -544,7 +546,7 @@
 
     function renderTableHeader() {
       const thead = document.getElementById('tableHead');
-      let html = `<tr class="bg-black text-white text-xs uppercase tracking-wider"><th class="sticky-corner bg-black text-white font-bold px-4 py-3.5 border-r border-slate-700 min-w-[160px] text-center">DATE AND TIME</th>`;
+      let html = `<tr class="sticky-header bg-black text-white text-xs uppercase tracking-wider"><th class="sticky-corner bg-black text-white font-bold px-4 py-3.5 border-r border-slate-700 min-w-[160px] text-center">DATE AND TIME</th>`;
 
       dashboardState.columns.forEach(col => {
         const isMaskedHeader = !isAdminOrOps() && !col.isMyCol && !col.isOpsCol;
