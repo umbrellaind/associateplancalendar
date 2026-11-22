@@ -9,7 +9,6 @@
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
     .umbrella-gradient { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
-    .gold-accent { color: #d97706; }
     .pill-yellow { background-color: #fef9c3; border-color: #fde047; color: #854d0e; }
     .pill-green  { background-color: #dcfce7; border-color: #86efac; color: #166534; }
     .pill-red    { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
@@ -33,7 +32,7 @@
   </script>
 
   <!-- ===================================================================== -->
-  <!-- 1. LOGIN & SIGNUP SCREEN                                              -->
+  <!-- 1. LOGIN & SIGNUP SCREEN (CLEAN, NO FADED EXAMPLES)                   -->
   <!-- ===================================================================== -->
   <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
@@ -54,43 +53,37 @@
         <!-- Login Form -->
         <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">User ID or Email</label>
-            <input id="loginId" type="text" required placeholder="Enter your registered ID" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Registered Mobile Number</label>
+            <input id="loginId" type="text" required placeholder="Enter Mobile Number" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-            <input id="loginPw" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+            <input id="loginPw" type="password" required placeholder="Enter Password" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
           </div>
           <button type="submit" id="loginBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Sign In to Portal</button>
         </form>
 
-        <!-- Signup Form -->
+        <!-- Signup Form (Admin assigns Sheet Column upon approval) -->
         <form id="signupForm" onsubmit="submitSignup(event)" class="hidden space-y-3.5">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
-            <input id="regName" type="text" required placeholder="e.g. David Jones" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+            <input id="regName" type="text" required placeholder="Enter Full Name" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">User ID / Email</label>
-            <input id="regId" type="text" required placeholder="Choose a login ID or email" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Number</label>
+            <input id="regId" type="text" required placeholder="Enter 10-Digit Mobile Number" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-            <input id="regPw" type="password" required placeholder="Create password" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Create Password</label>
+            <input id="regPw" type="password" required placeholder="Create Password" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
           </div>
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Role</label>
-              <select id="regRole" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
-                <option value="ASSOCIATE">Associate</option>
-                <option value="FIELD">Field Team</option>
-                <option value="OPERATOR">Ops Operator</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Sheet Column Name</label>
-              <input id="regCol" type="text" placeholder="e.g. DAVID" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg uppercase" />
-            </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Team Role</label>
+            <select id="regRole" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+              <option value="ASSOCIATE">Associate</option>
+              <option value="FIELD">Field Team</option>
+              <option value="OPERATOR">Ops Operator</option>
+            </select>
           </div>
           <button type="submit" id="signupBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Request Access</button>
         </form>
@@ -120,15 +113,27 @@
             Today's Ops Load: 0% Busy
           </div>
 
-          <!-- Performance Report Button (Strictly Super Admin & Associate Only) -->
+          <!-- New Hospital & Kickoff Docs Checklist (Available to ALL Team Roles) -->
+          <button id="btnNewLead" onclick="openNewLeadModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition">
+            + New Hospital &amp; Docs
+          </button>
+
+          <!-- Admin & Ops Operator: Assign Registered Hospital to Calendar -->
+          <button id="btnAssignHosp" onclick="openAssignModal('', '')" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
+            + Assign Hospital
+          </button>
+
+          <!-- Performance Report Button (Strictly Admin & Associate Only) -->
           <button id="btnOpenReport" onclick="openReportModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-sm transition">
             📊 Performance Report
           </button>
 
-          <!-- Super Admin Only Controls -->
-          <button id="btnAssignHosp" onclick="openAssignModal()" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
-            + Assign Hospital
+          <!-- Admin Only: Pending UDCP Approvals Gate -->
+          <button id="btnPendingApprovals" onclick="openApprovalsModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-300 hover:bg-amber-200 text-red-950 font-extrabold text-xs shadow-sm transition">
+            🔔 Pending Approvals (0)
           </button>
+
+          <!-- Admin Only: Audit Log & User Access -->
           <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
             📜 Old Records
           </button>
@@ -221,13 +226,13 @@
           </div>
         </div>
 
-        <!-- Payment & Fee Section (Role Protected) -->
+        <!-- Payment & Fee Section (ADMIN sees all; ASSOCIATE sees own column; OPERATOR & FIELD never see fee) -->
         <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Payment Milestone Status</span>
             <span id="mdlPayBadge" class="px-2 py-0.5 rounded font-bold text-[11px]"></span>
           </div>
-          <div id="mdlAdminFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-slate-800">
+          <div id="mdlFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-slate-800">
             <span>Total Consultancy Fee: <strong id="mdlTotalFee" class="text-sm text-slate-900"></strong></span>
             <span>Paid: <strong id="mdlPaidPct" class="text-emerald-700"></strong></span>
           </div>
@@ -243,9 +248,20 @@
           </a>
         </div>
 
+        <!-- Stage 3 Audit Prep Trigger (ADMIN pushes directly; OPERATOR & ASSOCIATE send to Admin Approval Gate) -->
+        <div id="mdlStage3Box" class="hidden p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 flex items-center justify-between gap-2">
+          <div>
+            <p class="font-extrabold text-indigo-950">Stage 3: Audit Preparation Checklist</p>
+            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Auto-load 34 Audit Prep items into UDCP</p>
+          </div>
+          <button id="btnTriggerStage3" onclick="triggerStage3AuditPrep()" class="px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs">
+            Push Audit Prep
+          </button>
+        </div>
+
         <!-- Status & Remark Update -->
         <div class="space-y-2.5">
-          <div id="mdlStatusSelectWrap">
+          <div>
             <label class="block font-bold text-slate-700 mb-1">Project Status</label>
             <select id="mdlStatusSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold bg-white">
               <option value="yellow">🟡 Running Smoothly</option>
@@ -263,11 +279,9 @@
             <button onclick="saveProjectUpdate(false, false)" class="flex-1 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold">
               Save Update
             </button>
-            <!-- Field Team One-Tap Complete -->
             <button id="btnFieldDone" onclick="saveProjectUpdate(true, false)" class="hidden py-2.5 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
               ✓ Mark Visit Completed
             </button>
-            <!-- Associate Flag Issue -->
             <button id="btnAssocFlag" onclick="saveProjectUpdate(false, true)" class="hidden py-2.5 px-3.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
               ☎ Flag Hospital Issue
             </button>
@@ -285,8 +299,8 @@
             <div>
               <label class="block text-[11px] font-semibold text-slate-600 mb-1">Delay Accountability</label>
               <select id="mdlDelayCat" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white">
-                <option value="Hospital-End Delay">Hospital-End Delay</option>
-                <option value="Associate-End Delay">Associate-End Delay</option>
+                <option value="Hospital End">Hospital End</option>
+                <option value="Associate End">Associate End</option>
                 <option value="Ops / Technical">Ops / Technical</option>
               </select>
             </div>
@@ -301,12 +315,125 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 4. SUPER ADMIN ONLY: SEARCH & ASSIGN REGISTERED HOSPITAL MODAL        -->
+  <!-- 4. NEW HOSPITAL LEAD & 1. KICKOFF DOCS CHECKLIST MODAL (ALL ROLES)    -->
+  <!-- ===================================================================== -->
+  <div id="newLeadModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold">New Hospital Lead &amp; Stage 1 Kickoff Documents</h3>
+          <p class="text-[11px] text-red-100">Sent to Super Admin &amp; Dr. Garima for authorization before adding to UDCP</p>
+        </div>
+        <button onclick="closeModal('newLeadModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Form View -->
+      <form id="newLeadForm" onsubmit="submitNewHospitalLead(event)" class="p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Hospital Name *</label>
+            <input id="leadHospName" type="text" required placeholder="Enter Hospital Name" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">City / District *</label>
+            <input id="leadCity" type="text" required placeholder="Enter City" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Hospital Contact Mobile</label>
+            <input id="leadMobile" type="text" placeholder="Director / Coordinator Number" class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Associate Column</label>
+            <select id="leadAssocCol" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
+          </div>
+        </div>
+
+        <!-- Financial Section (STRICTLY Visible ONLY to ASSOCIATE & ADMIN; Hidden from FIELD & OPERATOR) -->
+        <div id="leadFinancialBox" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-amber-950 mb-1">Total Consultancy Fee (₹)</label>
+            <input id="leadTotalFee" type="number" min="0" placeholder="0" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-bold" />
+          </div>
+          <div>
+            <label class="block font-bold text-amber-950 mb-1">Advance Milestone (P1 - 25%)</label>
+            <select id="leadP1Paid" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-semibold">
+              <option value="NO">Not Received Yet (0%)</option>
+              <option value="YES">Received (25% Paid)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-amber-950 mb-1">Payment Lock Mode</label>
+            <select id="leadLockMode" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-semibold">
+              <option value="SOFT">SOFT (Reminder Mode)</option>
+              <option value="STRICT">STRICT (Payment Lock)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live 37-Item Kickoff Docs Checklist -->
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-3.5 py-2.5 flex items-center justify-between">
+            <span class="font-extrabold text-slate-800">Stage 1: Kickoff Documents Checklist (Tick Collected Items)</span>
+            <span id="leadCollectedCounter" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">0 / 37 Collected</span>
+          </div>
+          <div id="leadChecklistContainer" class="max-h-64 overflow-y-auto divide-y divide-slate-100 p-2 bg-white">
+            <p class="p-4 text-center text-slate-400">Loading master checklist...</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Additional Visit / Deal Notes</label>
+          <input id="leadNotes" type="text" placeholder="Any special scope, bed count, or payment note..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
+        </div>
+
+        <button type="submit" id="btnSubmitLead" class="w-full py-3 umbrella-gradient text-white font-extrabold rounded-xl shadow hover:opacity-95 transition">
+          Submit for Admin Authorization &amp; Generate Client Checklist
+        </button>
+      </form>
+
+      <!-- Client Handover Receipt View (Shown immediately after submit) -->
+      <div id="leadReceiptView" class="hidden p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+          <p class="font-extrabold text-sm">✓ Lead Submitted for Super Admin / Dr. Garima Approval!</p>
+          <p class="mt-0.5">Below is the Collected vs. Pending Documents summary to share with the hospital right now:</p>
+        </div>
+        <textarea id="leadWhatsAppSummary" rows="11" readonly class="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 font-mono text-[11px]"></textarea>
+        <div class="flex gap-2.5">
+          <button onclick="copyLeadSummary()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">
+            📋 Copy Checklist for WhatsApp
+          </button>
+          <button onclick="closeModal('newLeadModal')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-bold">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 5. ADMIN ONLY: PENDING UDCP AUTHORIZATIONS MODAL                      -->
+  <!-- ===================================================================== -->
+  <div id="approvalsModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold">Admin Authorization Gate (Push to UDCP_MASTER_DB)</h3>
+          <p class="text-[11px] text-red-100">Verify fee, associate &amp; stage before authorizing into UDCP</p>
+        </div>
+        <button onclick="closeModal('approvalsModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div id="approvalsListWrap" class="p-5 overflow-y-auto space-y-4 text-xs"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 6. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR           -->
   <!-- ===================================================================== -->
   <div id="assignModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <h3 class="text-sm font-extrabold">Assign Registered Hospital</h3>
+        <h3 class="text-sm font-extrabold">Assign Registered Hospital to Calendar</h3>
         <button onclick="closeModal('assignModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
       <form onsubmit="submitAssignHospital(event)" class="p-5 space-y-3.5 text-xs">
@@ -314,7 +441,7 @@
           <label class="block font-bold text-slate-700 mb-1">Search Registered Hospital</label>
           <input id="assignSearchInput" oninput="filterRegisteredHospitals()" type="text" placeholder="Type hospital name or HOSP-ID..." class="w-full px-3 py-2 border border-slate-300 rounded-lg mb-1.5 focus:outline-none focus:border-red-600" />
           <select id="assignHospSelect" required size="5" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 font-medium"></select>
-          <p class="text-[10px] text-slate-500 mt-1">Only hospitals registered in the master database can be assigned.</p>
+          <p class="text-[10px] text-slate-500 mt-1">Only authorized hospitals from UDCP_MASTER_DB appear here.</p>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
           <div>
@@ -328,7 +455,7 @@
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Initial Remark / Visit Purpose (Optional)</label>
-          <input id="assignRemarkInput" type="text" placeholder="e.g. Desktop NC Follow-up / Gap Audit Visit" class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
+          <input id="assignRemarkInput" type="text" placeholder="Enter remark..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
         </div>
         <button type="submit" class="w-full py-2.5 umbrella-gradient text-white font-bold rounded-lg shadow">Add to Schedule</button>
       </form>
@@ -336,7 +463,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 5. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
+  <!-- 7. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
   <!-- ===================================================================== -->
   <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
@@ -352,7 +479,6 @@
       </div>
 
       <div id="reportPrintArea" class="p-6 overflow-y-auto space-y-5 text-xs">
-        <!-- Official Umbrella Letterhead -->
         <div class="border-b-2 border-red-700 pb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 class="text-lg font-extrabold text-red-800 tracking-tight">UMBRELLA HEALTHCARE CONSULTANCY</h2>
@@ -365,7 +491,6 @@
           </div>
         </div>
 
-        <!-- Formal Salutation ("To, Associate Name") -->
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
           <div>
             <p class="text-[11px] text-slate-500 font-semibold">To,</p>
@@ -375,10 +500,8 @@
           <div id="repCompletionBadge" class="px-3.5 py-2 rounded-xl bg-red-50 border border-red-200 text-right"></div>
         </div>
 
-        <!-- 6 Analytical KPI Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="repKpiCards"></div>
 
-        <!-- Stage-Wise & Payment Health Breakdown -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="border border-slate-200 rounded-xl p-3.5">
             <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Stage-Wise Distribution Analysis</h4>
@@ -390,14 +513,13 @@
           </div>
         </div>
 
-        <!-- 4 Detailed Actionable Tables -->
         <div id="repTablesContainer" class="space-y-4"></div>
       </div>
     </div>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 6. OLD RECORDS (RESCHEDULE AUDIT LOG) MODAL — SUPER ADMIN ONLY        -->
+  <!-- 8. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
   <!-- ===================================================================== -->
   <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
@@ -409,10 +531,11 @@
         <table class="w-full border-collapse">
           <thead class="bg-slate-100 text-slate-700 font-bold">
             <tr>
+              <th class="p-2 text-left border">Log ID</th>
               <th class="p-2 text-left border">Hospital</th>
               <th class="p-2 text-left border">Associate</th>
-              <th class="p-2 text-left border">Old Date → New Date</th>
-              <th class="p-2 text-left border">Accountability</th>
+              <th class="p-2 text-left border">Old Date &rarr; New Date</th>
+              <th class="p-2 text-left border">Fault Side</th>
               <th class="p-2 text-left border">Proof / Reason</th>
             </tr>
           </thead>
@@ -422,9 +545,6 @@
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- 7. USER ACCESS APPROVAL MODAL — SUPER ADMIN ONLY                      -->
-  <!-- ===================================================================== -->
   <div id="usersModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
       <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
@@ -436,10 +556,10 @@
           <thead class="bg-slate-100 text-slate-700 font-bold">
             <tr>
               <th class="p-2 text-left border">Name</th>
-              <th class="p-2 text-left border">User ID</th>
+              <th class="p-2 text-left border">Mobile ID</th>
               <th class="p-2 text-left border">Role</th>
-              <th class="p-2 text-left border">Column</th>
-              <th class="p-2 text-center border">Active</th>
+              <th class="p-2 text-left border">Sheet Column</th>
+              <th class="p-2 text-center border">Authorized</th>
             </tr>
           </thead>
           <tbody id="usersTableBody" class="divide-y"></tbody>
@@ -449,15 +569,15 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 8. FRONTEND APPLICATION LOGIC                                         -->
+  <!-- 9. FRONTEND APPLICATION LOGIC                                         -->
   <!-- ===================================================================== -->
   <script>
     let currentUser = null;
-    let portalData  = { columns: [], rows: [], directory: [], auditLogs: [], usersList: [] };
+    let portalData  = { columns: [], rows: [], directory: [], auditLogs: [], usersList: [], pendingApprovals: [] };
+    let kickoffTemplateCache = [];
     let dateFilterMode = 'next30';
     let activeEditContext = null;
 
-    // Boot: Check saved session + instant Stale-While-Revalidate cache
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('umbrella_ops_user');
       if (savedUser) {
@@ -538,8 +658,7 @@
           name: document.getElementById('regName').value,
           userId: document.getElementById('regId').value,
           password: document.getElementById('regPw').value,
-          role: document.getElementById('regRole').value,
-          column: document.getElementById('regCol').value
+          role: document.getElementById('regRole').value
         });
         showAuthAlert(resp.message, resp.success);
         if (resp.success) document.getElementById('signupForm').reset();
@@ -562,12 +681,15 @@
       const r = currentUser.role;
       document.getElementById('userBadge').textContent = currentUser.name + ' (' + r + ')';
 
-      // Strict Role Visibility
-      document.getElementById('btnAssignHosp').classList.toggle('hidden', r !== 'ADMIN');
+      // ADMIN & OPERATOR can assign registered hospitals to calendar
+      document.getElementById('btnAssignHosp').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
+
+      // ADMIN only controls
+      document.getElementById('btnPendingApprovals').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
 
-      // Performance Report strictly for ADMIN & ASSOCIATE (Hidden from OPERATOR & FIELD)
+      // Performance Report strictly for ADMIN & ASSOCIATE
       document.getElementById('btnOpenReport').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
 
       // Highlight guide for Associates & Field Team
@@ -588,6 +710,10 @@
         if (resp.success) {
           portalData = resp;
           localStorage.setItem('umbrella_ops_cache_' + currentUser.role + '_' + currentUser.column, JSON.stringify(resp));
+          if (currentUser.role === 'ADMIN') {
+            const cnt = (resp.pendingApprovals || []).length;
+            document.getElementById('btnPendingApprovals').textContent = '🔔 Pending Approvals (' + cnt + ')';
+          }
           renderCalendar();
         }
       } catch (e) {
@@ -635,31 +761,28 @@
 
       const statusFlt = document.getElementById('statusFilter').value;
       const searchQ   = document.getElementById('searchBox').value.trim().toLowerCase();
+      const canQuickAssign = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
 
-      // Update Today's Ops Load Meter in Header
       const todayRow = (portalData.rows || []).find(r => r.date === todayIso);
       const todayCount = todayRow ? todayRow.totalProjects : 0;
       const todayPct = Math.round((todayCount / DAILY_CAPACITY) * 100);
       document.getElementById('todayLoadBadge').textContent = "Today's Ops Load: " + (todayCount === DAILY_CAPACITY ? '100% FULL' : todayPct + '% Busy');
 
-      // Filter Rows
       const filteredRows = (portalData.rows || []).filter(row => {
         if (dateFilterMode === 'next30' && (row.date < todayIso || row.date > max30Iso)) return false;
         if (dateFilterMode === 'past' && row.date >= todayIso) return false;
         return true;
       });
 
-      // Render Desktop Table Header (100% Screen-Fit Fixed Layout)
       const thead = document.getElementById('calendarThead');
       let thHtml = '<tr><th class="w-32 p-2.5 text-left border-r border-slate-700">Date &amp; Ops Load</th>';
       cols.forEach(col => {
-        const isOwn = (col === currentUser.column);
+        const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
         thHtml += `<th class="p-2 text-center border-r border-slate-700 truncate ${isOwn ? 'bg-red-700 text-white' : ''}">${col}</th>`;
       });
       thHtml += '</tr>';
       thead.innerHTML = thHtml;
 
-      // Render Desktop Table Body & Mobile Cards
       const tbody = document.getElementById('calendarTbody');
       const mobileWrap = document.getElementById('mobileCardsWrap');
       let tbHtml = '';
@@ -678,11 +801,11 @@
         let mobDayCards = '';
 
         cols.forEach(col => {
-          const isOwn = (col === currentUser.column);
+          const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
           const cellData = row.cells[col] || { items: [], remark: '' };
           let pillsHtml = '';
 
-          cellData.items.forEach((item, idx) => {
+          cellData.items.forEach(item => {
             if (statusFlt !== 'ALL' && item.status !== statusFlt) return;
             if (searchQ && !item.masked && item.title.toLowerCase().indexOf(searchQ) === -1) return;
 
@@ -710,7 +833,11 @@
             }
           });
 
-          tbHtml += `<td class="p-1.5 border-r border-slate-200 align-top ${isOwn ? 'bg-red-50/30' : ''}">${pillsHtml}</td>`;
+          const quickBtn = canQuickAssign
+            ? `<button onclick="openAssignModal('${row.date}', '${col}')" title="Quick Assign to ${col}" class="w-full mt-0.5 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 hover:text-red-700 hover:border-red-400 text-[10px] font-bold opacity-60 hover:opacity-100 transition">+</button>`
+            : '';
+
+          tbHtml += `<td class="p-1.5 border-r border-slate-200 align-top ${isOwn ? 'bg-red-50/30' : ''}">${pillsHtml}${quickBtn}</td>`;
         });
 
         tbHtml += '</tr>';
@@ -744,7 +871,6 @@
       document.getElementById('mdlStageText').textContent = item.stage + ' — ' + item.progressPct + '%';
       document.getElementById('mdlProgressBar').style.width = (item.progressPct || 0) + '%';
 
-      // Payment Milestone Status (Fee strictly hidden from non-ADMIN)
       const payBadge = document.getElementById('mdlPayBadge');
       if (item.isPaymentHold) {
         payBadge.textContent = '🔒 Payment Hold (' + item.lockMode + ')';
@@ -754,8 +880,8 @@
         payBadge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-emerald-100 text-emerald-800';
       }
 
-      const feeRow = document.getElementById('mdlAdminFeeRow');
-      if (r === 'ADMIN') {
+      const feeRow = document.getElementById('mdlFeeRow');
+      if (item.totalFee !== undefined) {
         feeRow.classList.remove('hidden');
         document.getElementById('mdlTotalFee').textContent = '₹' + Number(item.totalFee || 0).toLocaleString('en-IN');
         document.getElementById('mdlPaidPct').textContent = (item.paidPct || 0) + '%';
@@ -763,7 +889,6 @@
         feeRow.classList.add('hidden');
       }
 
-      // External Links (ADMIN & OPERATOR Only)
       const extBox = document.getElementById('mdlExternalLinks');
       if (r === 'ADMIN' || r === 'OPERATOR') {
         extBox.classList.remove('hidden');
@@ -780,10 +905,30 @@
         extBox.classList.add('hidden');
       }
 
+      const stg3Box = document.getElementById('mdlStage3Box');
+      const btnStg3 = document.getElementById('btnTriggerStage3');
+      if ((r === 'ADMIN' || r === 'OPERATOR' || r === 'ASSOCIATE') && item.hospId) {
+        stg3Box.classList.remove('hidden');
+        if (item.hasStage3) {
+          document.getElementById('mdlStage3Sub').textContent = 'Stage 3 (3. Audit Prep) is already active in UDCP.';
+          btnStg3.textContent = '✓ Audit Prep Active';
+          btnStg3.disabled = true;
+          btnStg3.className = 'px-3 py-2 rounded-lg bg-emerald-600 text-white font-bold opacity-80 cursor-default';
+        } else {
+          document.getElementById('mdlStage3Sub').textContent = r === 'ADMIN'
+            ? 'Authorize & push 34 Audit Prep items into UDCP'
+            : 'Send request to Admin to push 34 Audit Prep items';
+          btnStg3.textContent = r === 'ADMIN' ? '✓ Push Audit Prep' : '📤 Request Audit Prep';
+          btnStg3.disabled = false;
+          btnStg3.className = 'px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs';
+        }
+      } else {
+        stg3Box.classList.add('hidden');
+      }
+
       document.getElementById('mdlStatusSelect').value = item.status || 'yellow';
       document.getElementById('mdlRemarkInput').value = ctx.remark || '';
 
-      // Role-specific action buttons
       document.getElementById('btnFieldDone').classList.toggle('hidden', r !== 'FIELD');
       document.getElementById('btnAssocFlag').classList.toggle('hidden', r !== 'ASSOCIATE');
       document.getElementById('mdlRescheduleBox').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
@@ -793,12 +938,32 @@
       document.getElementById('detailModal').classList.remove('hidden');
     }
 
+    async function triggerStage3AuditPrep() {
+      if (!activeEditContext) return;
+      const btn = document.getElementById('btnTriggerStage3');
+      btn.disabled = true; btn.textContent = 'Processing...';
+      try {
+        const resp = await callApi({
+          action: 'requestStage3AuditPrep',
+          role: currentUser.role,
+          userName: currentUser.name,
+          hospId: activeEditContext.item.hospId,
+          hospitalName: activeEditContext.item.title,
+          associateCol: activeEditContext.column
+        });
+        alert(resp.message || (resp.success ? 'Stage 3 Audit Prep pushed to UDCP!' : 'Action failed'));
+        closeModal('detailModal');
+        fetchDashboardData(true);
+      } catch (e) {
+        alert('Error sending Audit Prep request.');
+      }
+    }
+
     async function saveProjectUpdate(fieldCompleted, flagIssue) {
       if (!activeEditContext) return;
       const newStatus = fieldCompleted ? 'green' : (flagIssue ? 'red' : document.getElementById('mdlStatusSelect').value);
       const newRemark = document.getElementById('mdlRemarkInput').value;
 
-      // Optimistic UI update
       activeEditContext.item.status = newStatus;
       closeModal('detailModal');
       renderCalendar();
@@ -847,13 +1012,248 @@
     }
 
     // -----------------------------------------------------------------------
-    // SUPER ADMIN ONLY: ASSIGN REGISTERED HOSPITAL
+    // NEW HOSPITAL LEAD & STAGE 1 KICKOFF DOCS MODAL (ALL ROLES)
     // -----------------------------------------------------------------------
-    function openAssignModal() {
-      document.getElementById('assignDateInput').value = getTodayIso();
+    async function openNewLeadModal() {
+      document.getElementById('newLeadForm').classList.remove('hidden');
+      document.getElementById('leadReceiptView').classList.add('hidden');
+      document.getElementById('newLeadForm').reset();
+
+      const r = currentUser.role;
+      document.getElementById('leadFinancialBox').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
+
+      const assocSel = document.getElementById('leadAssocCol');
+      const cols = portalData.columns || [];
+      assocSel.innerHTML = cols.map(c => `<option value="${c}" ${c === currentUser.column ? 'selected' : ''}>${c}</option>`).join('');
+
+      document.getElementById('newLeadModal').classList.remove('hidden');
+
+      if (!kickoffTemplateCache.length) {
+        const resp = await callApi({ action: 'getKickoffTemplate' });
+        if (resp.success) kickoffTemplateCache = resp.items || [];
+      }
+      renderKickoffChecklist();
+    }
+
+    function renderKickoffChecklist() {
+      const wrap = document.getElementById('leadChecklistContainer');
+      document.getElementById('leadCollectedCounter').textContent = '0 / ' + kickoffTemplateCache.length + ' Collected';
+      wrap.innerHTML = kickoffTemplateCache.map(it => `
+        <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" value="${it.index}" onchange="updateCollectedCount()" class="lead-doc-chk mt-0.5 w-4 h-4 accent-emerald-600" />
+          <span class="text-[11px] text-slate-800 leading-snug"><strong class="text-slate-500 mr-1">${it.srNo}.</strong>${it.text}</span>
+        </label>
+      `).join('');
+    }
+
+    function updateCollectedCount() {
+      const checked = document.querySelectorAll('.lead-doc-chk:checked').length;
+      document.getElementById('leadCollectedCounter').textContent = checked + ' / ' + kickoffTemplateCache.length + ' Collected';
+    }
+
+    async function submitNewHospitalLead(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitLead');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const hospName = document.getElementById('leadHospName').value.trim();
+      const city     = document.getElementById('leadCity').value.trim();
+      const mobile   = document.getElementById('leadMobile').value.trim();
+      const assocCol = document.getElementById('leadAssocCol').value;
+      const notes    = document.getElementById('leadNotes').value.trim();
+
+      const checkedBoxes = Array.from(document.querySelectorAll('.lead-doc-chk:checked'));
+      const collectedIndices = checkedBoxes.map(cb => Number(cb.value));
+      const collectedSet = new Set(collectedIndices);
+
+      const payload = {
+        action: 'submitNewHospitalLead',
+        role: currentUser.role,
+        userName: currentUser.name,
+        hospitalName: hospName,
+        city: city,
+        mobile: mobile,
+        associateCol: assocCol,
+        totalFee: document.getElementById('leadTotalFee').value,
+        p1Paid: document.getElementById('leadP1Paid').value,
+        lockMode: document.getElementById('leadLockMode').value,
+        collectedIndices: collectedIndices,
+        notes: notes
+      };
+
+      try {
+        const resp = await callApi(payload);
+        if (resp.success) {
+          const collectedLines = [];
+          const pendingLines   = [];
+          kickoffTemplateCache.forEach(it => {
+            if (collectedSet.has(it.index)) collectedLines.push('✅ ' + it.srNo + '. ' + it.text);
+            else pendingLines.push('⏳ ' + it.srNo + '. ' + it.text);
+          });
+
+          const summaryTxt =
+            '☂️ *UMBRELLA HEALTHCARE CONSULTANCY*\n' +
+            '*Initial Kickoff Documents Status*\n' +
+            'Hospital: *' + hospName + '* (' + city + ')\n' +
+            'Collected: ' + collectedLines.length + ' | Pending: ' + pendingLines.length + '\n\n' +
+            '*--- COLLECTED DOCUMENTS ---*\n' +
+            (collectedLines.length ? collectedLines.join('\n') : 'None yet') + '\n\n' +
+            '*--- PENDING DOCUMENTS TO ARRANGE ---*\n' +
+            (pendingLines.length ? pendingLines.join('\n') : 'All documents collected!');
+
+          document.getElementById('leadWhatsAppSummary').value = summaryTxt;
+          document.getElementById('newLeadForm').classList.add('hidden');
+          document.getElementById('leadReceiptView').classList.remove('hidden');
+          fetchDashboardData(true);
+        } else {
+          alert(resp.message || 'Submission failed.');
+        }
+      } catch (err) {
+        alert('Error submitting hospital lead.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit for Admin Authorization & Generate Client Checklist';
+      }
+    }
+
+    function copyLeadSummary() {
+      const ta = document.getElementById('leadWhatsAppSummary');
+      ta.select();
+      navigator.clipboard.writeText(ta.value);
+      alert('Checklist copied! You can paste it directly in WhatsApp.');
+    }
+
+    // -----------------------------------------------------------------------
+    // ADMIN ONLY: APPROVALS GATE MODAL
+    // -----------------------------------------------------------------------
+    function openApprovalsModal() {
+      const list = portalData.pendingApprovals || [];
+      const wrap = document.getElementById('approvalsListWrap');
+
+      if (!list.length) {
+        wrap.innerHTML = '<div class="p-8 text-center text-slate-400 font-semibold">No pending hospital or Stage 3 requests right now.</div>';
+      } else {
+        wrap.innerHTML = list.map(req => {
+          const isNewHosp = req.requestType === 'NEW_HOSPITAL';
+          return `
+            <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                <div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${isNewHosp ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">
+                    ${isNewHosp ? 'NEW HOSPITAL (STAGE 1: 37 DOCS)' : 'STAGE 3: AUDIT PREP (34 ITEMS)'}
+                  </span>
+                  <h4 class="text-sm font-extrabold text-slate-900 mt-1">${req.hospitalName} <span class="font-normal text-slate-500">(${req.city})</span></h4>
+                </div>
+                <div class="text-right text-[11px] text-slate-600">
+                  <p>Submitted by: <strong>${req.submittedBy}</strong> (${req.submittedRole})</p>
+                  ${isNewHosp ? `<p>Initial Docs Collected: <strong>${req.collectedCount} / 37</strong></p>` : `<p>Existing ID: <strong>${req.existingHospId}</strong></p>`}
+                </div>
+              </div>
+
+              ${isNewHosp ? `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Total Fee (₹)</label>
+                    <input id="apr_fee_${req.requestId}" type="number" value="${req.totalFee}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-bold" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">P1 Advance (25%)</label>
+                    <select id="apr_p1_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
+                      <option value="NO" ${req.p1Paid === 'NO' ? 'selected' : ''}>NO (0%)</option>
+                      <option value="YES" ${req.p1Paid === 'YES' ? 'selected' : ''}>YES (25% Paid)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Lock Mode</label>
+                    <select id="apr_lock_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
+                      <option value="SOFT" ${req.lockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
+                      <option value="STRICT" ${req.lockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Associate Column</label>
+                    <select id="apr_assoc_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
+                      ${(portalData.columns || []).map(c => `<option value="${c}" ${c === req.associateCol ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${req.notes ? `<p class="text-[11px] text-slate-600 bg-white p-2 rounded border">Note: ${req.notes}</p>` : ''}
+
+              <div class="flex items-center justify-end gap-2 pt-1">
+                <button onclick="rejectRequest('${req.requestId}')" class="px-3.5 py-2 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 font-bold">
+                  Reject
+                </button>
+                <button onclick="authorizeRequest('${req.requestId}', '${req.requestType}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs">
+                  ✓ Authorize &amp; Push to UDCP
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('approvalsModal').classList.remove('hidden');
+    }
+
+    async function authorizeRequest(reqId, reqType) {
+      const payload = {
+        action: 'approvePendingRequest',
+        role: currentUser.role,
+        userName: currentUser.name,
+        requestId: reqId
+      };
+      if (reqType === 'NEW_HOSPITAL') {
+        payload.overrideFee   = document.getElementById('apr_fee_' + reqId).value;
+        payload.overrideP1    = document.getElementById('apr_p1_' + reqId).value;
+        payload.overrideLock  = document.getElementById('apr_lock_' + reqId).value;
+        payload.overrideAssoc = document.getElementById('apr_assoc_' + reqId).value;
+      }
+
+      const resp = await callApi(payload);
+      if (resp.success) {
+        if (resp.type === 'NEW_HOSPITAL') {
+          const shareMsg =
+            '✅ Authorized & Added to UDCP!\n\n' +
+            'Hospital: ' + resp.hospitalName + '\n' +
+            'Login ID: ' + resp.hospId + '\n' +
+            'Password: ' + resp.password + '\n' +
+            'Portal: ' + resp.udcpUrl + '\n' +
+            'Stage 1 Kickoff Docs Created: ' + resp.totalItems + ' (' + resp.collectedCount + ' Submitted)';
+          alert(shareMsg);
+        } else {
+          alert('✅ Stage 3 (3. Audit Prep — ' + resp.totalItems + ' items) pushed to UDCP for ' + resp.hospitalName + '!');
+        }
+        closeModal('approvalsModal');
+        fetchDashboardData(true);
+      } else {
+        alert(resp.message || 'Authorization failed.');
+      }
+    }
+
+    async function rejectRequest(reqId) {
+      if (!confirm('Are you sure you want to reject this request?')) return;
+      await callApi({
+        action: 'rejectPendingRequest',
+        role: currentUser.role,
+        userName: currentUser.name,
+        requestId: reqId
+      });
+      closeModal('approvalsModal');
+      fetchDashboardData(true);
+    }
+
+    // -----------------------------------------------------------------------
+    // ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR
+    // -----------------------------------------------------------------------
+    function openAssignModal(presetDate, presetCol) {
+      document.getElementById('assignDateInput').value = presetDate || getTodayIso();
       document.getElementById('assignSearchInput').value = '';
+      document.getElementById('assignRemarkInput').value = '';
       const colSel = document.getElementById('assignColSelect');
-      colSel.innerHTML = (portalData.columns || []).map(c => `<option value="${c}">${c}</option>`).join('');
+      colSel.innerHTML = (portalData.columns || []).map(c =>
+        `<option value="${c}" ${c === presetCol ? 'selected' : ''}>${c}</option>`
+      ).join('');
       filterRegisteredHospitals();
       document.getElementById('assignModal').classList.remove('hidden');
     }
@@ -889,7 +1289,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // DETAILED PERFORMANCE & LINEUP REPORT (SUPER ADMIN & ASSOCIATE ONLY)
+    // DETAILED PERFORMANCE & LINEUP REPORT (ADMIN & ASSOCIATE ONLY)
     // -----------------------------------------------------------------------
     function openReportModal() {
       const sel = document.getElementById('reportAssocSelect');
@@ -914,12 +1314,13 @@
 
       const records = [];
       (portalData.rows || []).forEach(r => {
-        const cell = r.cells[targetCol];
-        if (!cell) return;
-        cell.items.forEach(it => {
-          if (!it.masked) {
-            records.push({ date: r.date, remark: cell.remark, ...it });
-          }
+        Object.keys(r.cells || {}).forEach(colKey => {
+          const isMatch = (colKey === targetCol) || (targetCol && colKey.indexOf(targetCol) === 0);
+          if (!isMatch) return;
+          const cell = r.cells[colKey];
+          cell.items.forEach(it => {
+            if (!it.masked) records.push({ date: r.date, remark: cell.remark, ...it });
+          });
         });
       });
 
@@ -931,7 +1332,6 @@
       const past      = records.filter(x => x.date < todayIso);
       const compRate  = total > 0 ? Math.round((completed.length / total) * 100) : 0;
 
-      // Delay accountability count (if available in auditLogs)
       const colLogs = (portalData.auditLogs || []).filter(l => l.associate === targetCol);
       const hospDelays = colLogs.filter(l => l.category.indexOf('Hospital') !== -1).length;
       const assocDelays= colLogs.filter(l => l.category.indexOf('Associate') !== -1).length;
@@ -943,7 +1343,6 @@
         <p class="text-xl font-extrabold text-red-800">${compRate}%</p>
       `;
 
-      // 6 Analytical KPI Cards
       const kpis = [
         { label: 'Total Assigned Projects', val: total, sub: 'Active & Historical', cls: 'bg-slate-50 border-slate-200 text-slate-900' },
         { label: 'Completed Projects', val: completed.length, sub: 'Verified Green', cls: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
@@ -960,7 +1359,6 @@
         </div>
       `).join('');
 
-      // Stage-Wise Distribution
       const stageMap = {};
       records.forEach(rec => {
         const s = rec.stage || '1. Kickoff Docs';
@@ -979,22 +1377,18 @@
           }).join('')
         : '<p class="text-slate-400">No stage data available.</p>';
 
-      // Payment Milestone Health
       const payClear = records.filter(x => !x.isPaymentHold && (x.paidPct || 0) > 0).length;
       const payZero  = records.filter(x => (x.paidPct || 0) === 0).length;
       const payHold  = records.filter(x => x.isPaymentHold).length;
+      const totalFeeSum = records.reduce((acc, x) => acc + (Number(x.totalFee) || 0), 0);
       let payHtml = `
         <div class="flex justify-between py-1 border-b border-slate-100"><span>Milestones Active (25%–100% Paid):</span><strong class="text-emerald-700">${payClear} Hospitals</strong></div>
         <div class="flex justify-between py-1 border-b border-slate-100"><span>Pending Initial Milestone (0%):</span><strong class="text-amber-700">${payZero} Hospitals</strong></div>
         <div class="flex justify-between py-1 border-b border-slate-100"><span>Strict Payment Lock Hold:</span><strong class="text-red-700">${payHold} Hospitals</strong></div>
+        <div class="flex justify-between py-1.5 bg-slate-50 px-2 rounded font-extrabold text-slate-900"><span>Portfolio Total Fee Value:</span><span>₹${totalFeeSum.toLocaleString('en-IN')}</span></div>
       `;
-      if (currentUser.role === 'ADMIN') {
-        const totalFeeSum = records.reduce((acc, x) => acc + (Number(x.totalFee) || 0), 0);
-        payHtml += `<div class="flex justify-between py-1.5 bg-slate-50 px-2 rounded font-extrabold text-slate-900"><span>Portfolio Total Fee Value:</span><span>₹${totalFeeSum.toLocaleString('en-IN')}</span></div>`;
-      }
       document.getElementById('repPaymentBreakdown').innerHTML = payHtml;
 
-      // 4 Detailed Tables
       const renderSectionTable = (title, badgeCls, rowsArr) => `
         <div class="border border-slate-200 rounded-xl overflow-hidden">
           <div class="px-3.5 py-2 font-extrabold text-xs flex justify-between items-center ${badgeCls}">
@@ -1006,7 +1400,7 @@
                 <th class="p-2 text-left border-b">Date</th>
                 <th class="p-2 text-left border-b">Hospital Name</th>
                 <th class="p-2 text-left border-b">Current Stage &amp; Live %</th>
-                <th class="p-2 text-left border-b">Payment Status</th>
+                <th class="p-2 text-left border-b">Fee &amp; Payment Status</th>
                 <th class="p-2 text-left border-b">Remark / Notes</th>
               </tr>
             </thead>
@@ -1016,7 +1410,7 @@
                   <td class="p-2 font-semibold whitespace-nowrap">${formatDisplayDate(r.date)}</td>
                   <td class="p-2 font-bold text-slate-900">${r.title}</td>
                   <td class="p-2">${r.stage} (<strong>${r.progressPct}%</strong>)</td>
-                  <td class="p-2">${r.isPaymentHold ? '🔒 Hold' : (r.paidPct + '% Clear')}</td>
+                  <td class="p-2">₹${Number(r.totalFee || 0).toLocaleString('en-IN')} • ${r.isPaymentHold ? '🔒 Hold' : (r.paidPct + '% Clear')}</td>
                   <td class="p-2 text-slate-600">${r.remark || '-'}</td>
                 </tr>
               `).join('') : '<tr><td colspan="5" class="p-3 text-center text-slate-400">No records in this category.</td></tr>'}
@@ -1033,19 +1427,20 @@
     }
 
     // -----------------------------------------------------------------------
-    // SUPER ADMIN MODALS: AUDIT LOG & USERS AUTH
+    // ADMIN MODALS: AUDIT LOG & USERS AUTH
     // -----------------------------------------------------------------------
     function openAuditModal() {
       const tbody = document.getElementById('auditTableBody');
       tbody.innerHTML = (portalData.auditLogs || []).map(l => `
         <tr>
+          <td class="p-2 border font-semibold">${l.logId}</td>
           <td class="p-2 border font-bold">${l.hospital}</td>
           <td class="p-2 border">${l.associate}</td>
           <td class="p-2 border">${l.oldDate} &rarr; <strong>${l.newDate}</strong></td>
           <td class="p-2 border font-semibold text-red-700">${l.category}</td>
           <td class="p-2 border">${l.remark}</td>
         </tr>
-      `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">No reschedule logs recorded yet.</td></tr>';
+      `).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">No reschedule logs recorded yet.</td></tr>';
       document.getElementById('auditModal').classList.remove('hidden');
     }
 
