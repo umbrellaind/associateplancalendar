@@ -3,1571 +3,1089 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Umbrella Healthcare Consultancy - Working Targets Portal</title>
+  <title>Umbrella Healthcare Consultancy — Operations & Working Targets Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
-    .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
-    .table-container::-webkit-scrollbar-track { background: #f1f5f9; }
-    .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
-    .sticky-header th { position: sticky; top: 0; z-index: 30; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade { animation: fadeIn 0.2s ease-out forwards; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .umbrella-gradient { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
+    .gold-accent { color: #d97706; }
+    .pill-yellow { background-color: #fef9c3; border-color: #fde047; color: #854d0e; }
+    .pill-green  { background-color: #dcfce7; border-color: #86efac; color: #166534; }
+    .pill-red    { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .pill-locked { background-color: #f1f5f9; border-color: #cbd5e1; color: #64748b; cursor: not-allowed; }
+    @media print {
+      body * { visibility: hidden; }
+      #reportPrintArea, #reportPrintArea * { visibility: visible; }
+      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 12px; }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-red-100 selection:text-red-800">
+<body class="min-h-screen flex flex-col">
 
-  <!-- 1. ROLE-BASED LOGIN & SELF-SIGNUP SCREEN -->
-  <div id="authScreen" class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade">
-      <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-5 text-white text-center">
-        <div class="w-12 h-12 rounded-xl bg-white/15 mx-auto flex items-center justify-center mb-2.5 shadow-inner">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 12a10.06 10.06 1 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>
-          </svg>
-        </div>
-        <h1 class="text-lg font-extrabold tracking-tight">UMBRELLA HEALTHCARE</h1>
-        <p class="text-xs text-red-100 mt-0.5">Working Targets & Operations Portal</p>
+  <!-- ===================================================================== -->
+  <!-- CONFIGURATION: REPLACE WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL     -->
+  <!-- ===================================================================== -->
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzdPsjzKLEShlSGaH9iGB6W6eOxKyvew3KpAONrNIcE6D3v0kV-1X1PfR6K1ZcbvKkfqA/exec";
+    const DAILY_CAPACITY = 6; // 6 Projects = 100% Busy
+  </script>
+
+  <!-- ===================================================================== -->
+  <!-- 1. LOGIN & SIGNUP SCREEN                                              -->
+  <!-- ===================================================================== -->
+  <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+      <div class="umbrella-gradient p-6 text-white text-center">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-white/15 border border-amber-300/60 flex items-center justify-center text-2xl">☂️</div>
+        <h1 class="text-xl font-extrabold tracking-tight">UMBRELLA HEALTHCARE</h1>
+        <p class="text-xs text-red-100 tracking-widest uppercase mt-0.5">Always and Anywhere With You</p>
       </div>
 
-      <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-50 text-xs font-bold">
-        <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-3 text-red-600 border-b-2 border-red-600 bg-white transition cursor-pointer">SECURE LOGIN</button>
-        <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="py-3 text-slate-500 hover:text-slate-800 transition cursor-pointer">NEW USER SIGNUP</button>
+      <div class="p-6">
+        <div class="flex rounded-lg bg-slate-100 p-1 mb-5 text-xs font-semibold">
+          <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-md bg-white shadow text-red-700">Team Login</button>
+          <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="flex-1 py-2 rounded-md text-slate-600">New User Signup</button>
+        </div>
+
+        <div id="authAlert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">User ID or Email</label>
+            <input id="loginId" type="text" required placeholder="Enter your registered ID" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+            <input id="loginPw" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <button type="submit" id="loginBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Sign In to Portal</button>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" onsubmit="submitSignup(event)" class="hidden space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+            <input id="regName" type="text" required placeholder="e.g. Stuti / Kunal Verma" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">User ID / Email</label>
+            <input id="regId" type="text" required placeholder="Choose a login ID or email" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+            <input id="regPw" type="password" required placeholder="Create password" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Role</label>
+              <select id="regRole" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+                <option value="ASSOCIATE">Associate</option>
+                <option value="FIELD">Field Team</option>
+                <option value="OPERATOR">Ops Operator</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Sheet Column Name</label>
+              <input id="regCol" type="text" placeholder="e.g. STUTI / KUNAL" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg uppercase" />
+            </div>
+          </div>
+          <button type="submit" id="signupBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Request Access</button>
+        </form>
       </div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-4">
-        <div id="loginErrorBox" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700"></div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Number (User ID)</label>
-          <input type="tel" id="loginMobile" maxlength="10" required placeholder="Enter 10-digit mobile number" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-          <input type="password" id="loginPassword" required placeholder="Enter your password" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
-        </div>
-        <button type="submit" id="loginSubmitBtn" class="w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md shadow-red-200 transition cursor-pointer">Login to Portal →</button>
-      </form>
-
-      <form id="signupForm" onsubmit="handleSelfSignup(event)" class="hidden p-6 space-y-3.5">
-        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-medium">
-          Self-Signup ke baad aapka account <strong>Pending (FALSE)</strong> rahega. Admin authorize karega tabhi login hoga.
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-          <input type="text" id="regName" required placeholder="e.g., Stuti / Vishal Kumar" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Number (Will be your User ID)</label>
-          <input type="tel" id="regMobile" maxlength="10" required placeholder="10-digit mobile number" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Create Your Password</label>
-          <input type="password" id="regPassword" required placeholder="Create strong password" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold focus:ring-2 focus:ring-red-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Requested Role</label>
-          <select id="regRole" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 outline-none">
-            <option value="ASSOCIATE">Associate (Field Partner)</option>
-            <option value="OPERATOR">Operator (Internal Ops Team)</option>
-          </select>
-        </div>
-        <button type="submit" id="signupSubmitBtn" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition cursor-pointer">Submit Registration for Admin Approval</button>
-      </form>
     </div>
   </div>
 
-  <!-- 2. MAIN PROTECTED PORTAL -->
-  <div id="portalApp" class="hidden min-h-screen flex flex-col">
-    <!-- Top Brand & Session Header -->
-    <header class="bg-white border-b-2 border-red-600 shadow-xs sticky top-0 z-40">
-      <div class="max-w-[1920px] mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+  <!-- ===================================================================== -->
+  <!-- 2. MAIN OPERATIONS DASHBOARD                                          -->
+  <!-- ===================================================================== -->
+  <div id="appShell" class="hidden flex-1 flex flex-col">
+
+    <!-- Top Brand Header -->
+    <header class="umbrella-gradient text-white shadow-md sticky top-0 z-30">
+      <div class="max-w-[1600px] mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 12a10.06 10.06 1 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>
-            </svg>
-          </div>
+          <div class="w-9 h-9 rounded-lg bg-white/15 border border-amber-300/60 flex items-center justify-center text-lg">☂️</div>
           <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">UMBRELLA HEALTHCARE</h1>
-              <span id="navRoleBadge" class="px-2 py-0.5 text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-200 rounded-full">SESSION</span>
-            </div>
-            <p class="text-[11px] text-slate-500 hidden sm:block">100% Screen-Fit 30-Day Calendar • 4 Projects = 100% Daily Ops Load</p>
+            <h1 class="text-sm sm:text-base font-extrabold leading-tight tracking-tight">UMBRELLA HEALTHCARE CONSULTANCY</h1>
+            <p class="text-[11px] text-red-100">Operations &amp; Working Targets Calendar</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span id="syncPill" class="hidden items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span> Syncing...
-          </span>
-          <div class="flex items-center gap-2 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
-            <div class="text-right">
-              <p id="loggedInUserName" class="text-xs font-extrabold text-slate-900 leading-tight"></p>
-              <p id="loggedInUserMeta" class="text-[10px] font-medium text-slate-500"></p>
-            </div>
-            <button onclick="refreshDashboard(true, false)" title="Force Sync Latest Sheet Data" class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer">↻</button>
-            <button onclick="logoutUser()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-red-600 text-slate-700 hover:text-white border border-slate-300 hover:border-red-600 text-xs font-bold transition cursor-pointer">Logout</button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Today's Ops Load Meter -->
+          <div id="todayLoadBadge" class="px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-bold">
+            Today's Ops Load: 0% Busy
+          </div>
+
+          <!-- Performance Report Button (Strictly Super Admin & Associate Only) -->
+          <button id="btnOpenReport" onclick="openReportModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-sm transition">
+            📊 Performance Report
+          </button>
+
+          <!-- Super Admin Only Controls -->
+          <button id="btnAssignHosp" onclick="openAssignModal()" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
+            + Assign Hospital
+          </button>
+          <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
+            📜 Old Records
+          </button>
+          <button id="btnUsersAuth" onclick="openUsersModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
+            🔐 Users
+          </button>
+
+          <!-- User Badge + Refresh + Logout -->
+          <div class="flex items-center gap-1.5 pl-2 border-l border-white/20">
+            <span id="userBadge" class="text-xs font-semibold text-red-50 hidden sm:inline"></span>
+            <button onclick="fetchDashboardData(true)" title="Sync Now" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold">↻</button>
+            <button onclick="logoutUser()" class="px-2.5 py-1.5 rounded-lg bg-black/25 hover:bg-black/40 text-xs font-semibold">Logout</button>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="max-w-[1920px] w-full mx-auto px-3 sm:px-5 py-3 space-y-3 flex-1">
-      <!-- Role Banner + Live Ops Load + Admin/Ops Actions -->
-      <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-        <div id="modeBanner" class="flex items-center gap-2.5"></div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Live Today Ops Workload Badge (4 projects = 100% busy) -->
-          <div id="todayLoadWidget" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center gap-2">
-            <span class="text-slate-400 text-[10px] uppercase">Today's Ops Load:</span>
-            <span id="todayLoadBadge" class="text-amber-300 font-extrabold">0% Busy (0/4)</span>
+    <!-- Filter & Role Info Bar -->
+    <div class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5">
+      <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-semibold">
+            <button id="flt30Btn" onclick="setDateFilter('next30')" class="px-3 py-1.5 rounded-md bg-white shadow text-red-700">Today + 30 Days</button>
+            <button id="fltAllBtn" onclick="setDateFilter('all')" class="px-3 py-1.5 rounded-md text-slate-600">All Dates</button>
+            <button id="fltPastBtn" onclick="setDateFilter('past')" class="px-3 py-1.5 rounded-md text-slate-600">Past Dates</button>
           </div>
 
-          <!-- ONLY VISIBLE TO ADMIN & OPERATORS -->
-          <div id="adminOpsToolbar" class="hidden flex-wrap items-center gap-2">
-            <button id="btnAdminUsers" onclick="openUserAuthModal()" class="hidden items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition cursor-pointer">
-              <span>🔐 Users (<span id="pendingUsersBadge">0</span>)</span>
-            </button>
-            <button id="btnAddHospital" onclick="openAddHospitalModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-2xs transition cursor-pointer">
-              <span>+ Add Hospital</span>
-            </button>
-            <button id="btnAuditLog" onclick="openAuditLogModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-900 text-white shadow-2xs transition cursor-pointer">
-              <span>Old Records (<span id="auditCountBadge">0</span>)</span>
-            </button>
-          </div>
+          <select id="statusFilter" onchange="renderCalendar()" class="px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg bg-white text-slate-700">
+            <option value="ALL">All Statuses</option>
+            <option value="yellow">Running Smoothly</option>
+            <option value="green">Completed</option>
+            <option value="red">On Hold / Issue</option>
+          </select>
+
+          <input id="searchBox" oninput="renderCalendar()" type="text" placeholder="Search hospital..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg w-44 sm:w-56 focus:outline-none focus:border-red-600" />
+        </div>
+
+        <div class="flex items-center gap-3 text-[11px] font-medium text-slate-600">
+          <span id="roleGuideBanner" class="hidden text-red-700 font-semibold">Your schedule is highlighted in red.</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-300 inline-block"></span> Running</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> Done</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span> Hold</span>
         </div>
       </div>
+    </div>
 
-      <!-- Filter & Legend Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-2xs">
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs font-bold">
-            <button id="btnFilter30" onclick="setDateFilter('30days')" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer">Next 30 Days</button>
-            <button id="btnFilterAll" onclick="setDateFilter('all')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer">All Dates</button>
-          </div>
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-4">
+      <div id="loadingIndicator" class="hidden text-center py-12 text-sm font-semibold text-slate-500">Loading schedule...</div>
 
-          <input type="text" id="calendarQuickSearch" oninput="renderScheduleViews()" placeholder="🔍 Filter hospital on screen..." class="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold outline-none focus:border-red-500 w-44 sm:w-56" />
-        </div>
-
-        <div class="flex items-center gap-2.5 flex-wrap text-[11px] font-semibold text-slate-600">
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> Complete</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block"></span> In Progress</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-red-500 inline-block"></span> Issue / Hold</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-indigo-400 inline-block"></span> Rescheduled</span>
-        </div>
+      <!-- Desktop 100% Screen-Fit Fixed Table -->
+      <div id="desktopTableWrap" class="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full table-fixed border-collapse text-xs">
+          <thead id="calendarThead" class="bg-slate-900 text-white"></thead>
+          <tbody id="calendarTbody" class="divide-y divide-slate-200"></tbody>
+        </table>
       </div>
 
-      <!-- 3A. DESKTOP 100% SCREEN-FIT TABLE (No Horizontal Scrollbar!) -->
-      <div class="hidden md:block bg-white rounded-xl border border-slate-300 shadow-sm overflow-hidden">
-        <div class="table-container overflow-y-auto max-h-[72vh]">
-          <table class="w-full table-fixed border-collapse text-left">
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody" class="divide-y divide-slate-200 text-xs"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 3B. MOBILE RESPONSIVE DAY-BY-DAY CARDS -->
-      <div id="mobileCardsContainer" class="md:hidden space-y-3"></div>
+      <!-- Mobile Day-by-Day Cards -->
+      <div id="mobileCardsWrap" class="md:hidden space-y-3"></div>
     </main>
   </div>
 
-  <!-- Loading Overlay & Toast -->
-  <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-50 hidden items-center justify-center">
-    <div class="bg-white px-5 py-3.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3">
-      <div class="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-      <span id="loadingText" class="text-xs font-bold text-slate-800">Loading schedule...</span>
-    </div>
-  </div>
-
-  <div id="toastBanner" class="fixed bottom-5 right-5 z-50 hidden max-w-md bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-fade">
-    <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shrink-0">✓</span>
-    <span id="toastText" class="text-xs sm:text-sm font-medium">Action completed!</span>
-  </div>
-
-  <!-- CLICK-TO-OPEN PROJECT DETAIL & ACTION MODAL (Opens when clicking a hospital pill) -->
-  <div id="projectDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-fade">
-      <div id="detailModalHeader" class="bg-slate-900 px-5 py-4 text-white flex items-start justify-between gap-2">
+  <!-- ===================================================================== -->
+  <!-- 3. PROJECT DETAIL & ACTION MODAL                                      -->
+  <!-- ===================================================================== -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
-          <span id="detailColBadge" class="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-wider">UMBRELLA</span>
-          <h3 id="detailHospitalTitle" class="text-base font-extrabold mt-1 leading-snug">Hospital Name</h3>
-          <p id="detailDateSub" class="text-xs text-slate-300 mt-0.5">Date</p>
+          <span id="mdlColBadge" class="text-[10px] uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded font-bold"></span>
+          <h3 id="mdlHospTitle" class="text-base font-extrabold mt-0.5"></h3>
         </div>
-        <button onclick="closeModal('projectDetailModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+        <button onclick="closeModal('detailModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
 
-      <div class="p-5 space-y-4">
-        <!-- Master Sheet Completion & Admin/Ops Links -->
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+      <div class="p-5 space-y-4 text-xs max-h-[82vh] overflow-y-auto">
+        <!-- Date & Stage Progress Card -->
+        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
           <div>
-            <span class="text-[10px] font-bold uppercase text-slate-400 block">Master Sheet Progress</span>
-            <span id="detailCompletionVal" class="text-sm font-extrabold text-emerald-700">0% Complete</span>
+            <p class="text-slate-500 font-medium">Scheduled Date</p>
+            <p id="mdlDateText" class="text-sm font-bold text-slate-900 mt-0.5"></p>
           </div>
-          <!-- Links strictly rendered ONLY for Admin & Operator -->
-          <div id="detailExternalLinks" class="flex items-center gap-1.5"></div>
+          <div>
+            <p class="text-slate-500 font-medium">Current Stage &amp; Progress</p>
+            <p id="mdlStageText" class="text-sm font-bold text-red-700 mt-0.5"></p>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+              <div id="mdlProgressBar" class="bg-emerald-600 h-full transition-all" style="width:0%"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Remark & Status Update -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Remark / Current Note</label>
-          <textarea id="detailRemarkInput" rows="2" placeholder="Enter update note..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium outline-none focus:border-red-500"></textarea>
+        <!-- Payment & Fee Section (Role Protected) -->
+        <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-700">Payment Milestone Status</span>
+            <span id="mdlPayBadge" class="px-2 py-0.5 rounded font-bold text-[11px]"></span>
+          </div>
+          <div id="mdlAdminFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-slate-800">
+            <span>Total Consultancy Fee: <strong id="mdlTotalFee" class="text-sm text-slate-900"></strong></span>
+            <span>Paid: <strong id="mdlPaidPct" class="text-emerald-700"></strong></span>
+          </div>
         </div>
 
-        <div id="detailStatusWrap" class="hidden">
-          <label class="block text-xs font-bold text-slate-700 mb-1">Status Color (Admin / Ops Only)</label>
-          <select id="detailStatusSelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold outline-none">
-            <option value="green">Green — Completed</option>
-            <option value="yellow">Yellow — In Progress</option>
-            <option value="red">Red — Hospital Issue / Hold</option>
-          </select>
+        <!-- Direct Links (Strictly Admin & Ops Operator Only) -->
+        <div id="mdlExternalLinks" class="hidden grid grid-cols-2 gap-2.5">
+          <a id="mdlUdcpBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-center shadow-xs transition">
+            🔗 Open UDCP Tracker
+          </a>
+          <a id="mdlDriveBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-center shadow-xs transition">
+            📁 Open Drive Folder
+          </a>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
-          <button onclick="saveDetailRemark()" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer">
-            Save Remark & Status
-          </button>
+        <!-- Status & Remark Update -->
+        <div class="space-y-2.5">
+          <div id="mdlStatusSelectWrap">
+            <label class="block font-bold text-slate-700 mb-1">Project Status</label>
+            <select id="mdlStatusSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold bg-white">
+              <option value="yellow">🟡 Running Smoothly</option>
+              <option value="green">🟢 Completed</option>
+              <option value="red">🔴 On Hold / Issue</option>
+            </select>
+          </div>
 
-          <button id="btnDetailOpsReschedule" onclick="triggerRescheduleFromDetail()" class="hidden w-full py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition cursor-pointer">
-            ↻ Ops Reschedule (Log Delay Proof)
-          </button>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Remark / Coordination Notes</label>
+            <textarea id="mdlRemarkInput" rows="2" placeholder="Enter update or hospital note..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600"></textarea>
+          </div>
 
-          <button id="btnDetailAssocIssue" onclick="triggerIssueFromDetail()" class="hidden w-full py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 text-xs font-bold transition cursor-pointer">
-            ☎ Contact Hospital / Flag Issue to Ops
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button onclick="saveProjectUpdate(false, false)" class="flex-1 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold">
+              Save Update
+            </button>
+            <!-- Field Team One-Tap Complete -->
+            <button id="btnFieldDone" onclick="saveProjectUpdate(true, false)" class="hidden py-2.5 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+              ✓ Mark Visit Completed
+            </button>
+            <!-- Associate Flag Issue -->
+            <button id="btnAssocFlag" onclick="saveProjectUpdate(false, true)" class="hidden py-2.5 px-3.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
+              ☎ Flag Hospital Issue
+            </button>
+          </div>
+        </div>
+
+        <!-- Ops / Admin Mandatory Reschedule Section -->
+        <div id="mdlRescheduleBox" class="hidden pt-3 border-t border-slate-200 space-y-2.5">
+          <p class="font-extrabold text-red-800">Reschedule Target Date (Proof Mandatory)</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">New Target Date</label>
+              <input id="mdlNewDate" type="date" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Delay Accountability</label>
+              <select id="mdlDelayCat" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white">
+                <option value="Hospital-End Delay">Hospital-End Delay</option>
+                <option value="Associate-End Delay">Associate-End Delay</option>
+                <option value="Ops / Technical">Ops / Technical</option>
+              </select>
+            </div>
+          </div>
+          <input id="mdlReschedReason" type="text" placeholder="Mandatory proof / reason for shifting date..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
+          <button onclick="submitReschedule()" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
+            Confirm Reschedule &amp; Log Proof
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ADMIN USER AUTHORIZATION MODAL -->
-  <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full overflow-hidden animate-fade">
-      <div class="bg-emerald-700 px-5 py-4 text-white flex items-center justify-between">
+  <!-- ===================================================================== -->
+  <!-- 4. SUPER ADMIN ONLY: SEARCH & ASSIGN REGISTERED HOSPITAL MODAL        -->
+  <!-- ===================================================================== -->
+  <div id="assignModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+        <h3 class="text-sm font-extrabold">Assign Registered Hospital</h3>
+        <button onclick="closeModal('assignModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <form onsubmit="submitAssignHospital(event)" class="p-5 space-y-3.5 text-xs">
         <div>
-          <h3 class="text-base font-bold">Admin User Authorization Panel (USERS_AUTH Sheet)</h3>
-          <p class="text-[11px] text-emerald-100">Approve self-registered users (TRUE/FALSE), assign Sheet Column & Role</p>
+          <label class="block font-bold text-slate-700 mb-1">Search Registered Hospital</label>
+          <input id="assignSearchInput" oninput="filterRegisteredHospitals()" type="text" placeholder="Type hospital name or HOSP-ID..." class="w-full px-3 py-2 border border-slate-300 rounded-lg mb-1.5 focus:outline-none focus:border-red-600" />
+          <select id="assignHospSelect" required size="5" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 font-medium"></select>
+          <p class="text-[10px] text-slate-500 mt-1">Only hospitals registered in the master database can be assigned.</p>
         </div>
-        <button onclick="closeModal('userAuthModal')" class="text-emerald-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
-      </div>
-      <div class="p-5 max-h-[70vh] overflow-y-auto">
-        <div class="overflow-x-auto border border-slate-200 rounded-xl">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
-              <tr><th class="p-3">Full Name</th><th class="p-3">Mobile</th><th class="p-3">Role</th><th class="p-3">Sheet Column</th><th class="p-3">Authorized</th><th class="p-3 text-right">Action</th></tr>
-            </thead>
-            <tbody id="usersAuthTableBody" class="divide-y divide-slate-200"></tbody>
-          </table>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Target Date</label>
+            <input id="assignDateInput" type="date" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Associate / Field Column</label>
+            <select id="assignColSelect" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
+          </div>
         </div>
-      </div>
-      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-between items-center">
-        <span class="text-xs text-slate-500">Only users marked <strong>TRUE</strong> can log in.</span>
-        <button onclick="closeModal('userAuthModal')" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg cursor-pointer">Done</button>
-      </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Initial Remark / Visit Purpose (Optional)</label>
+          <input id="assignRemarkInput" type="text" placeholder="e.g. Desktop NC Follow-up / Gap Audit Visit" class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
+        </div>
+        <button type="submit" class="w-full py-2.5 umbrella-gradient text-white font-bold rounded-lg shadow">Add to Schedule</button>
+      </form>
     </div>
   </div>
 
-  <!-- SEARCHABLE ADD HOSPITAL MODAL -->
-  <div id="addHospitalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fade">
-      <div class="bg-gradient-to-r from-red-600 to-red-700 px-5 py-4 text-white flex items-center justify-between gap-2">
-        <div>
-          <h3 class="text-base font-bold">Assign / Add Hospital Target</h3>
-          <p class="text-[11px] text-red-100">Search Master Sheet or add new hospital directly</p>
+  <!-- ===================================================================== -->
+  <!-- 5. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
+  <!-- ===================================================================== -->
+  <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between no-print">
+        <div class="flex items-center gap-3">
+          <h3 class="text-sm font-extrabold">Associate Performance &amp; Lineup Analysis</h3>
+          <select id="reportAssocSelect" onchange="buildPerformanceReport()" class="hidden px-2.5 py-1 rounded bg-white text-slate-900 text-xs font-bold"></select>
         </div>
         <div class="flex items-center gap-2">
-          <a href="https://docs.google.com/spreadsheets/d/1F2DLZOdMUmjUSIpOR-16F2Bq3SSeu-zC176BqoGZTbM/edit?usp=sharing" target="_blank" class="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold transition">
-            ↗ Master Sheet
-          </a>
-          <button onclick="closeModal('addHospitalModal')" class="text-red-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+          <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs">🖨️ Download / Print PDF</button>
+          <button onclick="closeModal('reportModal')" class="text-white/80 hover:text-white text-xl font-bold ml-2">&times;</button>
         </div>
       </div>
 
-      <div class="p-5 space-y-4">
-        <div class="relative">
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="text-xs font-bold text-slate-700">1. Search Hospital (or Type New Hospital Name)</label>
-            <button type="button" onclick="refreshDashboard(true, false)" class="text-[11px] font-bold text-red-600 hover:underline cursor-pointer">↻ Refresh List</button>
-          </div>
-          <input type="text" id="hospitalSearchInput" oninput="filterMasterHospitalsList()" onfocus="filterMasterHospitalsList()" autocomplete="off" placeholder="🔍 Type hospital name..." class="w-full rounded-xl border-2 border-slate-300 focus:border-red-500 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 outline-none" />
-          <input type="hidden" id="selectedHospitalIndex" value="-1" />
-
-          <div id="hospitalSearchResults" class="hidden mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-300 bg-white shadow-xl divide-y divide-slate-100"></div>
-
-          <div id="masterHospitalMeta" class="mt-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
-            <span class="text-slate-500">Type above to select from Master Sheet or create new</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div id="reportPrintArea" class="p-6 overflow-y-auto space-y-5 text-xs">
+        <!-- Official Umbrella Letterhead -->
+        <div class="border-b-2 border-red-700 pb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Target Date Slot</label>
-            <select id="addTargetDateSelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none"></select>
+            <h2 class="text-lg font-extrabold text-red-800 tracking-tight">UMBRELLA HEALTHCARE CONSULTANCY</h2>
+            <p class="text-[11px] font-semibold text-amber-700">Always and Anywhere With You • Quality &amp; Accreditation Operations</p>
+            <p class="text-[10px] text-slate-500">105 SMCT Building, Ghurvakhera, Kanpur Nagar, UP 208021 | umbrellagroup.one</p>
           </div>
+          <div class="text-right">
+            <p class="text-xs font-extrabold text-slate-800">PERFORMANCE &amp; LINEUP REPORT</p>
+            <p id="repGeneratedDate" class="text-[11px] text-slate-500"></p>
+          </div>
+        </div>
+
+        <!-- Formal Salutation ("To, Associate Name") -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Source / Column</label>
-            <select id="addTargetColSelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none"></select>
+            <p class="text-[11px] text-slate-500 font-semibold">To,</p>
+            <p id="repToName" class="text-base font-extrabold text-slate-900"></p>
+            <p class="text-[11px] text-slate-600 mt-0.5">Subject: Comprehensive Project Lineup, Stage Distribution &amp; Execution Analysis</p>
+          </div>
+          <div id="repCompletionBadge" class="px-3.5 py-2 rounded-xl bg-red-50 border border-red-200 text-right"></div>
+        </div>
+
+        <!-- 6 Analytical KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="repKpiCards"></div>
+
+        <!-- Stage-Wise & Payment Health Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border border-slate-200 rounded-xl p-3.5">
+            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Stage-Wise Distribution Analysis</h4>
+            <div id="repStageBreakdown" class="space-y-2"></div>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-3.5">
+            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Payment Milestone &amp; Hold Health</h4>
+            <div id="repPaymentBreakdown" class="space-y-2"></div>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">4. Initial Remark</label>
-          <input type="text" id="addHospitalRemark" placeholder="e.g., Document verification" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none" />
-        </div>
-      </div>
-
-      <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex justify-end gap-2">
-        <button onclick="closeModal('addHospitalModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg cursor-pointer">Cancel</button>
-        <button onclick="confirmAddHospital()" class="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer">Add to Sheet</button>
+        <!-- 4 Detailed Actionable Tables -->
+        <div id="repTablesContainer" class="space-y-4"></div>
       </div>
     </div>
   </div>
 
-  <!-- OPS RESCHEDULE MODAL -->
-  <div id="opsRescheduleModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-fade">
-      <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
-        <div>
-          <h3 class="text-base font-bold">Ops Reschedule & Audit Logger</h3>
-          <p class="text-[11px] text-slate-300">Logs delay count & reason into RESCHEDULE_AUDIT_LOG tab</p>
-        </div>
-        <button onclick="closeModal('opsRescheduleModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+  <!-- ===================================================================== -->
+  <!-- 6. OLD RECORDS (RESCHEDULE AUDIT LOG) MODAL — SUPER ADMIN ONLY        -->
+  <!-- ===================================================================== -->
+  <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
+        <h3 class="text-sm font-extrabold">Old Records &amp; Date Shift Proof Log</h3>
+        <button onclick="closeModal('auditModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
-      <div class="p-5 space-y-4">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
-          <div><span class="text-[10px] font-bold uppercase text-amber-700">Hospital Project</span><p id="reschedHospitalName" class="text-sm font-extrabold text-slate-900"></p></div>
-          <div class="text-right"><span class="text-[10px] font-bold uppercase text-amber-700">Current Slot</span><p id="reschedCurrentSlot" class="text-xs font-bold text-slate-800"></p></div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">1. New Target Date</label>
-            <select id="reschedNewDateSelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Delay Side</label>
-            <select id="reschedFaultSide" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-red-700 outline-none">
-              <option value="Hospital End">Hospital End (Docs / MD / Payment Hold)</option>
-              <option value="Associate End">Associate End (Coordination Delay)</option>
-              <option value="Ops / Internal">Ops Team Slot Adjustment</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Exact Proof / Reason</label>
-          <textarea id="reschedExactReason" rows="2" placeholder="Enter exact proof..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none"></textarea>
-        </div>
-      </div>
-      <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex justify-end gap-2">
-        <button onclick="closeModal('opsRescheduleModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg cursor-pointer">Cancel</button>
-        <button onclick="confirmOpsReschedule()" class="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer">Reschedule & Log Proof</button>
+      <div class="p-4 overflow-y-auto text-xs">
+        <table class="w-full border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-bold">
+            <tr>
+              <th class="p-2 text-left border">Hospital</th>
+              <th class="p-2 text-left border">Associate</th>
+              <th class="p-2 text-left border">Old Date → New Date</th>
+              <th class="p-2 text-left border">Accountability</th>
+              <th class="p-2 text-left border">Proof / Reason</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody" class="divide-y"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- ASSOCIATE ISSUE ESCALATION MODAL -->
-  <div id="associateIssueModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-fade">
-      <div class="bg-red-600 px-5 py-4 text-white flex items-center justify-between">
-        <div><h3 class="text-base font-bold">Contact Hospital / Flag Issue</h3><p class="text-[11px] text-red-100">Log hospital-side issue for Ops Team</p></div>
-        <button onclick="closeModal('associateIssueModal')" class="text-red-100 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
+  <!-- ===================================================================== -->
+  <!-- 7. USER ACCESS APPROVAL MODAL — SUPER ADMIN ONLY                      -->
+  <!-- ===================================================================== -->
+  <div id="usersModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
+        <h3 class="text-sm font-extrabold">Team Access &amp; Role Management</h3>
+        <button onclick="closeModal('usersModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
-      <div class="p-5 space-y-4">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><span class="text-[10px] font-bold uppercase text-slate-400">Your Hospital</span><p id="issueHospitalName" class="text-sm font-extrabold text-slate-900"></p></div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">Issue Type</label>
-          <select id="issueCategorySelect" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none">
-            <option value="Documents Pending from Hospital">Documents Pending from Hospital</option>
-            <option value="Hospital MD / Owner Unavailable">Hospital MD / Owner Unavailable</option>
-            <option value="Payment / Billing Hold at Hospital">Payment / Billing Hold at Hospital</option>
-            <option value="Hospital Staff Not Responding">Hospital Staff Not Responding</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">Call Summary / Details</label>
-          <textarea id="issueNoteInput" rows="2" placeholder="Enter details..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none"></textarea>
-        </div>
-      </div>
-      <div class="bg-slate-50 px-5 py-3.5 border-t border-slate-200 flex justify-end gap-2">
-        <button onclick="closeModal('associateIssueModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg cursor-pointer">Cancel</button>
-        <button onclick="confirmAssociateIssue()" class="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer">Submit Issue to Ops</button>
+      <div class="p-4 overflow-y-auto text-xs">
+        <table class="w-full border-collapse">
+          <thead class="bg-slate-100 text-slate-700 font-bold">
+            <tr>
+              <th class="p-2 text-left border">Name</th>
+              <th class="p-2 text-left border">User ID</th>
+              <th class="p-2 text-left border">Role</th>
+              <th class="p-2 text-left border">Column</th>
+              <th class="p-2 text-center border">Active</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody" class="divide-y"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- HOSPITAL-WISE CONSOLIDATED AUDIT & OLD RECORDS MODAL (ADMIN/OPS ONLY) -->
-  <div id="auditLogModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full overflow-hidden animate-fade">
-      <div class="bg-slate-900 px-5 py-4 text-white flex items-center justify-between">
-        <div>
-          <h3 class="text-base font-bold">Hospital-Wise Audit & Old Records</h3>
-          <p class="text-[11px] text-slate-300">Consolidated hospital delay count, timeline & Umbrella letterhead print</p>
-        </div>
-        <button onclick="closeModal('auditLogModal')" class="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer">✕</button>
-      </div>
-
-      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-2.5 flex-wrap">
-            <label class="text-xs font-extrabold text-slate-700 uppercase">Associate Old Records:</label>
-            <select id="auditAssociateFilter" onchange="renderAuditModalContent()" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-red-500">
-              <option value="ALL">ALL ASSOCIATES (All Hospitals)</option>
-            </select>
-          </div>
-          <button onclick="printAssociateOldRecords()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition cursor-pointer">
-            <span>🖨️ Print Selected Associate Old Records</span>
-          </button>
-        </div>
-
-        <div id="auditSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-xl">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="p-3">Hospital Name</th>
-                <th class="p-3">Associate / Source</th>
-                <th class="p-3 text-center">Total Reschedules</th>
-                <th class="p-3">Date Shifts & Exact Proofs (Timeline)</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="auditTableBody" class="divide-y divide-slate-200"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-between items-center">
-        <span class="text-xs text-slate-500">Click <strong>"Print History"</strong> for official Umbrella Healthcare PDF proof</span>
-        <button onclick="closeModal('auditLogModal')" class="px-4 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg cursor-pointer">Close</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- ===================================================================== -->
+  <!-- 8. FRONTEND APPLICATION LOGIC                                         -->
+  <!-- ===================================================================== -->
   <script>
-    // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL BELOW
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdPsjzKLEShlSGaH9iGB6W6eOxKyvew3KpAONrNIcE6D3v0kV-1X1PfR6K1ZcbvKkfqA/exec';
-    const DAILY_FULL_CAPACITY = 4; // 1 project = 25%, 2 = 50%, 3 = 75%, 4 = 100% Busy
+    let currentUser = null;
+    let portalData  = { columns: [], rows: [], directory: [], auditLogs: [], usersList: [] };
+    let dateFilterMode = 'next30';
+    let activeEditContext = null;
 
-    let sessionCreds = null;
-    let currentUserObj = null;
-    let dashboardState = { columns: [], rows: [], masterHospitals: [], auditLogs: [], usersList: [] };
-    let activeTarget = null;
-    let dateFilterMode = '30days';
-
-    function isAdminOrOps() {
-      return currentUserObj && (currentUserObj.role === 'ADMIN' || currentUserObj.role === 'OPERATOR');
-    }
-
-    function getCacheKey() {
-      return currentUserObj ? `umbrella_dash_cache_v4_${currentUserObj.mobile}` : 'umbrella_dash_cache_v4';
-    }
-
-    function saveLocalDashboardCache() {
-      try { localStorage.setItem(getCacheKey(), JSON.stringify(dashboardState)); } catch (e) {}
-    }
-
-    function loadLocalDashboardCache() {
-      try {
-        const raw = localStorage.getItem(getCacheKey());
-        if (!raw) return false;
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.columns && parsed.rows) {
-          dashboardState = parsed;
-          return true;
+    // Boot: Check saved session + instant Stale-While-Revalidate cache
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('umbrella_ops_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          enterAppShell();
+          const cachedPayload = localStorage.getItem('umbrella_ops_cache_' + currentUser.role + '_' + currentUser.column);
+          if (cachedPayload) {
+            portalData = JSON.parse(cachedPayload);
+            renderCalendar();
+          }
+          fetchDashboardData(false);
+        } catch (e) {
+          localStorage.removeItem('umbrella_ops_user');
         }
-      } catch (e) {}
-      return false;
+      }
+    });
+
+    function switchAuthTab(mode) {
+      document.getElementById('loginForm').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('signupForm').classList.toggle('hidden', mode !== 'signup');
+      document.getElementById('tabLoginBtn').className = mode === 'login'
+        ? 'flex-1 py-2 rounded-md bg-white shadow text-red-700'
+        : 'flex-1 py-2 rounded-md text-slate-600';
+      document.getElementById('tabSignupBtn').className = mode === 'signup'
+        ? 'flex-1 py-2 rounded-md bg-white shadow text-red-700'
+        : 'flex-1 py-2 rounded-md text-slate-600';
+      document.getElementById('authAlert').classList.add('hidden');
     }
 
-    async function apiCall(payload, loadingMsg = 'Syncing...', silent = false) {
-      if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT')) {
-        throw new Error('Please paste your deployed Google Apps Script Web App URL in SCRIPT_URL inside index.html.');
-      }
-      const syncPill = document.getElementById('syncPill');
-      if (silent) {
-        if (syncPill) { syncPill.classList.remove('hidden'); syncPill.classList.add('inline-flex'); }
-      } else {
-        showLoading(loadingMsg);
-      }
+    function showAuthAlert(msg, isSuccess) {
+      const el = document.getElementById('authAlert');
+      el.textContent = msg;
+      el.className = 'mb-4 p-3 rounded-lg text-xs font-semibold ' + (isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200');
+      el.classList.remove('hidden');
+    }
 
+    async function callApi(payload) {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }
+
+    async function submitLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true; btn.textContent = 'Signing in...';
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
+        const resp = await callApi({
+          action: 'login',
+          userId: document.getElementById('loginId').value,
+          password: document.getElementById('loginPw').value
         });
-        return await res.json();
+        if (resp.success) {
+          currentUser = resp.user;
+          localStorage.setItem('umbrella_ops_user', JSON.stringify(currentUser));
+          enterAppShell();
+          fetchDashboardData(false);
+        } else {
+          showAuthAlert(resp.message || 'Login failed', false);
+        }
+      } catch (err) {
+        showAuthAlert('Connection error. Please check Web App URL.', false);
       } finally {
-        if (silent) {
-          if (syncPill) { syncPill.classList.add('hidden'); syncPill.classList.remove('inline-flex'); }
-        } else {
-          hideLoading();
-        }
+        btn.disabled = false; btn.textContent = 'Sign In to Portal';
       }
     }
 
-    function showLoading(msg) {
-      document.getElementById('loadingText').textContent = msg;
-      const el = document.getElementById('loadingOverlay');
-      el.classList.remove('hidden'); el.classList.add('flex');
-    }
-
-    function hideLoading() {
-      const el = document.getElementById('loadingOverlay');
-      el.classList.add('hidden'); el.classList.remove('flex');
-    }
-
-    function switchAuthTab(tab) {
-      const loginForm = document.getElementById('loginForm');
-      const signupForm = document.getElementById('signupForm');
-      const tabLoginBtn = document.getElementById('tabLoginBtn');
-      const tabSignupBtn = document.getElementById('tabSignupBtn');
-      document.getElementById('loginErrorBox').classList.add('hidden');
-
-      if (tab === 'login') {
-        loginForm.classList.remove('hidden'); signupForm.classList.add('hidden');
-        tabLoginBtn.className = 'py-3 text-red-600 border-b-2 border-red-600 bg-white transition cursor-pointer';
-        tabSignupBtn.className = 'py-3 text-slate-500 hover:text-slate-800 transition cursor-pointer';
-      } else {
-        loginForm.classList.add('hidden'); signupForm.classList.remove('hidden');
-        tabSignupBtn.className = 'py-3 text-red-600 border-b-2 border-red-600 bg-white transition cursor-pointer';
-        tabLoginBtn.className = 'py-3 text-slate-500 hover:text-slate-800 transition cursor-pointer';
-      }
-    }
-
-    async function handleLogin(e) {
+    async function submitSignup(e) {
       e.preventDefault();
-      const mobile = document.getElementById('loginMobile').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const errBox = document.getElementById('loginErrorBox');
-
+      const btn = document.getElementById('signupBtn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
       try {
-        const res = await apiCall({ action: 'LOGIN', mobile, password }, 'Verifying credentials...', false);
-        if (!res.success) {
-          errBox.textContent = res.message; errBox.classList.remove('hidden'); return;
-        }
-        errBox.classList.add('hidden');
-        sessionCreds = { mobile, password };
-        currentUserObj = res.user;
-        localStorage.setItem('umbrella_session', JSON.stringify({ mobile, password, user: res.user }));
-
-        activatePortalUI();
-        const hasCache = loadLocalDashboardCache();
-        if (hasCache) {
-          renderApp();
-          await refreshDashboard(false, true);
-        } else {
-          await refreshDashboard(false, false);
-        }
-        showToast(`Welcome ${currentUserObj.name}!`);
+        const resp = await callApi({
+          action: 'signup',
+          name: document.getElementById('regName').value,
+          userId: document.getElementById('regId').value,
+          password: document.getElementById('regPw').value,
+          role: document.getElementById('regRole').value,
+          column: document.getElementById('regCol').value
+        });
+        showAuthAlert(resp.message, resp.success);
+        if (resp.success) document.getElementById('signupForm').reset();
       } catch (err) {
-        errBox.textContent = err.message; errBox.classList.remove('hidden');
-      }
-    }
-
-    function activatePortalUI() {
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('portalApp').classList.remove('hidden');
-      document.getElementById('loggedInUserName').textContent = currentUserObj.name;
-      document.getElementById('loggedInUserMeta').textContent = `${currentUserObj.mobile} • ${currentUserObj.role}`;
-      document.getElementById('navRoleBadge').textContent = `${currentUserObj.role}`;
-    }
-
-    async function handleSelfSignup(e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const mobile = document.getElementById('regMobile').value.trim();
-      const password = document.getElementById('regPassword').value;
-      const role = document.getElementById('regRole').value;
-
-      try {
-        const res = await apiCall({ action: 'SIGNUP', name, mobile, password, role }, 'Submitting registration...', false);
-        if (!res.success) { showToast(res.message); return; }
-        document.getElementById('signupForm').reset();
-        switchAuthTab('login');
-        document.getElementById('loginMobile').value = mobile;
-        showToast(res.message);
-      } catch (err) {
-        showToast(err.message);
+        showAuthAlert('Registration failed. Please try again.', false);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Request Access';
       }
     }
 
     function logoutUser() {
-      localStorage.removeItem('umbrella_session');
-      sessionCreds = null;
-      currentUserObj = null;
-      document.getElementById('portalApp').classList.add('hidden');
-      document.getElementById('authScreen').classList.remove('hidden');
-      document.getElementById('loginPassword').value = '';
+      localStorage.removeItem('umbrella_ops_user');
+      location.reload();
     }
 
-    async function refreshDashboard(forceRefreshMaster = false, silent = false) {
-      if (!sessionCreds) return;
+    function enterAppShell() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appShell').classList.remove('hidden');
+
+      const r = currentUser.role;
+      document.getElementById('userBadge').textContent = currentUser.name + ' (' + r + ')';
+
+      // Strict Role Visibility
+      document.getElementById('btnAssignHosp').classList.toggle('hidden', r !== 'ADMIN');
+      document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
+      document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
+
+      // Performance Report strictly for ADMIN & ASSOCIATE (Hidden from OPERATOR & FIELD)
+      document.getElementById('btnOpenReport').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
+
+      // Highlight guide for Associates & Field Team
+      document.getElementById('roleGuideBanner').classList.toggle('hidden', !(r === 'ASSOCIATE' || r === 'FIELD'));
+    }
+
+    async function fetchDashboardData(forceRefresh) {
+      if (!portalData.rows.length) {
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+      }
       try {
-        const res = await apiCall({
-          action: 'GET_DASHBOARD',
-          mobile: sessionCreds.mobile,
-          password: sessionCreds.password,
-          forceRefreshMaster
-        }, 'Syncing schedule...', silent);
-
-        if (!res.success) {
-          showToast(res.message);
-          if (res.message && res.message.toLowerCase().includes('unauthorized')) logoutUser();
-          return;
-        }
-
-        dashboardState.columns = res.columns;
-        dashboardState.rows = res.rows;
-        dashboardState.masterHospitals = isAdminOrOps() ? (res.masterHospitals || []) : [];
-        dashboardState.auditLogs = isAdminOrOps() ? (res.auditLogs || []) : [];
-        dashboardState.usersList = (currentUserObj.role === 'ADMIN') ? (res.usersList || []) : [];
-
-        saveLocalDashboardCache();
-        renderApp();
-      } catch (err) {
-        showToast(err.message);
-      }
-    }
-
-    // Parse date strings like "November 22, 2026" safely
-    function parseSheetDate(dateStr) {
-      const d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        d.setHours(0, 0, 0, 0);
-        return d;
-      }
-      return null;
-    }
-
-    function formatShortDate(dateStr) {
-      const d = parseSheetDate(dateStr);
-      if (!d) return dateStr;
-      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-    }
-
-    function getFilteredRows() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const maxDate = new Date(today);
-      maxDate.setDate(today.getDate() + 30);
-
-      const searchQ = (document.getElementById('calendarQuickSearch')?.value || '').trim().toLowerCase();
-
-      return dashboardState.rows.map((row, origIndex) => {
-        const parsed = parseSheetDate(row.date);
-        const isToday = parsed && parsed.getTime() === today.getTime();
-        const isWithin30 = !parsed || (parsed >= today && parsed <= maxDate);
-
-        // Calculate active projects on this date (exclude already shifted ones)
-        let activeCount = 0;
-        dashboardState.columns.forEach(col => {
-          const items = (row.entries[col.actualName]?.items) || [];
-          items.forEach(it => {
-            if (it.status !== 'shifted') activeCount++;
-          });
+        const resp = await callApi({
+          action: 'getDashboard',
+          role: currentUser.role,
+          column: currentUser.column,
+          forceRefresh: !!forceRefresh
         });
-
-        const loadPct = Math.round((activeCount / DAILY_FULL_CAPACITY) * 100);
-        return { ...row, origIndex, isToday, isWithin30, activeCount, loadPct };
-      }).filter(r => {
-        if (dateFilterMode === '30days' && !r.isWithin30) return false;
-        if (searchQ) {
-          const hasMatch = dashboardState.columns.some(col => {
-            const items = (r.entries[col.actualName]?.items) || [];
-            return items.some(it => !it.masked && it.text.toLowerCase().includes(searchQ));
-          });
-          if (!hasMatch) return false;
+        if (resp.success) {
+          portalData = resp;
+          localStorage.setItem('umbrella_ops_cache_' + currentUser.role + '_' + currentUser.column, JSON.stringify(resp));
+          renderCalendar();
         }
-        return true;
-      });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+      }
     }
 
     function setDateFilter(mode) {
       dateFilterMode = mode;
-      const b30 = document.getElementById('btnFilter30');
-      const bAll = document.getElementById('btnFilterAll');
-      if (mode === '30days') {
-        b30.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
-        bAll.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
-      } else {
-        bAll.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-2xs cursor-pointer';
-        b30.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer';
-      }
-      renderScheduleViews();
+      ['next30', 'all', 'past'].forEach(m => {
+        const btn = document.getElementById(m === 'next30' ? 'flt30Btn' : (m === 'all' ? 'fltAllBtn' : 'fltPastBtn'));
+        btn.className = (m === mode) ? 'px-3 py-1.5 rounded-md bg-white shadow text-red-700' : 'px-3 py-1.5 rounded-md text-slate-600';
+      });
+      renderCalendar();
     }
 
-    function getPillStyle(status, isClickable) {
-      const hoverEffect = isClickable ? 'cursor-pointer hover:ring-2 hover:ring-slate-900 hover:shadow-xs' : 'cursor-default select-none';
-      if (status === 'shifted') return `bg-indigo-50 text-indigo-700 border border-indigo-200 border-dashed line-through opacity-75 ${hoverEffect}`;
-      if (status === 'green') return `bg-emerald-100 text-emerald-950 border border-emerald-300 ${hoverEffect}`;
-      if (status === 'red') return `bg-red-100 text-red-950 border border-red-300 ${hoverEffect}`;
-      return `bg-amber-100 text-amber-950 border border-amber-300 ${hoverEffect}`;
+    function getTodayIso() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
-    function getLoadBadgeHtml(activeCount, loadPct) {
-      if (loadPct === 0) {
-        return `<span class="text-[9px] font-bold text-slate-400">0% Free</span>`;
-      }
-      if (loadPct < 75) {
-        return `<span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-extrabold">${loadPct}% Busy (${activeCount}/${DAILY_FULL_CAPACITY})</span>`;
-      }
-      if (loadPct === 75) {
-        return `<span class="px-1.5 py-0.2 rounded bg-amber-500/25 text-amber-300 text-[9px] font-extrabold">75% Busy (3/4)</span>`;
-      }
-      return `<span class="px-1.5 py-0.2 rounded bg-red-600 text-white text-[9px] font-extrabold">${loadPct}% FULL (${activeCount}/${DAILY_FULL_CAPACITY})</span>`;
+    function formatDisplayDate(iso) {
+      if (!iso || iso.length < 10) return iso;
+      const p = iso.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return p[2] + '-' + (months[parseInt(p[1], 10) - 1] || p[1]) + '-' + p[0];
     }
 
-    function renderApp() {
-      renderBannerAndControls();
-      renderTableHeader();
-      renderScheduleViews();
+    function computeLoadBadge(count) {
+      const pct = Math.round((count / DAILY_CAPACITY) * 100);
+      if (count === 0) return { text: '0% Free', cls: 'bg-slate-100 text-slate-600' };
+      if (count < DAILY_CAPACITY) return { text: pct + '% Busy', cls: pct >= 80 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700' };
+      if (count === DAILY_CAPACITY) return { text: '100% FULL', cls: 'bg-red-100 text-red-800' };
+      return { text: pct + '% OVERLOAD', cls: 'bg-red-700 text-white' };
     }
 
-    function renderBannerAndControls() {
-      const banner = document.getElementById('modeBanner');
-      const toolbar = document.getElementById('adminOpsToolbar');
-      const btnAdminUsers = document.getElementById('btnAdminUsers');
+    function renderCalendar() {
+      const cols = portalData.columns || [];
+      const todayIso = getTodayIso();
+      const plus30 = new Date();
+      plus30.setDate(plus30.getDate() + 30);
+      const max30Iso = plus30.getFullYear() + '-' + String(plus30.getMonth() + 1).padStart(2, '0') + '-' + String(plus30.getDate()).padStart(2, '0');
 
-      if (isAdminOrOps()) {
-        toolbar.classList.remove('hidden');
-        toolbar.classList.add('flex');
-        const groupedHospitals = getGroupedHospitalAudits('ALL');
-        document.getElementById('auditCountBadge').textContent = groupedHospitals.length;
+      const statusFlt = document.getElementById('statusFilter').value;
+      const searchQ   = document.getElementById('searchBox').value.trim().toLowerCase();
 
-        if (currentUserObj.role === 'ADMIN') {
-          const pendingCount = dashboardState.usersList.filter(u => !u.authorized).length;
-          document.getElementById('pendingUsersBadge').textContent = `${pendingCount} Pending`;
-          btnAdminUsers.classList.remove('hidden'); btnAdminUsers.classList.add('inline-flex');
-        } else {
-          btnAdminUsers.classList.add('hidden'); btnAdminUsers.classList.remove('inline-flex');
-        }
-      } else {
-        toolbar.classList.add('hidden');
-        toolbar.classList.remove('flex');
-        btnAdminUsers.classList.add('hidden');
-      }
+      // Update Today's Ops Load Meter in Header
+      const todayRow = (portalData.rows || []).find(r => r.date === todayIso);
+      const todayCount = todayRow ? todayRow.totalProjects : 0;
+      const todayPct = Math.round((todayCount / DAILY_CAPACITY) * 100);
+      document.getElementById('todayLoadBadge').textContent = "Today's Ops Load: " + (todayCount === DAILY_CAPACITY ? '100% FULL' : todayPct + '% Busy');
 
-      if (currentUserObj.role === 'ADMIN') {
-        banner.innerHTML = `<div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0">A</div><div><span class="text-xs sm:text-sm font-extrabold text-slate-900">ADMIN CONTROL</span><p class="text-[11px] text-slate-500">Click any hospital pill to view Master Sheet links, update remarks, or reschedule.</p></div>`;
-      } else if (currentUserObj.role === 'OPERATOR') {
-        banner.innerHTML = `<div class="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-xs shrink-0">OP</div><div><span class="text-xs sm:text-sm font-extrabold text-slate-900">UMBRELLA OPERATIONS TEAM</span><p class="text-[11px] text-slate-500">Next 30 days roadmap active. Click any hospital pill for links, remarks & reschedule.</p></div>`;
-      } else {
-        banner.innerHTML = `<div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold text-xs shrink-0">${currentUserObj.sheetCol.charAt(0)}</div><div><span class="text-xs sm:text-sm font-extrabold text-slate-900">ASSOCIATE: <span class="text-red-600">${currentUserObj.sheetCol}</span></span><p class="text-[11px] text-slate-500">Live Ops occupancy visible across all dates. Click only your highlighted hospitals for updates.</p></div>`;
-      }
-    }
-
-    function renderTableHeader() {
-      const thead = document.getElementById('tableHead');
-      let html = `<tr class="sticky-header bg-slate-950 text-white text-[11px] uppercase tracking-wider">
-        <th class="bg-slate-950 text-white font-bold px-2 py-2.5 border-r border-slate-800 w-[112px] text-center">DATE & LOAD</th>`;
-
-      dashboardState.columns.forEach(col => {
-        const isMaskedHeader = !isAdminOrOps() && !col.isMyCol && !col.isOpsCol;
-        const thBg = col.isMyCol ? 'bg-red-700 text-white' : 'bg-slate-950 text-slate-200';
-        html += `
-          <th class="${thBg} font-bold px-1.5 py-2.5 border-r border-slate-800 text-center truncate" title="${col.displayName}">
-            <div class="truncate ${isMaskedHeader ? 'font-mono text-slate-400 select-none' : ''}">${col.displayName}</div>
-            ${col.isMyCol ? '<div class="text-[8px] bg-white text-red-700 rounded-full px-1 mt-0.5 inline-block font-extrabold">YOURS</div>' : ''}
-          </th>
-        `;
+      // Filter Rows
+      const filteredRows = (portalData.rows || []).filter(row => {
+        if (dateFilterMode === 'next30' && (row.date < todayIso || row.date > max30Iso)) return false;
+        if (dateFilterMode === 'past' && row.date >= todayIso) return false;
+        return true;
       });
 
-      html += `</tr>`;
-      thead.innerHTML = html;
-    }
+      // Render Desktop Table Header (100% Screen-Fit Fixed Layout)
+      const thead = document.getElementById('calendarThead');
+      let thHtml = '<tr><th class="w-32 p-2.5 text-left border-r border-slate-700">Date &amp; Ops Load</th>';
+      cols.forEach(col => {
+        const isOwn = (col === currentUser.column);
+        thHtml += `<th class="p-2 text-center border-r border-slate-700 truncate ${isOwn ? 'bg-red-700 text-white' : ''}">${col}</th>`;
+      });
+      thHtml += '</tr>';
+      thead.innerHTML = thHtml;
 
-    function renderScheduleViews() {
-      const rows = getFilteredRows();
+      // Render Desktop Table Body & Mobile Cards
+      const tbody = document.getElementById('calendarTbody');
+      const mobileWrap = document.getElementById('mobileCardsWrap');
+      let tbHtml = '';
+      let mobHtml = '';
 
-      // Update Top Today's Load Widget (uses first row if today isn't found in sheet)
-      const todayRow = rows.find(r => r.isToday) || rows[0];
-      if (todayRow) {
-        const badge = document.getElementById('todayLoadBadge');
-        badge.textContent = `${todayRow.loadPct}% Busy (${todayRow.activeCount}/${DAILY_FULL_CAPACITY})`;
-        badge.className = todayRow.loadPct >= 100 ? 'text-red-400 font-extrabold' : 'text-amber-300 font-extrabold';
-      }
+      filteredRows.forEach(row => {
+        const load = computeLoadBadge(row.totalProjects);
+        const isToday = (row.date === todayIso);
 
-      renderDesktopTable(rows);
-      renderMobileCards(rows);
-    }
+        tbHtml += `<tr class="${isToday ? 'bg-red-50/40' : 'hover:bg-slate-50/80'}">`;
+        tbHtml += `<td class="p-2 border-r border-slate-200 align-top">
+          <div class="font-bold text-slate-900">${formatDisplayDate(row.date)} ${isToday ? '<span class="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded ml-1">TODAY</span>' : ''}</div>
+          <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${load.cls}">${load.text}</span>
+        </td>`;
 
-    function renderDesktopTable(rows) {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
+        let mobDayCards = '';
 
-      rows.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.className = row.isToday ? 'bg-red-50/30' : 'hover:bg-slate-50/90';
+        cols.forEach(col => {
+          const isOwn = (col === currentUser.column);
+          const cellData = row.cells[col] || { items: [], remark: '' };
+          let pillsHtml = '';
 
-        const shortDate = formatShortDate(row.date);
-        const loadHtml = getLoadBadgeHtml(row.activeCount, row.loadPct);
+          cellData.items.forEach((item, idx) => {
+            if (statusFlt !== 'ALL' && item.status !== statusFlt) return;
+            if (searchQ && !item.masked && item.title.toLowerCase().indexOf(searchQ) === -1) return;
 
-        let rowHTML = `
-          <td class="bg-slate-900 text-white px-2 py-2 border-r border-b border-slate-800 text-center align-middle">
-            <div class="font-extrabold text-[11px] leading-tight">${shortDate} ${row.isToday ? '<span class="text-[9px] bg-red-600 px-1 rounded">TODAY</span>' : ''}</div>
-            <div class="mt-1">${loadHtml}</div>
-          </td>
-        `;
+            if (item.masked) {
+              pillsHtml += `<div class="mb-1 px-2 py-1 rounded border text-[11px] font-medium truncate pill-locked" title="Restricted">${item.title}</div>`;
+            } else {
+              const pCls = item.status === 'green' ? 'pill-green' : (item.status === 'red' ? 'pill-red' : 'pill-yellow');
+              const stgShort = 'S' + (item.stageOrder || 1) + ' • ' + (item.progressPct || 0) + '%';
+              const holdIcon = item.isPaymentHold ? ' 🔒' : '';
 
-        dashboardState.columns.forEach(col => {
-          const cell = row.entries[col.actualName] || { items: [], status: 'none', remark: '', masked: false };
-          const items = cell.items || [];
-          const colBgTint = col.isMyCol ? 'bg-red-50/40' : 'bg-white';
-          const isClickable = isAdminOrOps() || col.isMyCol;
+              pillsHtml += `<button onclick='openDetailModal(${JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;")})'
+                class="w-full text-left mb-1 px-2 py-1.5 rounded border text-[11px] font-bold shadow-2xs hover:opacity-90 transition block ${pCls}">
+                <div class="truncate">${item.title}${holdIcon}</div>
+                <div class="text-[9px] font-semibold opacity-80 mt-0.5">${stgShort}</div>
+              </button>`;
 
-          if (items.length > 0) {
-            const pillsHtml = items.map((item, idx) => {
-              const pillCls = getPillStyle(item.status, isClickable && !item.masked);
-              const clickAttr = (isClickable && !item.masked)
-                ? `onclick="openProjectDetailModal(${row.origIndex}, '${col.actualName}', ${idx})"`
-                : '';
-              const titleAttr = !item.masked ? `title="${item.text}${cell.remark ? ' • Note: ' + cell.remark : ''}"` : '';
-              return `
-                <div ${clickAttr} ${titleAttr} class="px-1.5 py-1 rounded-md text-[11px] font-bold leading-tight truncate flex items-center justify-between gap-1 transition ${pillCls} ${item.masked ? 'font-mono tracking-tight' : ''}">
-                  <span class="truncate">${item.text}</span>
-                  ${!item.masked && item.reschedCount > 0 ? `<span class="w-2 h-2 rounded-full bg-red-600 shrink-0" title="Delayed ${item.reschedCount}x"></span>` : ''}
+              mobDayCards += `<button onclick='openDetailModal(${JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;")})'
+                class="w-full text-left p-2.5 rounded-lg border text-xs font-bold flex items-center justify-between ${pCls}">
+                <div>
+                  <span class="text-[10px] uppercase opacity-75 block">${col}</span>
+                  <span>${item.title}${holdIcon}</span>
                 </div>
-              `;
-            }).join('');
+                <span class="text-[11px] px-2 py-0.5 rounded bg-white/70">${stgShort}</span>
+              </button>`;
+            }
+          });
 
-            const addMiniBtn = isAdminOrOps()
-              ? `<button onclick="openAddHospitalModal(${row.origIndex}, '${col.actualName}')" title="Add another hospital on ${shortDate}" class="w-full text-[9px] font-bold text-slate-400 hover:text-red-600 leading-none py-0.5 cursor-pointer">+ add</button>`
-              : '';
-
-            rowHTML += `
-              <td class="${colBgTint} p-1 border-r border-b border-slate-200 align-top">
-                <div class="space-y-1">
-                  ${pillsHtml}
-                  ${addMiniBtn}
-                </div>
-              </td>
-            `;
-          } else {
-            rowHTML += `
-              <td class="${colBgTint} p-1 border-r border-b border-slate-200 align-middle text-center">
-                ${isAdminOrOps()
-                  ? `<button onclick="openAddHospitalModal(${row.origIndex}, '${col.actualName}')" class="text-[10px] text-slate-300 hover:text-red-600 font-bold cursor-pointer">+</button>`
-                  : `<span class="text-slate-200 text-[10px]">·</span>`
-                }
-              </td>
-            `;
-          }
+          tbHtml += `<td class="p-1.5 border-r border-slate-200 align-top ${isOwn ? 'bg-red-50/30' : ''}">${pillsHtml}</td>`;
         });
 
-        tr.innerHTML = rowHTML;
-        tbody.appendChild(tr);
+        tbHtml += '</tr>';
+
+        if (mobDayCards || isToday) {
+          mobHtml += `<div class="bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
+            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+              <span class="font-extrabold text-xs text-slate-900">${formatDisplayDate(row.date)}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${load.cls}">${load.text}</span>
+            </div>
+            <div class="space-y-1.5">${mobDayCards || '<p class="text-[11px] text-slate-400">No visible items</p>'}</div>
+          </div>`;
+        }
       });
+
+      tbody.innerHTML = tbHtml || `<tr><td colspan="${cols.length + 1}" class="p-8 text-center text-slate-400">No targets found for selected filter.</td></tr>`;
+      mobileWrap.innerHTML = mobHtml || '<div class="p-6 text-center text-xs text-slate-400 bg-white rounded-xl border">No targets found.</div>';
     }
 
-    function renderMobileCards(rows) {
-      const container = document.getElementById('mobileCardsContainer');
-      container.innerHTML = rows.map(row => {
-        const loadHtml = getLoadBadgeHtml(row.activeCount, row.loadPct);
-        const activeColsHtml = dashboardState.columns.map(col => {
-          const cell = row.entries[col.actualName];
-          if (!cell || !cell.items || cell.items.length === 0) return '';
-          const isClickable = isAdminOrOps() || col.isMyCol;
+    // -----------------------------------------------------------------------
+    // DETAIL MODAL HANDLERS
+    // -----------------------------------------------------------------------
+    function openDetailModal(ctx) {
+      activeEditContext = ctx;
+      const item = ctx.item;
+      const r = currentUser.role;
 
-          const itemsHtml = cell.items.map((item, idx) => {
-            const pillCls = getPillStyle(item.status, isClickable && !item.masked);
-            const clickAttr = (isClickable && !item.masked)
-              ? `onclick="openProjectDetailModal(${row.origIndex}, '${col.actualName}', ${idx})"`
-              : '';
-            return `
-              <div ${clickAttr} class="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center justify-between ${pillCls} ${item.masked ? 'font-mono' : ''}">
-                <span>${item.text}</span>
-                ${(isClickable && !item.masked) ? '<span class="text-[10px] opacity-70">Tap →</span>' : ''}
-              </div>
-            `;
-          }).join('');
+      document.getElementById('mdlColBadge').textContent = ctx.column;
+      document.getElementById('mdlHospTitle').textContent = item.title + (item.hospId ? ' (' + item.hospId + ')' : '');
+      document.getElementById('mdlDateText').textContent = formatDisplayDate(ctx.date);
+      document.getElementById('mdlStageText').textContent = item.stage + ' — ' + item.progressPct + '%';
+      document.getElementById('mdlProgressBar').style.width = (item.progressPct || 0) + '%';
 
-          return `
-            <div class="pt-2 first:pt-0">
-              <div class="text-[10px] font-extrabold uppercase tracking-wider mb-1 ${col.isMyCol ? 'text-red-600' : 'text-slate-500'}">
-                ${col.displayName} ${col.isMyCol ? '(YOURS)' : ''}
-              </div>
-              <div class="space-y-1">${itemsHtml}</div>
-            </div>
-          `;
-        }).filter(Boolean).join('');
+      // Payment Milestone Status (Fee strictly hidden from non-ADMIN)
+      const payBadge = document.getElementById('mdlPayBadge');
+      if (item.isPaymentHold) {
+        payBadge.textContent = '🔒 Payment Hold (' + item.lockMode + ')';
+        payBadge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-red-100 text-red-800';
+      } else {
+        payBadge.textContent = (item.paidPct || 0) + '% Milestones Clear (' + item.lockMode + ')';
+        payBadge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-emerald-100 text-emerald-800';
+      }
 
-        return `
-          <div class="bg-white rounded-xl border ${row.isToday ? 'border-red-500 ring-1 ring-red-300' : 'border-slate-200'} shadow-2xs overflow-hidden">
-            <div class="bg-slate-900 text-white px-3.5 py-2 flex items-center justify-between">
-              <span class="text-xs font-extrabold">${row.date} ${row.isToday ? '(TODAY)' : ''}</span>
-              ${loadHtml}
-            </div>
-            <div class="p-3 divide-y divide-slate-100 space-y-2">
-              ${activeColsHtml || '<p class="text-xs text-slate-400 text-center py-1">No targets assigned</p>'}
-            </div>
+      const feeRow = document.getElementById('mdlAdminFeeRow');
+      if (r === 'ADMIN') {
+        feeRow.classList.remove('hidden');
+        document.getElementById('mdlTotalFee').textContent = '₹' + Number(item.totalFee || 0).toLocaleString('en-IN');
+        document.getElementById('mdlPaidPct').textContent = (item.paidPct || 0) + '%';
+      } else {
+        feeRow.classList.add('hidden');
+      }
+
+      // External Links (ADMIN & OPERATOR Only)
+      const extBox = document.getElementById('mdlExternalLinks');
+      if (r === 'ADMIN' || r === 'OPERATOR') {
+        extBox.classList.remove('hidden');
+        document.getElementById('mdlUdcpBtn').href = item.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/';
+        const drvBtn = document.getElementById('mdlDriveBtn');
+        if (item.driveUrl) {
+          drvBtn.href = item.driveUrl;
+          drvBtn.classList.remove('opacity-40', 'pointer-events-none');
+        } else {
+          drvBtn.href = '#';
+          drvBtn.classList.add('opacity-40', 'pointer-events-none');
+        }
+      } else {
+        extBox.classList.add('hidden');
+      }
+
+      document.getElementById('mdlStatusSelect').value = item.status || 'yellow';
+      document.getElementById('mdlRemarkInput').value = ctx.remark || '';
+
+      // Role-specific action buttons
+      document.getElementById('btnFieldDone').classList.toggle('hidden', r !== 'FIELD');
+      document.getElementById('btnAssocFlag').classList.toggle('hidden', r !== 'ASSOCIATE');
+      document.getElementById('mdlRescheduleBox').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
+      document.getElementById('mdlNewDate').value = '';
+      document.getElementById('mdlReschedReason').value = '';
+
+      document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    async function saveProjectUpdate(fieldCompleted, flagIssue) {
+      if (!activeEditContext) return;
+      const newStatus = fieldCompleted ? 'green' : (flagIssue ? 'red' : document.getElementById('mdlStatusSelect').value);
+      const newRemark = document.getElementById('mdlRemarkInput').value;
+
+      // Optimistic UI update
+      activeEditContext.item.status = newStatus;
+      closeModal('detailModal');
+      renderCalendar();
+
+      await callApi({
+        action: 'updateRemarkStatus',
+        role: currentUser.role,
+        userColumn: currentUser.column,
+        userName: currentUser.name,
+        column: activeEditContext.column,
+        rowIndex: activeEditContext.rowIndex,
+        hospitalName: activeEditContext.item.title,
+        status: newStatus,
+        remark: newRemark,
+        fieldCompleted: fieldCompleted,
+        flagIssue: flagIssue
+      });
+      fetchDashboardData(true);
+    }
+
+    async function submitReschedule() {
+      if (!activeEditContext) return;
+      const newDate = document.getElementById('mdlNewDate').value;
+      const reason  = document.getElementById('mdlReschedReason').value.trim();
+      const cat     = document.getElementById('mdlDelayCat').value;
+
+      if (!newDate || !reason) {
+        alert('Please enter both New Target Date and Mandatory Reschedule Reason.');
+        return;
+      }
+
+      closeModal('detailModal');
+      await callApi({
+        action: 'rescheduleTarget',
+        role: currentUser.role,
+        userName: currentUser.name,
+        column: activeEditContext.column,
+        rowIndex: activeEditContext.rowIndex,
+        oldDate: activeEditContext.date,
+        newDate: newDate,
+        hospitalName: activeEditContext.item.rawLine || activeEditContext.item.title,
+        reasonCategory: cat,
+        reasonRemark: reason
+      });
+      fetchDashboardData(true);
+    }
+
+    // -----------------------------------------------------------------------
+    // SUPER ADMIN ONLY: ASSIGN REGISTERED HOSPITAL
+    // -----------------------------------------------------------------------
+    function openAssignModal() {
+      document.getElementById('assignDateInput').value = getTodayIso();
+      document.getElementById('assignSearchInput').value = '';
+      const colSel = document.getElementById('assignColSelect');
+      colSel.innerHTML = (portalData.columns || []).map(c => `<option value="${c}">${c}</option>`).join('');
+      filterRegisteredHospitals();
+      document.getElementById('assignModal').classList.remove('hidden');
+    }
+
+    function filterRegisteredHospitals() {
+      const q = document.getElementById('assignSearchInput').value.trim().toLowerCase();
+      const sel = document.getElementById('assignHospSelect');
+      const list = (portalData.directory || []).filter(h =>
+        !q || h.name.toLowerCase().includes(q) || h.userId.toLowerCase().includes(q)
+      );
+      sel.innerHTML = list.map(h =>
+        `<option value="${h.userId}" data-name="${h.name}">${h.userId} — ${h.name} (${h.stage})</option>`
+      ).join('');
+    }
+
+    async function submitAssignHospital(e) {
+      e.preventDefault();
+      const sel = document.getElementById('assignHospSelect');
+      const opt = sel.options[sel.selectedIndex];
+      if (!opt) return;
+
+      closeModal('assignModal');
+      await callApi({
+        action: 'assignHospital',
+        role: currentUser.role,
+        date: document.getElementById('assignDateInput').value,
+        column: document.getElementById('assignColSelect').value,
+        hospId: opt.value,
+        hospitalName: opt.getAttribute('data-name'),
+        remark: document.getElementById('assignRemarkInput').value
+      });
+      fetchDashboardData(true);
+    }
+
+    // -----------------------------------------------------------------------
+    // DETAILED PERFORMANCE & LINEUP REPORT (SUPER ADMIN & ASSOCIATE ONLY)
+    // -----------------------------------------------------------------------
+    function openReportModal() {
+      const sel = document.getElementById('reportAssocSelect');
+      if (currentUser.role === 'ADMIN') {
+        sel.classList.remove('hidden');
+        sel.innerHTML = (portalData.columns || []).map(c => `<option value="${c}">${c}</option>`).join('');
+      } else {
+        sel.classList.add('hidden');
+      }
+      buildPerformanceReport();
+      document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function buildPerformanceReport() {
+      const targetCol = currentUser.role === 'ADMIN'
+        ? document.getElementById('reportAssocSelect').value
+        : currentUser.column;
+
+      const todayIso = getTodayIso();
+      const plus30 = new Date(); plus30.setDate(plus30.getDate() + 30);
+      const max30Iso = plus30.getFullYear() + '-' + String(plus30.getMonth() + 1).padStart(2, '0') + '-' + String(plus30.getDate()).padStart(2, '0');
+
+      const records = [];
+      (portalData.rows || []).forEach(r => {
+        const cell = r.cells[targetCol];
+        if (!cell) return;
+        cell.items.forEach(it => {
+          if (!it.masked) {
+            records.push({ date: r.date, remark: cell.remark, ...it });
+          }
+        });
+      });
+
+      const total     = records.length;
+      const completed = records.filter(x => x.status === 'green');
+      const running   = records.filter(x => x.status === 'yellow');
+      const onHold    = records.filter(x => x.status === 'red');
+      const upcoming  = records.filter(x => x.date >= todayIso && x.date <= max30Iso);
+      const past      = records.filter(x => x.date < todayIso);
+      const compRate  = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+
+      // Delay accountability count (if available in auditLogs)
+      const colLogs = (portalData.auditLogs || []).filter(l => l.associate === targetCol);
+      const hospDelays = colLogs.filter(l => l.category.indexOf('Hospital') !== -1).length;
+      const assocDelays= colLogs.filter(l => l.category.indexOf('Associate') !== -1).length;
+
+      document.getElementById('repGeneratedDate').textContent = 'Date: ' + formatDisplayDate(todayIso);
+      document.getElementById('repToName').textContent = targetCol;
+      document.getElementById('repCompletionBadge').innerHTML = `
+        <p class="text-[10px] font-bold text-red-700 uppercase">Overall Completion Rate</p>
+        <p class="text-xl font-extrabold text-red-800">${compRate}%</p>
+      `;
+
+      // 6 Analytical KPI Cards
+      const kpis = [
+        { label: 'Total Assigned Projects', val: total, sub: 'Active & Historical', cls: 'bg-slate-50 border-slate-200 text-slate-900' },
+        { label: 'Completed Projects', val: completed.length, sub: 'Verified Green', cls: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
+        { label: 'Running Smoothly', val: running.length, sub: 'On Track Schedule', cls: 'bg-amber-50 border-amber-200 text-amber-800' },
+        { label: 'On Hold / Critical', val: onHold.length, sub: 'Immediate Attention', cls: 'bg-red-50 border-red-200 text-red-800' },
+        { label: 'Next 30 Days Lineup', val: upcoming.length, sub: 'Upcoming Targets', cls: 'bg-blue-50 border-blue-200 text-blue-800' },
+        { label: 'Reschedule Split', val: colLogs.length, sub: `Hosp: ${hospDelays} | Assoc: ${assocDelays}`, cls: 'bg-purple-50 border-purple-200 text-purple-800' }
+      ];
+      document.getElementById('repKpiCards').innerHTML = kpis.map(k => `
+        <div class="p-3 rounded-xl border ${k.cls}">
+          <p class="text-[10px] font-bold opacity-80">${k.label}</p>
+          <p class="text-xl font-extrabold mt-0.5">${k.val}</p>
+          <p class="text-[10px] opacity-75 mt-0.5">${k.sub}</p>
+        </div>
+      `).join('');
+
+      // Stage-Wise Distribution
+      const stageMap = {};
+      records.forEach(rec => {
+        const s = rec.stage || '1. Kickoff Docs';
+        if (!stageMap[s]) stageMap[s] = { count: 0, sumPct: 0 };
+        stageMap[s].count += 1;
+        stageMap[s].sumPct += (rec.progressPct || 0);
+      });
+      const stageKeys = Object.keys(stageMap).sort();
+      document.getElementById('repStageBreakdown').innerHTML = stageKeys.length
+        ? stageKeys.map(s => {
+            const avg = Math.round(stageMap[s].sumPct / stageMap[s].count);
+            return `<div class="flex items-center justify-between text-xs py-1 border-b border-slate-100">
+              <span class="font-semibold text-slate-700">${s}</span>
+              <span class="font-bold text-slate-900">${stageMap[s].count} Hospitals <span class="text-emerald-700 ml-1">(Avg ${avg}%)</span></span>
+            </div>`;
+          }).join('')
+        : '<p class="text-slate-400">No stage data available.</p>';
+
+      // Payment Milestone Health
+      const payClear = records.filter(x => !x.isPaymentHold && (x.paidPct || 0) > 0).length;
+      const payZero  = records.filter(x => (x.paidPct || 0) === 0).length;
+      const payHold  = records.filter(x => x.isPaymentHold).length;
+      let payHtml = `
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Milestones Active (25%–100% Paid):</span><strong class="text-emerald-700">${payClear} Hospitals</strong></div>
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Pending Initial Milestone (0%):</span><strong class="text-amber-700">${payZero} Hospitals</strong></div>
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Strict Payment Lock Hold:</span><strong class="text-red-700">${payHold} Hospitals</strong></div>
+      `;
+      if (currentUser.role === 'ADMIN') {
+        const totalFeeSum = records.reduce((acc, x) => acc + (Number(x.totalFee) || 0), 0);
+        payHtml += `<div class="flex justify-between py-1.5 bg-slate-50 px-2 rounded font-extrabold text-slate-900"><span>Portfolio Total Fee Value:</span><span>₹${totalFeeSum.toLocaleString('en-IN')}</span></div>`;
+      }
+      document.getElementById('repPaymentBreakdown').innerHTML = payHtml;
+
+      // 4 Detailed Tables
+      const renderSectionTable = (title, badgeCls, rowsArr) => `
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="px-3.5 py-2 font-extrabold text-xs flex justify-between items-center ${badgeCls}">
+            <span>${title}</span><span>${rowsArr.length} Projects</span>
           </div>
-        `;
-      }).join('');
+          <table class="w-full border-collapse text-[11px]">
+            <thead class="bg-slate-50 text-slate-600 font-bold">
+              <tr>
+                <th class="p-2 text-left border-b">Date</th>
+                <th class="p-2 text-left border-b">Hospital Name</th>
+                <th class="p-2 text-left border-b">Current Stage &amp; Live %</th>
+                <th class="p-2 text-left border-b">Payment Status</th>
+                <th class="p-2 text-left border-b">Remark / Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${rowsArr.length ? rowsArr.map(r => `
+                <tr>
+                  <td class="p-2 font-semibold whitespace-nowrap">${formatDisplayDate(r.date)}</td>
+                  <td class="p-2 font-bold text-slate-900">${r.title}</td>
+                  <td class="p-2">${r.stage} (<strong>${r.progressPct}%</strong>)</td>
+                  <td class="p-2">${r.isPaymentHold ? '🔒 Hold' : (r.paidPct + '% Clear')}</td>
+                  <td class="p-2 text-slate-600">${r.remark || '-'}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5" class="p-3 text-center text-slate-400">No records in this category.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      document.getElementById('repTablesContainer').innerHTML =
+        renderSectionTable('1. Upcoming Lineup (Today & Next 30 Days)', 'bg-blue-50 text-blue-900', upcoming) +
+        renderSectionTable('2. Critical / On-Hold Hospitals (Action Required)', 'bg-red-50 text-red-900', onHold) +
+        renderSectionTable('3. Running Smoothly & Completed Projects', 'bg-emerald-50 text-emerald-900', [...running, ...completed]) +
+        renderSectionTable('4. Past Scheduled History', 'bg-slate-100 text-slate-800', past);
     }
 
-    // CLICK-TO-OPEN PROJECT DETAIL CARD
-    function openProjectDetailModal(rowIndex, colName, itemIndex) {
-      const row = dashboardState.rows[rowIndex];
-      const cell = row.entries[colName];
-      const item = cell.items[itemIndex];
-      if (!item || item.masked) return;
-
-      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName, itemIndex, hospitalName: item.text };
-
-      document.getElementById('detailColBadge').textContent = colName;
-      document.getElementById('detailHospitalTitle').textContent = item.text;
-      document.getElementById('detailDateSub').textContent = `${row.date}${item.reschedCount > 0 ? ` • Delayed ${item.reschedCount}x` : ''}`;
-      document.getElementById('detailCompletionVal').textContent = item.completion ? `${item.completion} Complete` : 'Linked to Master Sheet';
-      document.getElementById('detailRemarkInput').value = cell.remark || '';
-
-      // STRICT PRIVACY: External links rendered ONLY for Admin & Operator
-      const linksBox = document.getElementById('detailExternalLinks');
-      if (isAdminOrOps()) {
-        linksBox.innerHTML = `
-          ${item.sheetUrl ? `<a href="${item.sheetUrl}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold">Open Sheet</a>` : ''}
-          ${item.driveUrl ? `<a href="${item.driveUrl}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold">Open Drive</a>` : ''}
-        `;
-      } else {
-        linksBox.innerHTML = `<span class="text-[10px] font-semibold text-slate-400">Ops Managed</span>`;
-      }
-
-      const statusWrap = document.getElementById('detailStatusWrap');
-      const btnOpsResched = document.getElementById('btnDetailOpsReschedule');
-      const btnAssocIssue = document.getElementById('btnDetailAssocIssue');
-
-      if (isAdminOrOps()) {
-        statusWrap.classList.remove('hidden');
-        document.getElementById('detailStatusSelect').value = cell.status === 'none' ? 'yellow' : cell.status;
-        if (item.status !== 'shifted') {
-          btnOpsResched.classList.remove('hidden');
-        } else {
-          btnOpsResched.classList.add('hidden');
-        }
-        btnAssocIssue.classList.add('hidden');
-      } else {
-        statusWrap.classList.add('hidden');
-        btnOpsResched.classList.add('hidden');
-        if (item.status !== 'shifted') {
-          btnAssocIssue.classList.remove('hidden');
-        } else {
-          btnAssocIssue.classList.add('hidden');
-        }
-      }
-
-      openModal('projectDetailModal');
+    // -----------------------------------------------------------------------
+    // SUPER ADMIN MODALS: AUDIT LOG & USERS AUTH
+    // -----------------------------------------------------------------------
+    function openAuditModal() {
+      const tbody = document.getElementById('auditTableBody');
+      tbody.innerHTML = (portalData.auditLogs || []).map(l => `
+        <tr>
+          <td class="p-2 border font-bold">${l.hospital}</td>
+          <td class="p-2 border">${l.associate}</td>
+          <td class="p-2 border">${l.oldDate} &rarr; <strong>${l.newDate}</strong></td>
+          <td class="p-2 border font-semibold text-red-700">${l.category}</td>
+          <td class="p-2 border">${l.remark}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">No reschedule logs recorded yet.</td></tr>';
+      document.getElementById('auditModal').classList.remove('hidden');
     }
 
-    async function saveDetailRemark() {
-      if (!activeTarget) return;
-      const remark = document.getElementById('detailRemarkInput').value.trim();
-      const status = isAdminOrOps() ? document.getElementById('detailStatusSelect').value : null;
-
-      closeModal('projectDetailModal');
-      const row = dashboardState.rows[activeTarget.rowIndex];
-      if (row && row.entries[activeTarget.colName]) {
-        row.entries[activeTarget.colName].remark = remark;
-        if (status) {
-          row.entries[activeTarget.colName].status = status;
-          (row.entries[activeTarget.colName].items || []).forEach(it => {
-            if (it.status !== 'shifted') it.status = status;
-          });
-        }
-        renderScheduleViews();
-      }
-      showToast('Updated! Syncing with sheet...');
-
-      try {
-        const res = await apiCall({
-          action: 'UPDATE_REMARK',
-          mobile: sessionCreds.mobile,
-          password: sessionCreds.password,
-          sheetRowNumber: activeTarget.sheetRowNumber,
-          colName: activeTarget.colName,
-          remark,
-          status
-        }, 'Saving...', true);
-        if (res.success) await refreshDashboard(false, true);
-      } catch (err) { showToast(err.message); }
-    }
-
-    function triggerRescheduleFromDetail() {
-      if (!activeTarget) return;
-      closeModal('projectDetailModal');
-      openOpsRescheduleModal(activeTarget.rowIndex, activeTarget.colName, activeTarget.itemIndex);
-    }
-
-    function triggerIssueFromDetail() {
-      if (!activeTarget) return;
-      closeModal('projectDetailModal');
-      openAssociateIssueModal(activeTarget.rowIndex, activeTarget.colName, activeTarget.hospitalName);
-    }
-
-    // ADMIN USER AUTHORIZATION
-    function openUserAuthModal() {
-      if (currentUserObj.role !== 'ADMIN') return;
-      const tbody = document.getElementById('usersAuthTableBody');
-      tbody.innerHTML = dashboardState.usersList.map(u => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 font-bold text-slate-900">${u.name}</td>
-          <td class="p-3 font-mono text-slate-600">${u.mobile}</td>
-          <td class="p-3">
-            <select onchange="updateUserAuthField(${u.rowIndex}, 'role', this.value)" ${u.role === 'ADMIN' ? 'disabled' : ''} class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold bg-white">
-              <option value="ADMIN" ${u.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
-              <option value="OPERATOR" ${u.role === 'OPERATOR' ? 'selected' : ''}>OPERATOR</option>
-              <option value="ASSOCIATE" ${u.role === 'ASSOCIATE' ? 'selected' : ''}>ASSOCIATE</option>
+    function openUsersModal() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = (portalData.usersList || []).map(u => `
+        <tr>
+          <td class="p-2 border font-bold">${u.name}</td>
+          <td class="p-2 border">${u.userId}</td>
+          <td class="p-2 border">
+            <select onchange="updateUserRow('${u.userId}', this.value, null, null)" class="border rounded px-1.5 py-0.5">
+              ${['ADMIN','OPERATOR','ASSOCIATE','FIELD'].map(rl => `<option value="${rl}" ${u.role === rl ? 'selected' : ''}>${rl}</option>`).join('')}
             </select>
           </td>
-          <td class="p-3">
-            <select onchange="updateUserAuthField(${u.rowIndex}, 'sheetCol', this.value)" ${u.role !== 'ASSOCIATE' ? 'disabled' : ''} class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold bg-white">
-              <option value="ADMIN" ${u.sheetCol === 'ADMIN' ? 'selected' : ''}>ALL (Admin)</option>
-              <option value="UMBRELLA" ${u.sheetCol === 'UMBRELLA' ? 'selected' : ''}>UMBRELLA (Ops)</option>
-              ${dashboardState.columns.filter(c => c.actualName !== 'UMBRELLA').map(c => `<option value="${c.actualName}" ${u.sheetCol === c.actualName ? 'selected' : ''}>${c.actualName}</option>`).join('')}
-            </select>
+          <td class="p-2 border">
+            <input type="text" value="${u.column}" onblur="updateUserRow('${u.userId}', null, this.value, null)" class="border rounded px-1.5 py-0.5 w-24 uppercase" />
           </td>
-          <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${u.authorized ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">${u.authorized ? 'TRUE (Active)' : 'FALSE (Blocked)'}</span></td>
-          <td class="p-3 text-right">${u.role === 'ADMIN' ? '<span class="text-slate-400 italic">Primary Admin</span>' : `<button onclick="updateUserAuthField(${u.rowIndex}, 'authorized', ${!u.authorized})" class="px-3 py-1 rounded-lg font-bold text-[11px] text-white cursor-pointer ${u.authorized ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}">${u.authorized ? 'Set FALSE (Block)' : 'Set TRUE (Approve)'}</button>`}</td>
+          <td class="p-2 border text-center">
+            <input type="checkbox" ${u.approved ? 'checked' : ''} onchange="updateUserRow('${u.userId}', null, null, this.checked)" />
+          </td>
         </tr>
       `).join('');
-      openModal('userAuthModal');
+      document.getElementById('usersModal').classList.remove('hidden');
     }
 
-    async function updateUserAuthField(targetRowIndex, field, value) {
-      try {
-        const payload = { action: 'UPDATE_USER_AUTH', mobile: sessionCreds.mobile, password: sessionCreds.password, targetRowIndex };
-        payload[field] = value;
-        const res = await apiCall(payload, 'Updating access...', true);
-        if (res.success) {
-          await refreshDashboard(false, true);
-          openUserAuthModal();
-          showToast(res.message);
-        }
-      } catch (err) { showToast(err.message); }
-    }
-
-    // SEARCHABLE ADD HOSPITAL MODAL
-    function openAddHospitalModal(preRowIdx = 0, preCol = 'UMBRELLA') {
-      if (!isAdminOrOps()) return;
-      document.getElementById('hospitalSearchInput').value = '';
-      document.getElementById('selectedHospitalIndex').value = '-1';
-      document.getElementById('hospitalSearchResults').classList.add('hidden');
-      document.getElementById('masterHospitalMeta').innerHTML = `<span class="text-slate-500">Total <strong>${dashboardState.masterHospitals.length}</strong> hospitals loaded from Master Sheet</span>`;
-
-      const dateSelect = document.getElementById('addTargetDateSelect');
-      dateSelect.innerHTML = dashboardState.rows.map((r, i) => `<option value="${r.sheetRowNumber}" ${i === preRowIdx ? 'selected' : ''}>${r.date}</option>`).join('');
-      const colSelect = document.getElementById('addTargetColSelect');
-      colSelect.innerHTML = dashboardState.columns.map(c => `<option value="${c.actualName}" ${c.actualName === preCol ? 'selected' : ''}>${c.actualName}</option>`).join('');
-      document.getElementById('addHospitalRemark').value = '';
-      openModal('addHospitalModal');
-      setTimeout(() => document.getElementById('hospitalSearchInput').focus(), 100);
-    }
-
-    function filterMasterHospitalsList() {
-      const query = document.getElementById('hospitalSearchInput').value.trim();
-      const resultsBox = document.getElementById('hospitalSearchResults');
-      document.getElementById('selectedHospitalIndex').value = '-1';
-
-      const list = dashboardState.masterHospitals || [];
-      const matches = list
-        .map((h, idx) => ({ ...h, origIdx: idx }))
-        .filter(h => h.name.toLowerCase().includes(query.toLowerCase()));
-
-      let html = matches.slice(0, 30).map(h => `
-        <div onclick="selectMasterHospitalItem(${h.origIdx})" class="px-3.5 py-2.5 hover:bg-red-50 cursor-pointer flex items-center justify-between text-xs">
-          <span class="font-bold text-slate-900">${h.name}</span>
-          <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">${h.completion}</span>
-        </div>
-      `).join('');
-
-      if (query.length >= 2) {
-        const safeName = query.replace(/'/g, "\\'");
-        html += `
-          <div onclick="selectNewMasterHospital('${safeName}')" class="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 cursor-pointer flex items-center justify-between text-xs border-t border-amber-200">
-            <span class="font-extrabold text-amber-900">+ Add "${query}" as NEW Hospital in Master Sheet (Col A)</span>
-            <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-bold">New</span>
-          </div>
-        `;
-      }
-
-      if (!html) {
-        html = `<div class="p-3 text-xs text-slate-400 text-center">Start typing to search hospitals...</div>`;
-      }
-
-      resultsBox.innerHTML = html;
-      resultsBox.classList.remove('hidden');
-    }
-
-    function selectMasterHospitalItem(origIdx) {
-      const h = dashboardState.masterHospitals[origIdx];
-      if (!h) return;
-      document.getElementById('selectedHospitalIndex').value = origIdx;
-      document.getElementById('hospitalSearchInput').value = h.name;
-      document.getElementById('hospitalSearchResults').classList.add('hidden');
-      document.getElementById('masterHospitalMeta').innerHTML = `
-        <span class="font-bold text-slate-700">Master Sheet: <span class="text-emerald-700">${h.completion} Complete</span></span>
-        <span class="text-blue-600 font-semibold">Existing Hospital ✓</span>
-      `;
-    }
-
-    function selectNewMasterHospital(newName) {
-      document.getElementById('selectedHospitalIndex').value = '-1';
-      document.getElementById('hospitalSearchInput').value = newName;
-      document.getElementById('hospitalSearchResults').classList.add('hidden');
-      document.getElementById('masterHospitalMeta').innerHTML = `
-        <span class="font-bold text-amber-800">Will append to MASTER SHEET (Col A) & Schedule</span>
-        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">New</span>
-      `;
-    }
-
-    async function confirmAddHospital() {
-      const typedName = document.getElementById('hospitalSearchInput').value.trim();
-      const idx = parseInt(document.getElementById('selectedHospitalIndex').value, 10);
-      const existingHosp = idx >= 0 ? dashboardState.masterHospitals[idx] : null;
-
-      const finalName = existingHosp ? existingHosp.name : typedName;
-      if (!finalName) {
-        showToast('Please search or type a hospital name first.');
-        return;
-      }
-
-      const addToMaster = !existingHosp;
-      const completionVal = existingHosp ? existingHosp.completion : '0%';
-      const sheetRowNumber = parseInt(document.getElementById('addTargetDateSelect').value, 10);
-      const colName = document.getElementById('addTargetColSelect').value;
-      const remark = document.getElementById('addHospitalRemark').value.trim() || `Scheduled (${completionVal} done)`;
-
-      closeModal('addHospitalModal');
-      const targetRow = dashboardState.rows.find(r => r.sheetRowNumber === sheetRowNumber);
-      if (targetRow) {
-        if (!targetRow.entries[colName]) {
-          targetRow.entries[colName] = { items: [], remark: '', status: 'yellow', masked: false };
-        }
-        targetRow.entries[colName].items.push({
-          itemIndex: targetRow.entries[colName].items.length,
-          text: finalName,
-          status: 'yellow',
-          masked: false,
-          reschedCount: 0,
-          completion: completionVal,
-          sheetUrl: existingHosp ? existingHosp.sheetUrl : null,
-          driveUrl: existingHosp ? existingHosp.driveUrl : null
-        });
-        renderScheduleViews();
-      }
-      showToast(addToMaster ? `Adding "${finalName}" to Master Sheet & Schedule...` : `Added ${finalName} — saving...`);
-
-      try {
-        const res = await apiCall({
-          action: 'ADD_HOSPITAL',
-          mobile: sessionCreds.mobile,
-          password: sessionCreds.password,
-          sheetRowNumber,
-          colName,
-          hospitalName: finalName,
-          remark,
-          addToMaster
-        }, 'Saving...', true);
-        if (res.success) await refreshDashboard(addToMaster, true);
-      } catch (err) { showToast(err.message); }
-    }
-
-    // OPS RESCHEDULE
-    function openOpsRescheduleModal(rowIndex, colName, itemIndex = 0) {
-      if (!isAdminOrOps()) return;
-      const row = dashboardState.rows[rowIndex];
-      const entry = row.entries[colName];
-      const item = (entry.items && entry.items[itemIndex]) || { text: '' };
-      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName, itemIndex };
-      document.getElementById('reschedHospitalName').textContent = item.text;
-      document.getElementById('reschedCurrentSlot').textContent = `${row.date} (${colName})`;
-      document.getElementById('reschedExactReason').value = '';
-      document.getElementById('reschedNewDateSelect').innerHTML = dashboardState.rows.filter((_, idx) => idx !== rowIndex).map(r => `<option value="${r.sheetRowNumber}">${r.date}</option>`).join('');
-      openModal('opsRescheduleModal');
-    }
-
-    async function confirmOpsReschedule() {
-      if (!activeTarget) return;
-      const newRowNumber = parseInt(document.getElementById('reschedNewDateSelect').value, 10);
-      const faultSide = document.getElementById('reschedFaultSide').value;
-      const reason = document.getElementById('reschedExactReason').value.trim() || 'Hospital end pending documents / approval';
-
-      closeModal('opsRescheduleModal');
-      showToast('Rescheduling & logging proof in background...');
-
-      try {
-        const res = await apiCall({
-          action: 'OPS_RESCHEDULE',
-          mobile: sessionCreds.mobile,
-          password: sessionCreds.password,
-          oldRowNumber: activeTarget.sheetRowNumber,
-          newRowNumber,
-          colName: activeTarget.colName,
-          itemIndex: activeTarget.itemIndex,
-          faultSide,
-          reason
-        }, 'Saving...', true);
-        if (res.success) {
-          await refreshDashboard(false, true);
-          showToast(res.message);
-        }
-      } catch (err) { showToast(err.message); }
-    }
-
-    // ASSOCIATE ISSUE ESCALATION
-    function openAssociateIssueModal(rowIndex, colName, hospitalName) {
-      const row = dashboardState.rows[rowIndex];
-      activeTarget = { rowIndex, sheetRowNumber: row.sheetRowNumber, colName, hospitalName };
-      document.getElementById('issueHospitalName').textContent = hospitalName;
-      document.getElementById('issueNoteInput').value = '';
-      openModal('associateIssueModal');
-    }
-
-    async function confirmAssociateIssue() {
-      if (!activeTarget) return;
-      const category = document.getElementById('issueCategorySelect').value;
-      const note = document.getElementById('issueNoteInput').value.trim();
-      const issueText = note ? `${category} — ${note}` : category;
-
-      closeModal('associateIssueModal');
-      showToast('Issue flagged! Syncing with Ops Team...');
-
-      try {
-        const res = await apiCall({
-          action: 'FLAG_ISSUE',
-          mobile: sessionCreds.mobile,
-          password: sessionCreds.password,
-          sheetRowNumber: activeTarget.sheetRowNumber,
-          colName: activeTarget.colName,
-          hospitalName: activeTarget.hospitalName,
-          issueText
-        }, 'Saving...', true);
-        if (res.success) await refreshDashboard(false, true);
-      } catch (err) { showToast(err.message); }
-    }
-
-    // OLD RECORDS & AUDIT PRINT (ADMIN & OPS ONLY)
-    function getGroupedHospitalAudits(filterAssociate = 'ALL') {
-      if (!isAdminOrOps()) return [];
-      const logs = dashboardState.auditLogs || [];
-      const map = {};
-
-      [...logs].reverse().forEach(log => {
-        if (filterAssociate !== 'ALL' && log.sourceCol.toUpperCase() !== filterAssociate.toUpperCase()) return;
-        const key = log.hospital.trim().toUpperCase();
-        if (!map[key]) {
-          map[key] = {
-            hospital: log.hospital.trim(),
-            sourceCol: log.sourceCol.trim(),
-            totalCount: 0,
-            hospEndCount: 0,
-            history: []
-          };
-        }
-        map[key].totalCount += 1;
-        if (log.faultSide === 'Hospital End') map[key].hospEndCount += 1;
-        map[key].history.push(log);
+    async function updateUserRow(targetUserId, newRole, newColumn, approved) {
+      await callApi({
+        action: 'updateUserAuth',
+        role: currentUser.role,
+        targetUserId: targetUserId,
+        newRole: newRole,
+        newColumn: newColumn,
+        approved: approved
       });
-
-      return Object.values(map).sort((a, b) => b.totalCount - a.totalCount);
+      fetchDashboardData(true);
     }
 
-    function openAuditLogModal() {
-      if (!isAdminOrOps()) return;
-      const filterSelect = document.getElementById('auditAssociateFilter');
-      const allAssociates = new Set();
-      (dashboardState.columns || []).forEach(c => allAssociates.add(c.actualName));
-      (dashboardState.auditLogs || []).forEach(l => allAssociates.add(l.sourceCol.toUpperCase()));
-
-      filterSelect.innerHTML = `<option value="ALL">ALL ASSOCIATES (Complete Overview)</option>` +
-        Array.from(allAssociates).map(name => `<option value="${name}">${name}</option>`).join('');
-
-      renderAuditModalContent();
-      openModal('auditLogModal');
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
     }
-
-    function renderAuditModalContent() {
-      const selectedAssoc = document.getElementById('auditAssociateFilter').value;
-      const grouped = getGroupedHospitalAudits(selectedAssoc);
-
-      const totalHospitals = grouped.length;
-      const totalReschedules = grouped.reduce((sum, g) => sum + g.totalCount, 0);
-      const totalHospEnd = grouped.reduce((sum, g) => sum + g.hospEndCount, 0);
-
-      document.getElementById('auditSummaryCards').innerHTML = `
-        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <span class="text-[11px] font-bold text-slate-500 uppercase">${selectedAssoc === 'ALL' ? 'Affected Hospitals' : selectedAssoc + ' — Affected Hospitals'}</span>
-          <p class="text-xl font-extrabold text-slate-900 mt-0.5">${totalHospitals} Hospitals</p>
-        </div>
-        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
-          <span class="text-[11px] font-bold text-amber-800 uppercase">Total Reschedule Events</span>
-          <p class="text-xl font-extrabold text-amber-900 mt-0.5">${totalReschedules} Times</p>
-        </div>
-        <div class="p-3 rounded-xl bg-red-50 border border-red-200">
-          <span class="text-[11px] font-bold text-red-700 uppercase">Hospital-End Faults</span>
-          <p class="text-xl font-extrabold text-red-700 mt-0.5">${totalHospEnd} Delays</p>
-        </div>
-      `;
-
-      const tbody = document.getElementById('auditTableBody');
-      if (grouped.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-semibold">No reschedule records found for ${selectedAssoc}.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = grouped.map(item => {
-        const timelineHtml = item.history.map((h, i) => `
-          <div class="py-1 ${i > 0 ? 'border-t border-slate-100 mt-1 pt-1' : ''}">
-            <span class="font-bold text-slate-800">#${i + 1}:</span>
-            <span class="text-slate-600">${h.fromDate} → <strong>${h.toDate}</strong></span>
-            <span class="ml-1 px-1.5 py-0.2 rounded text-[10px] font-bold ${h.faultSide === 'Hospital End' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}">${h.faultSide}</span>
-            <div class="text-slate-700 mt-0.5">Proof: <em>"${h.reason}"</em></div>
-          </div>
-        `).join('');
-
-        const safeHosp = item.hospital.replace(/'/g, "\\'");
-        return `
-          <tr class="hover:bg-slate-50 align-top">
-            <td class="p-3 font-extrabold text-slate-900 text-sm">${item.hospital}</td>
-            <td class="p-3 font-bold text-slate-700">${item.sourceCol}</td>
-            <td class="p-3 text-center">
-              <span class="px-2.5 py-1 rounded-full bg-slate-900 text-amber-300 font-extrabold text-xs">${item.totalCount}x</span>
-              <div class="text-[10px] text-red-600 font-bold mt-1">${item.hospEndCount} Hospital End</div>
-            </td>
-            <td class="p-3 text-xs max-w-md">${timelineHtml}</td>
-            <td class="p-3 text-right space-y-1.5 whitespace-nowrap">
-              <button onclick="printHospitalHistory('${safeHosp}')" class="w-full px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] shadow-2xs cursor-pointer block">🖨️ Print History</button>
-              <button onclick="copyHospitalFullProof('${safeHosp}')" class="w-full px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] cursor-pointer block">Copy WhatsApp</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function copyHospitalFullProof(hospitalName) {
-      const grouped = getGroupedHospitalAudits('ALL');
-      const item = grouped.find(g => g.hospital.toUpperCase() === hospitalName.toUpperCase());
-      if (!item) return;
-
-      const lines = item.history.map((h, i) =>
-        `${i + 1}) ${h.fromDate} -> ${h.toDate} [${h.faultSide}]: ${h.reason}`
-      ).join('\n');
-
-      const text = `*UMBRELLA HEALTHCARE CONSULTANCY — HOSPITAL DELAY PROOF*\nHospital: ${item.hospital}\nAssociate: ${item.sourceCol}\nTotal Reschedules: ${item.totalCount} Time(s) (${item.hospEndCount} Hospital End)\n\n*Timeline & Reasons:*\n${lines}`;
-      const temp = document.createElement('textarea');
-      temp.value = text;
-      document.body.appendChild(temp);
-      temp.select();
-      document.execCommand('copy');
-      document.body.removeChild(temp);
-      showToast(`Complete proof copied for ${item.hospital}!`);
-    }
-
-    function openUmbrellaPrintWindow(reportTitle, subTitle, summaryHtml, tableRowsHtml) {
-      const printWin = window.open('', '_blank', 'width=950,height=750');
-      const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-
-      printWin.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${reportTitle} - Umbrella Healthcare Consultancy</title>
-          <style>
-            body { font-family: Arial, Helvetica, sans-serif; color: #1e293b; margin: 0; padding: 28px; }
-            .letterhead { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #dc2626; padding-bottom: 14px; margin-bottom: 20px; }
-            .brand-left { display: flex; align-items: center; gap: 14px; }
-            .logo-box { width: 54px; height: 54px; background: #dc2626; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; }
-            .company-name { font-size: 20px; font-weight: 900; color: #b91c1c; letter-spacing: 0.5px; margin: 0; }
-            .company-sub { font-size: 11px; color: #475569; margin: 3px 0 0 0; font-weight: 600; }
-            .contact-right { text-align: right; font-size: 10.5px; color: #334155; line-height: 1.5; }
-            .report-banner { background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #dc2626; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px; }
-            .report-banner h2 { margin: 0; font-size: 16px; color: #991b1b; }
-            .report-banner p { margin: 4px 0 0 0; font-size: 12px; color: #475569; font-weight: 600; }
-            .summary-grid { display: flex; gap: 12px; margin-bottom: 18px; }
-            .sum-card { flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; background: #f8fafc; }
-            .sum-card span { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; display: block; }
-            .sum-card strong { font-size: 16px; color: #0f172a; margin-top: 2px; display: block; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-            th { background: #991b1b; color: #ffffff; text-align: left; padding: 9px 10px; font-size: 11px; text-transform: uppercase; border: 1px solid #7f1d1d; }
-            td { padding: 9px 10px; border: 1px solid #cbd5e1; vertical-align: top; }
-            tr:nth-child(even) td { background: #f8fafc; }
-            .badge-red { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10.5px; }
-            .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #cbd5e1; display: flex; justify-content: space-between; font-size: 11px; color: #64748b; }
-            @media print {
-              body { padding: 12px; }
-              .no-print { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="no-print" style="text-align:right; margin-bottom:12px;">
-            <button onclick="window.print()" style="background:#dc2626; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:700; cursor:pointer;">🖨️ Print / Save as PDF</button>
-          </div>
-          <div class="letterhead">
-            <div class="brand-left">
-              <div class="logo-box">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 12a10.06 10.06 1 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="company-name">UMBRELLA HEALTHCARE CONSULTANCY</h1>
-                <p class="company-sub">Healthcare Quality, NABH Accreditation & Hospital Operations Audit</p>
-              </div>
-            </div>
-            <div class="contact-right">
-              <strong>105 SMCT Ghurva Khera, Kanpur Nagar, UP</strong><br/>
-              Web: umbrellagroup.one | Mob: +91 6393662023<br/>
-              Report Date: <strong>${todayStr}</strong>
-            </div>
-          </div>
-
-          <div class="report-banner">
-            <h2>${reportTitle}</h2>
-            <p>${subTitle}</p>
-          </div>
-
-          <div class="summary-grid">${summaryHtml}</div>
-
-          <table>${tableRowsHtml}</table>
-
-          <div class="footer">
-            <span>System Generated Audit Proof — Working Targets Portal</span>
-            <span>Authorized Signatory — Umbrella Healthcare Consultancy</span>
-          </div>
-        </body>
-        </html>
-      `);
-      printWin.document.close();
-    }
-
-    function printHospitalHistory(hospitalName) {
-      const grouped = getGroupedHospitalAudits('ALL');
-      const item = grouped.find(g => g.hospital.toUpperCase() === hospitalName.toUpperCase());
-      if (!item) return;
-
-      const summaryHtml = `
-        <div class="sum-card"><span>Hospital Name</span><strong>${item.hospital}</strong></div>
-        <div class="sum-card"><span>Assigned Associate</span><strong>${item.sourceCol}</strong></div>
-        <div class="sum-card"><span>Total Reschedules</span><strong style="color:#b91c1c;">${item.totalCount} Times (${item.hospEndCount} Hospital End)</strong></div>
-      `;
-
-      const tableHtml = `
-        <thead>
-          <tr>
-            <th style="width:60px;">#</th>
-            <th>Original Date</th>
-            <th>Rescheduled To</th>
-            <th>Fault Side</th>
-            <th>Exact Delay Reason / Proof</th>
-            <th>Logged By</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${item.history.map((h, i) => `
-            <tr>
-              <td><strong>#${i + 1}</strong></td>
-              <td>${h.fromDate}</td>
-              <td><strong>${h.toDate}</strong></td>
-              <td><span class="badge-red">${h.faultSide}</span></td>
-              <td>${h.reason}</td>
-              <td>${h.by || 'Ops Team'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      `;
-
-      openUmbrellaPrintWindow(
-        `HOSPITAL RESCHEDULE & DELAY AUDIT REPORT: ${item.hospital.toUpperCase()}`,
-        `Associate: ${item.sourceCol} • Complete Chronological History of Project Reschedules`,
-        summaryHtml,
-        tableHtml
-      );
-    }
-
-    function printAssociateOldRecords() {
-      const selectedAssoc = document.getElementById('auditAssociateFilter').value;
-      const grouped = getGroupedHospitalAudits(selectedAssoc);
-      const totalHosp = grouped.length;
-      const totalResched = grouped.reduce((s, g) => s + g.totalCount, 0);
-      const totalHospEnd = grouped.reduce((s, g) => s + g.hospEndCount, 0);
-
-      const titleLabel = selectedAssoc === 'ALL' ? 'ALL ASSOCIATES — CONSOLIDATED OLD RECORDS STATEMENT' : `ASSOCIATE OLD RECORDS STATEMENT: ${selectedAssoc}`;
-
-      const summaryHtml = `
-        <div class="sum-card"><span>Associate / Filter</span><strong>${selectedAssoc}</strong></div>
-        <div class="sum-card"><span>Total Delayed Hospitals</span><strong>${totalHosp} Hospitals</strong></div>
-        <div class="sum-card"><span>Total Reschedule Count</span><strong style="color:#b91c1c;">${totalResched} Times (${totalHospEnd} Hospital End)</strong></div>
-      `;
-
-      const tableHtml = `
-        <thead>
-          <tr>
-            <th>Hospital Name</th>
-            <th>Associate</th>
-            <th>Reschedule Count</th>
-            <th>Complete Date Shift & Reason History</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${grouped.length === 0 ? `<tr><td colspan="4" style="text-align:center;">No records found.</td></tr>` : grouped.map(item => `
-            <tr>
-              <td><strong>${item.hospital}</strong></td>
-              <td>${item.sourceCol}</td>
-              <td><strong>${item.totalCount} Time(s)</strong><br/><span style="font-size:10px;color:#b91c1c;">(${item.hospEndCount} Hospital End)</span></td>
-              <td>
-                ${item.history.map((h, i) => `
-                  <div style="margin-bottom:5px; padding-bottom:5px; border-bottom:1px dashed #cbd5e1;">
-                    <strong>#${i + 1}:</strong> ${h.fromDate} → <strong>${h.toDate}</strong> <span class="badge-red">${h.faultSide}</span><br/>
-                    <span>Reason: ${h.reason}</span>
-                  </div>
-                `).join('')}
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      `;
-
-      openUmbrellaPrintWindow(
-        titleLabel,
-        'Complete Hospital-Wise Reschedule & Delay Accountability Statement',
-        summaryHtml,
-        tableHtml
-      );
-    }
-
-    function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
-    function openModal(id) { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
-    function showToast(msg) {
-      const banner = document.getElementById('toastBanner'); document.getElementById('toastText').textContent = msg;
-      banner.classList.remove('hidden'); clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => banner.classList.add('hidden'), 3500);
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      const saved = localStorage.getItem('umbrella_session');
-      if (!saved) return;
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.mobile && parsed.password && parsed.user) {
-          sessionCreds = { mobile: parsed.mobile, password: parsed.password };
-          currentUserObj = parsed.user;
-          activatePortalUI();
-
-          const hasCache = loadLocalDashboardCache();
-          if (hasCache) {
-            renderApp();
-            await refreshDashboard(false, true);
-          } else {
-            await refreshDashboard(false, false);
-          }
-        }
-      } catch (e) {
-        localStorage.removeItem('umbrella_session');
-      }
-    });
   </script>
 </body>
 </html>
