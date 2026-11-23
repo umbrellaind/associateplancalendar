@@ -108,7 +108,6 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <!-- Today's Ops Load Meter -->
           <div id="todayLoadBadge" class="px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-bold">
             Today's Ops Load: 0% Busy
           </div>
@@ -211,7 +210,6 @@
       </div>
 
       <div class="p-5 space-y-4 text-xs max-h-[82vh] overflow-y-auto">
-        <!-- Date & Stage Progress Card -->
         <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
           <div>
             <p class="text-slate-500 font-medium">Scheduled Date</p>
@@ -226,7 +224,6 @@
           </div>
         </div>
 
-        <!-- Payment & Fee Section (ADMIN sees all; ASSOCIATE sees own column; OPERATOR & FIELD never see fee) -->
         <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Payment Milestone Status</span>
@@ -238,7 +235,6 @@
           </div>
         </div>
 
-        <!-- Direct Links (Strictly Admin & Ops Operator Only) -->
         <div id="mdlExternalLinks" class="hidden grid grid-cols-2 gap-2.5">
           <a id="mdlUdcpBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-center shadow-xs transition">
             🔗 Open UDCP Tracker
@@ -248,18 +244,17 @@
           </a>
         </div>
 
-        <!-- Stage 3 Audit Prep Trigger (ADMIN pushes directly; OPERATOR & ASSOCIATE send to Admin Approval Gate) -->
+        <!-- Stage 3 Audit Prep Trigger (Opens 34-Item Checklist with Select All -> Queued for Admin Approval) -->
         <div id="mdlStage3Box" class="hidden p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 flex items-center justify-between gap-2">
           <div>
             <p class="font-extrabold text-indigo-950">Stage 3: Audit Preparation Checklist</p>
-            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Auto-load 34 Audit Prep items into UDCP</p>
+            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Select pre-collected items &amp; send for Admin authorization</p>
           </div>
-          <button id="btnTriggerStage3" onclick="triggerStage3AuditPrep()" class="px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs">
-            Push Audit Prep
+          <button id="btnTriggerStage3" onclick="openStage3ChecklistModal()" class="px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs">
+            📋 Setup Audit Prep
           </button>
         </div>
 
-        <!-- Status & Remark Update -->
         <div class="space-y-2.5">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Project Status</label>
@@ -288,7 +283,6 @@
           </div>
         </div>
 
-        <!-- Ops / Admin Mandatory Reschedule Section -->
         <div id="mdlRescheduleBox" class="hidden pt-3 border-t border-slate-200 space-y-2.5">
           <p class="font-extrabold text-red-800">Reschedule Target Date (Proof Mandatory)</p>
           <div class="grid grid-cols-2 gap-2">
@@ -315,14 +309,56 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 4. NEW HOSPITAL LEAD & 1. KICKOFF DOCS CHECKLIST MODAL (ALL ROLES)    -->
+  <!-- 4. STAGE 3 AUDIT PREP CHECKLIST MODAL (WITH SELECT ALL / CLEAR ALL)   -->
+  <!-- ===================================================================== -->
+  <div id="stage3Modal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+        <div>
+          <h3 id="stg3ModalTitle" class="text-sm sm:text-base font-extrabold">Stage 3: Audit Preparation Checklist (34 Items)</h3>
+          <p class="text-[11px] text-red-100">Tick items already completed/available; goes to Admin Approval Gate before UDCP</p>
+        </div>
+        <button onclick="closeModal('stage3Modal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-3 text-xs">
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+            <span class="font-extrabold text-slate-800">Audit Preparation Items</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleAllChecklist('.stg3-doc-chk', true, updateStage3Count)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px]">
+                ☑️ Select All
+              </button>
+              <button type="button" onclick="toggleAllChecklist('.stg3-doc-chk', false, updateStage3Count)" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-[11px]">
+                ☐ Clear All
+              </button>
+              <span id="stg3CollectedCounter" class="px-2.5 py-1 rounded bg-indigo-100 text-indigo-900 font-extrabold text-[11px]">0 / 34 Selected</span>
+            </div>
+          </div>
+          <div class="p-2 bg-slate-50 border-b border-slate-200">
+            <input id="stg3SearchInput" oninput="filterChecklistRows('stg3ChecklistContainer', this.value)" type="text" placeholder="Filter audit prep item..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" />
+          </div>
+          <div id="stg3ChecklistContainer" class="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2 bg-white">
+            <p class="p-4 text-center text-slate-400">Loading Audit Preparation checklist...</p>
+          </div>
+        </div>
+
+        <button type="button" id="btnSubmitStage3" onclick="submitStage3AuditPrep()" class="w-full py-3 umbrella-gradient text-white font-extrabold rounded-xl shadow hover:opacity-95 transition">
+          📤 Submit Stage 3 Audit Prep for Admin Authorization
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 5. NEW HOSPITAL LEAD & 1. KICKOFF DOCS CHECKLIST MODAL (ALL ROLES)    -->
   <!-- ===================================================================== -->
   <div id="newLeadModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
           <h3 class="text-sm sm:text-base font-extrabold">New Hospital Lead &amp; Stage 1 Kickoff Documents</h3>
-          <p class="text-[11px] text-red-100">Sent to Super Admin &amp; Dr. Garima for authorization before adding to UDCP</p>
+          <p class="text-[11px] text-red-100">Sent to Admin Approval Gate before adding to UDCP</p>
         </div>
         <button onclick="closeModal('newLeadModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
@@ -371,11 +407,22 @@
           </div>
         </div>
 
-        <!-- Live 37-Item Kickoff Docs Checklist -->
+        <!-- Live 37-Item Kickoff Docs Checklist with Select All / Clear All -->
         <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-3.5 py-2.5 flex items-center justify-between">
-            <span class="font-extrabold text-slate-800">Stage 1: Kickoff Documents Checklist (Tick Collected Items)</span>
-            <span id="leadCollectedCounter" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">0 / 37 Collected</span>
+          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+            <span class="font-extrabold text-slate-800">Stage 1: Kickoff Documents Checklist</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleAllChecklist('.lead-doc-chk', true, updateCollectedCount)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px]">
+                ☑️ Select All
+              </button>
+              <button type="button" onclick="toggleAllChecklist('.lead-doc-chk', false, updateCollectedCount)" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-[11px]">
+                ☐ Clear All
+              </button>
+              <span id="leadCollectedCounter" class="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[11px]">0 / 37 Collected</span>
+            </div>
+          </div>
+          <div class="p-2 bg-slate-50 border-b border-slate-200">
+            <input id="leadDocSearchInput" oninput="filterChecklistRows('leadChecklistContainer', this.value)" type="text" placeholder="Filter document item..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" />
           </div>
           <div id="leadChecklistContainer" class="max-h-64 overflow-y-auto divide-y divide-slate-100 p-2 bg-white">
             <p class="p-4 text-center text-slate-400">Loading master checklist...</p>
@@ -392,10 +439,10 @@
         </button>
       </form>
 
-      <!-- Client Handover Receipt View (Shown immediately after submit) -->
+      <!-- Client Handover Receipt View -->
       <div id="leadReceiptView" class="hidden p-5 overflow-y-auto space-y-4 text-xs">
         <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-          <p class="font-extrabold text-sm">✓ Lead Submitted for Super Admin / Dr. Garima Approval!</p>
+          <p class="font-extrabold text-sm">✓ Lead Submitted to Admin Approval Gate!</p>
           <p class="mt-0.5">Below is the Collected vs. Pending Documents summary to share with the hospital right now:</p>
         </div>
         <textarea id="leadWhatsAppSummary" rows="11" readonly class="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 font-mono text-[11px]"></textarea>
@@ -412,7 +459,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 5. ADMIN ONLY: PENDING UDCP AUTHORIZATIONS MODAL                      -->
+  <!-- 6. ADMIN ONLY: PENDING UDCP AUTHORIZATIONS MODAL                      -->
   <!-- ===================================================================== -->
   <div id="approvalsModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
@@ -429,7 +476,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 6. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR           -->
+  <!-- 7. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR           -->
   <!-- ===================================================================== -->
   <div id="assignModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
@@ -464,7 +511,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 7. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
+  <!-- 8. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
   <!-- ===================================================================== -->
   <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
@@ -520,7 +567,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 8. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
+  <!-- 9. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
   <!-- ===================================================================== -->
   <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
@@ -570,12 +617,13 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 9. FRONTEND APPLICATION LOGIC                                         -->
+  <!-- 10. FRONTEND APPLICATION LOGIC                                        -->
   <!-- ===================================================================== -->
   <script>
     let currentUser = null;
     let portalData  = { columns: [], rows: [], directory: [], auditLogs: [], usersList: [], pendingApprovals: [] };
-    let kickoffTemplateCache = [];
+    let kickoffTemplateCache   = [];
+    let auditPrepTemplateCache = [];
     let dateFilterMode = 'next30';
     let activeEditContext = null;
 
@@ -682,18 +730,11 @@
       const r = currentUser.role;
       document.getElementById('userBadge').textContent = currentUser.name + ' (' + r + ')';
 
-      // ADMIN & OPERATOR can assign registered hospitals to calendar
       document.getElementById('btnAssignHosp').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
-
-      // ADMIN only controls
       document.getElementById('btnPendingApprovals').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
-
-      // Performance Report strictly for ADMIN & ASSOCIATE
       document.getElementById('btnOpenReport').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
-
-      // Highlight guide for Associates & Field Team
       document.getElementById('roleGuideBanner').classList.toggle('hidden', !(r === 'ASSOCIATE' || r === 'FIELD'));
     }
 
@@ -838,7 +879,7 @@
               mobDayCards += `<button onclick='openDetailModal(${JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;")})'
                 class="w-full text-left p-2.5 rounded-lg border text-xs font-bold flex items-center justify-between ${pCls}">
                 <div>
-                  <span class="text-[10px] uppercase opacity-75 block">${col}</span>
+                  <span class="text-[10px] uppercase opacity-75 block">${colDisplayMap[col]}</span>
                   <span>${item.title}${holdIcon}</span>
                 </div>
                 <span class="text-[11px] px-2 py-0.5 rounded bg-white/70">${stgShort}</span>
@@ -871,7 +912,28 @@
     }
 
     // -----------------------------------------------------------------------
-    // DETAIL MODAL HANDLERS
+    // SHARED CHECKLIST HELPERS (SELECT ALL / CLEAR ALL / SEARCH FILTER)
+    // -----------------------------------------------------------------------
+    function toggleAllChecklist(selector, state, countCallback) {
+      document.querySelectorAll(selector).forEach(cb => {
+        if (cb.closest('label') && cb.closest('label').style.display !== 'none') {
+          cb.checked = state;
+        }
+      });
+      if (typeof countCallback === 'function') countCallback();
+    }
+
+    function filterChecklistRows(containerId, query) {
+      const q = String(query || '').trim().toLowerCase();
+      const labels = document.querySelectorAll('#' + containerId + ' label');
+      labels.forEach(lbl => {
+        const txt = lbl.textContent.toLowerCase();
+        lbl.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // DETAIL MODAL & STAGE 3 AUDIT PREP CHECKLIST MODAL
     // -----------------------------------------------------------------------
     function openDetailModal(ctx) {
       activeEditContext = ctx;
@@ -928,10 +990,8 @@
           btnStg3.disabled = true;
           btnStg3.className = 'px-3 py-2 rounded-lg bg-emerald-600 text-white font-bold opacity-80 cursor-default';
         } else {
-          document.getElementById('mdlStage3Sub').textContent = r === 'ADMIN'
-            ? 'Authorize & push 34 Audit Prep items into UDCP'
-            : 'Send request to Admin to push 34 Audit Prep items';
-          btnStg3.textContent = r === 'ADMIN' ? '✓ Push Audit Prep' : '📤 Request Audit Prep';
+          document.getElementById('mdlStage3Sub').textContent = 'Select pre-collected items & queue for Admin approval';
+          btnStg3.textContent = '📋 Setup Audit Prep';
           btnStg3.disabled = false;
           btnStg3.className = 'px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs';
         }
@@ -951,10 +1011,43 @@
       document.getElementById('detailModal').classList.remove('hidden');
     }
 
-    async function triggerStage3AuditPrep() {
+    async function openStage3ChecklistModal() {
       if (!activeEditContext) return;
-      const btn = document.getElementById('btnTriggerStage3');
-      btn.disabled = true; btn.textContent = 'Processing...';
+      document.getElementById('stg3ModalTitle').textContent = 'Stage 3: Audit Prep — ' + activeEditContext.item.title;
+      document.getElementById('stg3SearchInput').value = '';
+      closeModal('detailModal');
+      document.getElementById('stage3Modal').classList.remove('hidden');
+
+      if (!auditPrepTemplateCache.length) {
+        const resp = await callApi({ action: 'getAuditPrepTemplate' });
+        if (resp.success) auditPrepTemplateCache = resp.items || [];
+      }
+      renderStage3Checklist();
+    }
+
+    function renderStage3Checklist() {
+      const wrap = document.getElementById('stg3ChecklistContainer');
+      document.getElementById('stg3CollectedCounter').textContent = '0 / ' + auditPrepTemplateCache.length + ' Selected';
+      wrap.innerHTML = auditPrepTemplateCache.map(it => `
+        <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
+          <input type="checkbox" value="${it.index}" onchange="updateStage3Count()" class="stg3-doc-chk mt-0.5 w-4 h-4 accent-indigo-600" />
+          <span class="text-[11px] text-slate-800 leading-snug"><strong class="text-slate-500 mr-1">${it.srNo}.</strong>${it.text}</span>
+        </label>
+      `).join('');
+    }
+
+    function updateStage3Count() {
+      const checked = document.querySelectorAll('.stg3-doc-chk:checked').length;
+      document.getElementById('stg3CollectedCounter').textContent = checked + ' / ' + auditPrepTemplateCache.length + ' Selected';
+    }
+
+    async function submitStage3AuditPrep() {
+      if (!activeEditContext) return;
+      const btn = document.getElementById('btnSubmitStage3');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const collectedIndices = Array.from(document.querySelectorAll('.stg3-doc-chk:checked')).map(cb => Number(cb.value));
+
       try {
         const resp = await callApi({
           action: 'requestStage3AuditPrep',
@@ -962,13 +1055,16 @@
           userName: currentUser.name,
           hospId: activeEditContext.item.hospId,
           hospitalName: activeEditContext.item.title,
-          associateCol: activeEditContext.column
+          associateCol: activeEditContext.column,
+          collectedIndices: collectedIndices
         });
-        alert(resp.message || (resp.success ? 'Stage 3 Audit Prep pushed to UDCP!' : 'Action failed'));
-        closeModal('detailModal');
+        alert(resp.message || 'Queued for Admin authorization!');
+        closeModal('stage3Modal');
         fetchDashboardData(true);
       } catch (e) {
-        alert('Error sending Audit Prep request.');
+        alert('Error submitting Audit Prep checklist.');
+      } finally {
+        btn.disabled = false; btn.textContent = '📤 Submit Stage 3 Audit Prep for Admin Authorization';
       }
     }
 
@@ -1031,6 +1127,7 @@
       document.getElementById('newLeadForm').classList.remove('hidden');
       document.getElementById('leadReceiptView').classList.add('hidden');
       document.getElementById('newLeadForm').reset();
+      document.getElementById('leadDocSearchInput').value = '';
 
       const r = currentUser.role;
       document.getElementById('leadFinancialBox').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
@@ -1053,7 +1150,6 @@
         assocSel.innerHTML = `<option value="${ownCol}" selected>${ownCol}</option>`;
         assocRo.value = ownCol + ' (Auto-Linked to Your ID)';
       } else {
-        // FIELD role: hide associate selection completely; Admin assigns upon approval
         assocWrap.classList.add('hidden');
         assocSel.innerHTML = '<option value="" selected></option>';
       }
@@ -1177,7 +1273,9 @@
                 </div>
                 <div class="text-right text-[11px] text-slate-600">
                   <p>Submitted by: <strong>${req.submittedBy}</strong> (${req.submittedRole})</p>
-                  ${isNewHosp ? `<p>Initial Docs Collected: <strong>${req.collectedCount} / 37</strong></p>` : `<p>Existing ID: <strong>${req.existingHospId}</strong></p>`}
+                  ${isNewHosp
+                    ? `<p>Initial Docs Collected: <strong>${req.collectedCount} / 37</strong></p>`
+                    : `<p>Existing ID: <strong>${req.existingHospId}</strong> • Pre-Checked: <strong>${req.collectedCount} / 34</strong></p>`}
                 </div>
               </div>
 
@@ -1254,7 +1352,7 @@
             'Stage 1 Kickoff Docs Created: ' + resp.totalItems + ' (' + resp.collectedCount + ' Submitted)';
           alert(shareMsg);
         } else {
-          alert('✅ Stage 3 (3. Audit Prep — ' + resp.totalItems + ' items) pushed to UDCP for ' + resp.hospitalName + '!');
+          alert('✅ Stage 3 (3. Audit Prep — ' + resp.totalItems + ' items, ' + (resp.collectedCount || 0) + ' Submitted) pushed to UDCP for ' + resp.hospitalName + '!');
         }
         closeModal('approvalsModal');
         fetchDashboardData(true);
