@@ -1188,11 +1188,12 @@
         feeRow.classList.add('hidden');
       }
 
-      const extBox = document.getElementById('mdlExternalLinks');
+const extBox = document.getElementById('mdlExternalLinks');
+      const drvBtn = document.getElementById('mdlDriveBtn');
       if (isPrivileged) {
         extBox.classList.remove('hidden');
+        drvBtn.classList.remove('hidden');
         document.getElementById('mdlUdcpBtn').href = item.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/';
-        const drvBtn = document.getElementById('mdlDriveBtn');
         if (item.driveUrl) {
           drvBtn.href = item.driveUrl;
           drvBtn.classList.remove('opacity-40', 'pointer-events-none');
@@ -1200,6 +1201,10 @@
           drvBtn.href = '#';
           drvBtn.classList.add('opacity-40', 'pointer-events-none');
         }
+      } else if (r === 'FIELD' && item.udcpUrl) {
+        extBox.classList.remove('hidden');
+        drvBtn.classList.add('hidden');
+        document.getElementById('mdlUdcpBtn').href = item.udcpUrl;
       } else {
         extBox.classList.add('hidden');
       }
