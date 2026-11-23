@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Umbrella Healthcare Consultancy — Operations & Working Targets Portal</title>
+  <title>Umbrella Healthcare Consultancy — Operations &amp; Working Targets Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
     .umbrella-gradient { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
     .pill-yellow { background-color: #fef9c3; border-color: #fde047; color: #854d0e; }
     .pill-green  { background-color: #dcfce7; border-color: #86efac; color: #166534; }
     .pill-red    { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .pill-blue   { background-color: #dbeafe; border-color: #93c5fd; color: #1e40af; }
     .pill-locked { background-color: #f1f5f9; border-color: #cbd5e1; color: #64748b; cursor: not-allowed; }
     @media print {
       body * { visibility: hidden; }
@@ -32,7 +33,7 @@
   </script>
 
   <!-- ===================================================================== -->
-  <!-- 1. LOGIN & SIGNUP SCREEN (CLEAN, NO FADED EXAMPLES)                   -->
+  <!-- 1. LOGIN & SIGNUP SCREEN                                              -->
   <!-- ===================================================================== -->
   <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
@@ -50,7 +51,6 @@
 
         <div id="authAlert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
 
-        <!-- Login Form -->
         <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Registered Mobile Number</label>
@@ -63,7 +63,6 @@
           <button type="submit" id="loginBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Sign In to Portal</button>
         </form>
 
-        <!-- Signup Form (Admin assigns Sheet Column upon approval) -->
         <form id="signupForm" onsubmit="submitSignup(event)" class="hidden space-y-3.5">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
@@ -97,7 +96,7 @@
   <div id="appShell" class="hidden flex-1 flex flex-col">
 
     <!-- Top Brand Header -->
-    <header class="umbrella-gradient text-white shadow-md sticky top-0 z-30">
+    <header class="no-print umbrella-gradient text-white shadow-md sticky top-0 z-40">
       <div class="max-w-[1600px] mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-lg bg-white/15 border border-amber-300/60 flex items-center justify-center text-lg">☂️</div>
@@ -112,35 +111,36 @@
             Today's Ops Load: 0% Busy
           </div>
 
-          <!-- New Hospital & Kickoff Docs Checklist (Available to ALL Team Roles) -->
+          <button id="btnMyTasks" onclick="toggleMyTasksFilter()" class="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-extrabold text-xs shadow-sm transition">
+            📌 My Tasks (0)
+          </button>
+
           <button id="btnNewLead" onclick="openNewLeadModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition">
             + New Hospital &amp; Docs
           </button>
 
-          <!-- Admin & Ops Operator: Assign Registered Hospital to Calendar -->
           <button id="btnAssignHosp" onclick="openAssignModal('', '')" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
             + Assign Hospital
           </button>
 
-          <!-- Performance Report Button (Strictly Admin & Associate Only) -->
           <button id="btnOpenReport" onclick="openReportModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-sm transition">
             📊 Performance Report
           </button>
 
-          <!-- Admin Only: Pending UDCP Approvals Gate -->
           <button id="btnPendingApprovals" onclick="openApprovalsModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-300 hover:bg-amber-200 text-red-950 font-extrabold text-xs shadow-sm transition">
             🔔 Pending Approvals (0)
           </button>
 
-          <!-- Admin Only: Audit Log & User Access -->
           <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
             📜 Old Records
           </button>
           <button id="btnUsersAuth" onclick="openUsersModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
             🔐 Users
           </button>
+          <button id="btnAutoGreen" onclick="triggerAutoGreenEOD()" title="Mark un-rescheduled Today/Past items Green" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-500/30 hover:bg-emerald-500/50 border border-emerald-300/40 text-white font-extrabold text-[11px] transition">
+            ✓ Auto-Green
+          </button>
 
-          <!-- User Badge + Refresh + Logout -->
           <div class="flex items-center gap-1.5 pl-2 border-l border-white/20">
             <span id="userBadge" class="text-xs font-semibold text-red-50 hidden sm:inline"></span>
             <button onclick="fetchDashboardData(true)" title="Sync Now" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold">↻</button>
@@ -151,7 +151,7 @@
     </header>
 
     <!-- Filter & Role Info Bar -->
-    <div class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5">
+    <div class="no-print bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5">
       <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
         <div class="flex items-center gap-2 flex-wrap">
           <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-semibold">
@@ -165,6 +165,12 @@
             <option value="yellow">Running Smoothly</option>
             <option value="green">Completed</option>
             <option value="red">On Hold / Issue</option>
+            <option value="blue">Rescheduled (Shifted)</option>
+          </select>
+
+          <select id="ownerFilter" onchange="renderCalendar()" class="hidden px-2.5 py-1.5 text-xs font-bold border border-indigo-300 rounded-lg bg-indigo-50 text-indigo-900">
+            <option value="ALL">All Task Owners</option>
+            <option value="ASSOC_DUE">⚠️ Pending on Associate</option>
           </select>
 
           <input id="searchBox" oninput="renderCalendar()" type="text" placeholder="Search hospital..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg w-44 sm:w-56 focus:outline-none focus:border-red-600" />
@@ -175,31 +181,30 @@
           <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-300 inline-block"></span> Running</span>
           <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> Done</span>
           <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span> Hold</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span> Shifted</span>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-4">
+    <!-- Main Content Container with Sticky Freeze Header & Date Column -->
+    <main class="no-print flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-3">
       <div id="loadingIndicator" class="hidden text-center py-12 text-sm font-semibold text-slate-500">Loading schedule...</div>
 
-      <!-- Desktop 100% Screen-Fit Fixed Table -->
-      <div id="desktopTableWrap" class="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table class="w-full table-fixed border-collapse text-xs">
-          <thead id="calendarThead" class="bg-slate-900 text-white"></thead>
+      <div id="desktopTableWrap" class="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm max-h-[calc(100vh-150px)] overflow-auto">
+        <table class="w-full min-w-[1100px] table-fixed border-collapse text-xs">
+          <thead id="calendarThead" class="sticky top-0 z-30 bg-slate-900 text-white shadow-xs"></thead>
           <tbody id="calendarTbody" class="divide-y divide-slate-200"></tbody>
         </table>
       </div>
 
-      <!-- Mobile Day-by-Day Cards -->
       <div id="mobileCardsWrap" class="md:hidden space-y-3"></div>
     </main>
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 3. PROJECT DETAIL & ACTION MODAL                                      -->
+  <!-- 3. PROJECT DETAIL, 2-WAY TASK ASSIGNMENT & RESCHEDULE MODAL           -->
   <!-- ===================================================================== -->
-  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="detailModal" class="no-print hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
@@ -224,17 +229,50 @@
           </div>
         </div>
 
+        <!-- 2-Way Task Assignment (Admin & Ops Team Only; Hidden from Associates & Field Team) -->
+        <div id="mdlTaskAssignBox" class="hidden p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/60 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-indigo-950">Task Execution Assignment (Office &amp; Field)</span>
+            <span class="text-[10px] font-bold text-indigo-700">Internal Ops Only</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">🏢 Office NC / Form Owner</label>
+              <select id="mdlOfficeOwner" class="w-full px-2.5 py-1.5 border border-indigo-200 rounded-lg bg-white font-semibold"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 mb-1">🚗 Field Visit / Doc Collection</label>
+              <select id="mdlFieldOwner" class="w-full px-2.5 py-1.5 border border-emerald-200 rounded-lg bg-white font-semibold"></select>
+            </div>
+          </div>
+          <div class="pt-1">
+            <label class="block text-[11px] font-bold text-red-900 mb-1">⚖️ Action Accountability (Visible to Associate)</label>
+            <select id="mdlPendingSide" class="w-full px-2.5 py-1.5 border border-red-200 rounded-lg bg-white font-bold text-xs text-slate-900">
+              <option value="UMBRELLA_OPS">🏢 With Umbrella Ops Team (Processing / Visit)</option>
+              <option value="ASSOCIATE">⚠️ Pending on Associate (Docs / Fee / Coordination)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Associate & Field Neutral Banner (No Staff Names Exposed) -->
+        <div id="mdlNeutralRoleBanner" class="hidden p-3 rounded-xl border"></div>
+
+        <!-- Payment & Fee Section -->
         <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Payment Milestone Status</span>
             <span id="mdlPayBadge" class="px-2 py-0.5 rounded font-bold text-[11px]"></span>
           </div>
-          <div id="mdlFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-slate-800">
-            <span>Total Consultancy Fee: <strong id="mdlTotalFee" class="text-sm text-slate-900"></strong></span>
-            <span>Paid: <strong id="mdlPaidPct" class="text-emerald-700"></strong></span>
+          <div id="mdlFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 space-y-1 text-slate-800">
+            <div class="flex items-center justify-between">
+              <span>Total Consultancy Fee: <strong id="mdlTotalFee" class="text-sm text-slate-900"></strong></span>
+              <span>Paid: <strong id="mdlPaidPct" class="text-emerald-700"></strong></span>
+            </div>
+            <div class="text-[11px] text-amber-950 font-semibold" id="mdlNextDueRow"></div>
           </div>
         </div>
 
+        <!-- Direct Links (Admin & Ops Operator Only) -->
         <div id="mdlExternalLinks" class="hidden grid grid-cols-2 gap-2.5">
           <a id="mdlUdcpBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-center shadow-xs transition">
             🔗 Open UDCP Tracker
@@ -244,17 +282,18 @@
           </a>
         </div>
 
-        <!-- Stage 3 Audit Prep Trigger (Opens 34-Item Checklist with Select All -> Queued for Admin Approval) -->
+        <!-- Stage 3 Audit Prep Trigger -->
         <div id="mdlStage3Box" class="hidden p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 flex items-center justify-between gap-2">
           <div>
             <p class="font-extrabold text-indigo-950">Stage 3: Audit Preparation Checklist</p>
-            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Select pre-collected items &amp; send for Admin authorization</p>
+            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Select pre-collected items &amp; queue for Admin approval</p>
           </div>
           <button id="btnTriggerStage3" onclick="openStage3ChecklistModal()" class="px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs">
             📋 Setup Audit Prep
           </button>
         </div>
 
+        <!-- Status & Remark -->
         <div class="space-y-2.5">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Project Status</label>
@@ -283,8 +322,12 @@
           </div>
         </div>
 
+        <!-- Ops / Admin Mandatory Reschedule Section -->
         <div id="mdlRescheduleBox" class="hidden pt-3 border-t border-slate-200 space-y-2.5">
-          <p class="font-extrabold text-red-800">Reschedule Target Date (Proof Mandatory)</p>
+          <div class="flex items-center justify-between">
+            <p class="font-extrabold text-blue-900">↻ Reschedule Target Date (Adds 2x/3x Stamp)</p>
+            <span id="mdlReschedStampBadge" class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-extrabold text-[10px]">Current: 1x</span>
+          </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[11px] font-semibold text-slate-600 mb-1">New Target Date</label>
@@ -300,8 +343,8 @@
             </div>
           </div>
           <input id="mdlReschedReason" type="text" placeholder="Mandatory proof / reason for shifting date..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-          <button onclick="submitReschedule()" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
-            Confirm Reschedule &amp; Log Proof
+          <button onclick="submitReschedule()" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold">
+            ↻ Confirm Reschedule &amp; Stamp Next Date
           </button>
         </div>
       </div>
@@ -311,7 +354,7 @@
   <!-- ===================================================================== -->
   <!-- 4. STAGE 3 AUDIT PREP CHECKLIST MODAL (WITH SELECT ALL / CLEAR ALL)   -->
   <!-- ===================================================================== -->
-  <div id="stage3Modal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+  <div id="stage3Modal" class="no-print hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
@@ -353,7 +396,7 @@
   <!-- ===================================================================== -->
   <!-- 5. NEW HOSPITAL LEAD & 1. KICKOFF DOCS CHECKLIST MODAL (ALL ROLES)    -->
   <!-- ===================================================================== -->
-  <div id="newLeadModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+  <div id="newLeadModal" class="no-print hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
@@ -363,7 +406,6 @@
         <button onclick="closeModal('newLeadModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
 
-      <!-- Form View -->
       <form id="newLeadForm" onsubmit="submitNewHospitalLead(event)" class="p-5 overflow-y-auto space-y-4 text-xs">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -385,7 +427,6 @@
           </div>
         </div>
 
-        <!-- Financial Section (STRICTLY Visible ONLY to ASSOCIATE & ADMIN; Hidden from FIELD & OPERATOR) -->
         <div id="leadFinancialBox" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block font-bold text-amber-950 mb-1">Total Consultancy Fee (₹)</label>
@@ -407,7 +448,6 @@
           </div>
         </div>
 
-        <!-- Live 37-Item Kickoff Docs Checklist with Select All / Clear All -->
         <div class="border border-slate-200 rounded-xl overflow-hidden">
           <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2">
             <span class="font-extrabold text-slate-800">Stage 1: Kickoff Documents Checklist</span>
@@ -439,7 +479,6 @@
         </button>
       </form>
 
-      <!-- Client Handover Receipt View -->
       <div id="leadReceiptView" class="hidden p-5 overflow-y-auto space-y-4 text-xs">
         <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
           <p class="font-extrabold text-sm">✓ Lead Submitted to Admin Approval Gate!</p>
@@ -461,7 +500,7 @@
   <!-- ===================================================================== -->
   <!-- 6. ADMIN ONLY: PENDING UDCP AUTHORIZATIONS MODAL                      -->
   <!-- ===================================================================== -->
-  <div id="approvalsModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+  <div id="approvalsModal" class="no-print hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
         <div>
@@ -476,20 +515,19 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 7. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR           -->
+  <!-- 7. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL + 2-WAY TASK OWNERS   -->
   <!-- ===================================================================== -->
-  <div id="assignModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="assignModal" class="no-print hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
       <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <h3 class="text-sm font-extrabold">Assign Registered Hospital to Calendar</h3>
+        <h3 class="text-sm font-extrabold">Assign Registered Hospital &amp; Task Owners</h3>
         <button onclick="closeModal('assignModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
       </div>
-      <form onsubmit="submitAssignHospital(event)" class="p-5 space-y-3.5 text-xs">
+      <form onsubmit="submitAssignHospital(event)" class="p-5 space-y-3 text-xs max-h-[85vh] overflow-y-auto">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Search Registered Hospital</label>
           <input id="assignSearchInput" oninput="filterRegisteredHospitals()" type="text" placeholder="Type hospital name or HOSP-ID..." class="w-full px-3 py-2 border border-slate-300 rounded-lg mb-1.5 focus:outline-none focus:border-red-600" />
-          <select id="assignHospSelect" required size="5" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 font-medium"></select>
-          <p class="text-[10px] text-slate-500 mt-1">Only authorized hospitals from UDCP_MASTER_DB appear here.</p>
+          <select id="assignHospSelect" required size="4" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 font-medium"></select>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
           <div>
@@ -497,9 +535,26 @@
             <input id="assignDateInput" type="date" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg" />
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Associate / Field Column</label>
+            <label class="block font-bold text-slate-700 mb-1">Associate Column</label>
             <select id="assignColSelect" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
           </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-indigo-900 mb-1">🏢 Office NC / Form Owner</label>
+            <select id="assignOfficeSelect" class="w-full px-2.5 py-2 border border-indigo-200 rounded-lg bg-indigo-50/40 font-semibold"></select>
+          </div>
+          <div>
+            <label class="block font-bold text-emerald-900 mb-1">🚗 Field Visit / Docs</label>
+            <select id="assignFieldSelect" class="w-full px-2.5 py-2 border border-emerald-200 rounded-lg bg-emerald-50/40 font-semibold"></select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-red-900 mb-1">⚖️ Action Accountability</label>
+          <select id="assignSideSelect" class="w-full px-2.5 py-2 border border-red-200 rounded-lg bg-white font-bold">
+            <option value="UMBRELLA_OPS">🏢 With Umbrella Ops Team</option>
+            <option value="ASSOCIATE">⚠️ Pending on Associate</option>
+          </select>
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Initial Remark / Visit Purpose (Optional)</label>
@@ -511,16 +566,17 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 8. DETAILED PERFORMANCE & LINEUP REPORT MODAL (ADMIN & ASSOCIATE)     -->
+  <!-- 8. PERFORMANCE, PAYMENT RECOVERY & LINEUP REPORT (ADMIN & ASSOCIATE)  -->
   <!-- ===================================================================== -->
   <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
-      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between no-print">
+      <div class="umbrella-gradient px-5 py-3 text-white flex flex-wrap items-center justify-between gap-2 no-print">
         <div class="flex items-center gap-3">
-          <h3 class="text-sm font-extrabold">Associate Performance &amp; Lineup Analysis</h3>
+          <h3 class="text-sm font-extrabold">Associate Performance, Payment &amp; Lineup Analysis</h3>
           <select id="reportAssocSelect" onchange="buildPerformanceReport()" class="hidden px-2.5 py-1 rounded bg-white text-slate-900 text-xs font-bold"></select>
         </div>
         <div class="flex items-center gap-2">
+          <button onclick="copyReportWhatsApp()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">📋 Copy WhatsApp Summary</button>
           <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs">🖨️ Download / Print PDF</button>
           <button onclick="closeModal('reportModal')" class="text-white/80 hover:text-white text-xl font-bold ml-2">&times;</button>
         </div>
@@ -534,7 +590,7 @@
             <p class="text-[10px] text-slate-500">105 SMCT Building, Ghurvakhera, Kanpur Nagar, UP 208021 | umbrellagroup.one</p>
           </div>
           <div class="text-right">
-            <p class="text-xs font-extrabold text-slate-800">PERFORMANCE &amp; LINEUP REPORT</p>
+            <p class="text-xs font-extrabold text-slate-800">PERFORMANCE, LINEUP &amp; PAYMENT REPORT</p>
             <p id="repGeneratedDate" class="text-[11px] text-slate-500"></p>
           </div>
         </div>
@@ -543,9 +599,9 @@
           <div>
             <p class="text-[11px] text-slate-500 font-semibold">To,</p>
             <p id="repToName" class="text-base font-extrabold text-slate-900"></p>
-            <p class="text-[11px] text-slate-600 mt-0.5">Subject: Comprehensive Project Lineup, Stage Distribution &amp; Execution Analysis</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">Subject: Comprehensive Project Lineup, Pending Accountability &amp; Payment Recovery Analysis</p>
           </div>
-          <div id="repCompletionBadge" class="px-3.5 py-2 rounded-xl bg-red-50 border border-red-200 text-right"></div>
+          <div id="repCompletionBadge" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="repKpiCards"></div>
@@ -556,7 +612,7 @@
             <div id="repStageBreakdown" class="space-y-2"></div>
           </div>
           <div class="border border-slate-200 rounded-xl p-3.5">
-            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Payment Milestone &amp; Hold Health</h4>
+            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Payment Milestone &amp; Recovery Summary</h4>
             <div id="repPaymentBreakdown" class="space-y-2"></div>
           </div>
         </div>
@@ -569,7 +625,7 @@
   <!-- ===================================================================== -->
   <!-- 9. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
   <!-- ===================================================================== -->
-  <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="auditModal" class="no-print hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
       <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
         <h3 class="text-sm font-extrabold">Old Records &amp; Date Shift Proof Log</h3>
@@ -583,8 +639,8 @@
               <th class="p-2 text-left border">Hospital</th>
               <th class="p-2 text-left border">Associate</th>
               <th class="p-2 text-left border">Old Date &rarr; New Date</th>
-              <th class="p-2 text-left border">Fault Side</th>
-              <th class="p-2 text-left border">Proof / Reason</th>
+              <th class="p-2 text-left border">Stamp</th>
+              <th class="p-2 text-left border">Fault Side &amp; Proof</th>
             </tr>
           </thead>
           <tbody id="auditTableBody" class="divide-y"></tbody>
@@ -593,7 +649,7 @@
     </div>
   </div>
 
-  <div id="usersModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="usersModal" class="no-print hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
       <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
         <h3 class="text-sm font-extrabold">Team Access &amp; Role Management</h3>
@@ -621,10 +677,11 @@
   <!-- ===================================================================== -->
   <script>
     let currentUser = null;
-    let portalData  = { columns: [], rows: [], directory: [], auditLogs: [], usersList: [], pendingApprovals: [] };
+    let portalData  = { columns: [], rows: [], directory: [], teamMembers: null, auditLogs: [], usersList: [], pendingApprovals: [] };
     let kickoffTemplateCache   = [];
     let auditPrepTemplateCache = [];
     let dateFilterMode = 'next30';
+    let myTasksOnly    = false;
     let activeEditContext = null;
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -636,6 +693,7 @@
           const cachedPayload = localStorage.getItem('umbrella_ops_cache_' + currentUser.role + '_' + currentUser.column);
           if (cachedPayload) {
             portalData = JSON.parse(cachedPayload);
+            populateOwnerDropdowns();
             renderCalendar();
           }
           fetchDashboardData(false);
@@ -728,12 +786,15 @@
       document.getElementById('appShell').classList.remove('hidden');
 
       const r = currentUser.role;
-      document.getElementById('userBadge').textContent = currentUser.name + ' (' + r + ')';
+      const isNeutralAdmin = (r === 'ADMIN' && /garima/i.test(currentUser.name));
+      document.getElementById('userBadge').textContent = (isNeutralAdmin ? 'ADMIN (Umbrella HQ)' : currentUser.name) + ' (' + r + ')';
 
       document.getElementById('btnAssignHosp').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
+      document.getElementById('ownerFilter').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
       document.getElementById('btnPendingApprovals').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
+      document.getElementById('btnAutoGreen').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnOpenReport').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
       document.getElementById('roleGuideBanner').classList.toggle('hidden', !(r === 'ASSOCIATE' || r === 'FIELD'));
     }
@@ -746,6 +807,7 @@
         const resp = await callApi({
           action: 'getDashboard',
           role: currentUser.role,
+          userName: currentUser.name,
           column: currentUser.column,
           forceRefresh: !!forceRefresh
         });
@@ -756,6 +818,7 @@
             const cnt = (resp.pendingApprovals || []).length;
             document.getElementById('btnPendingApprovals').textContent = '🔔 Pending Approvals (' + cnt + ')';
           }
+          populateOwnerDropdowns();
           renderCalendar();
         }
       } catch (e) {
@@ -765,6 +828,26 @@
       }
     }
 
+    function populateOwnerDropdowns() {
+      const tm = portalData.teamMembers || { office: ['Ashish', 'ADMIN (Umbrella HQ)'], field: ['Kunal', 'Himanshu'] };
+      const officeOpts = '<option value="">-- Unassigned --</option>' +
+        tm.office.map(o => `<option value="${o}">${o}</option>`).join('');
+      const fieldOpts = '<option value="">-- Unassigned --</option>' +
+        tm.field.map(f => `<option value="${f}">${f}</option>`).join('');
+
+      document.getElementById('mdlOfficeOwner').innerHTML = officeOpts;
+      document.getElementById('mdlFieldOwner').innerHTML  = fieldOpts;
+      document.getElementById('assignOfficeSelect').innerHTML = officeOpts;
+      document.getElementById('assignFieldSelect').innerHTML  = fieldOpts;
+
+      const ownerFlt = document.getElementById('ownerFilter');
+      ownerFlt.innerHTML =
+        '<option value="ALL">All Task Owners</option>' +
+        '<option value="ASSOC_DUE">⚠️ Pending on Associate</option>' +
+        tm.office.map(o => `<option value="${o}">🏢 Office: ${o}</option>`).join('') +
+        tm.field.map(f => `<option value="${f}">🚗 Field: ${f}</option>`).join('');
+    }
+
     function setDateFilter(mode) {
       dateFilterMode = mode;
       ['next30', 'all', 'past'].forEach(m => {
@@ -772,6 +855,21 @@
         btn.className = (m === mode) ? 'px-3 py-1.5 rounded-md bg-white shadow text-red-700' : 'px-3 py-1.5 rounded-md text-slate-600';
       });
       renderCalendar();
+    }
+
+    function toggleMyTasksFilter() {
+      myTasksOnly = !myTasksOnly;
+      renderCalendar();
+    }
+
+    function isMyTaskItem(item) {
+      if (!item || item.masked) return false;
+      const r = currentUser.role;
+      const uName = String(currentUser.name || '').trim().toLowerCase();
+      if (r === 'OPERATOR') return String(item.officeOwner || '').toLowerCase() === uName;
+      if (r === 'FIELD')    return !!item.isMyFieldVisit || String(item.fieldOwner || '').toLowerCase() === uName;
+      if (r === 'ASSOCIATE') return item.pendingSide === 'ASSOCIATE';
+      return !!(item.officeOwner || item.fieldOwner);
     }
 
     function getTodayIso() {
@@ -802,13 +900,30 @@
       const max30Iso = plus30.getFullYear() + '-' + String(plus30.getMonth() + 1).padStart(2, '0') + '-' + String(plus30.getDate()).padStart(2, '0');
 
       const statusFlt = document.getElementById('statusFilter').value;
+      const ownerFlt  = document.getElementById('ownerFilter').value;
       const searchQ   = document.getElementById('searchBox').value.trim().toLowerCase();
-      const canQuickAssign = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
+      const isPrivileged = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
 
+      // Update Today's Ops Load & My Tasks Counter
       const todayRow = (portalData.rows || []).find(r => r.date === todayIso);
       const todayCount = todayRow ? todayRow.totalProjects : 0;
       const todayPct = Math.round((todayCount / DAILY_CAPACITY) * 100);
       document.getElementById('todayLoadBadge').textContent = "Today's Ops Load: " + (todayCount === DAILY_CAPACITY ? '100% FULL' : todayPct + '% Busy');
+
+      let myTaskCount = 0;
+      (portalData.rows || []).forEach(r => {
+        Object.keys(r.cells || {}).forEach(c => {
+          (r.cells[c].items || []).forEach(it => {
+            if (!it.isShifted && isMyTaskItem(it)) myTaskCount++;
+          });
+        });
+      });
+      const btnMy = document.getElementById('btnMyTasks');
+      const baseLbl = (currentUser.role === 'ASSOCIATE') ? '📌 Pending on You (' : '📌 My Tasks (';
+      btnMy.textContent = (myTasksOnly ? '✓ Showing ' : baseLbl) + myTaskCount + ')';
+      btnMy.className = myTasksOnly
+        ? 'px-3 py-1.5 rounded-lg bg-amber-300 text-slate-950 font-extrabold text-xs shadow-sm transition'
+        : 'px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-extrabold text-xs shadow-sm transition';
 
       const filteredRows = (portalData.rows || []).filter(row => {
         if (dateFilterMode === 'next30' && (row.date < todayIso || row.date > max30Iso)) return false;
@@ -816,7 +931,6 @@
         return true;
       });
 
-      const isPrivileged = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
       const colDisplayMap = {};
       let teamCounter = 1;
       cols.forEach(col => {
@@ -829,7 +943,7 @@
       });
 
       const thead = document.getElementById('calendarThead');
-      let thHtml = '<tr><th class="w-32 p-2.5 text-left border-r border-slate-700">Date &amp; Ops Load</th>';
+      let thHtml = '<tr><th class="w-36 p-2.5 text-left border-r border-slate-700 sticky left-0 z-40 bg-slate-900">Date &amp; Ops Load</th>';
       cols.forEach(col => {
         const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
         thHtml += `<th class="p-2 text-center border-r border-slate-700 truncate ${isOwn ? 'bg-red-700 text-white' : 'text-slate-300'}">${colDisplayMap[col]}</th>`;
@@ -847,7 +961,7 @@
         const isToday = (row.date === todayIso);
 
         tbHtml += `<tr class="${isToday ? 'bg-red-50/40' : 'hover:bg-slate-50/80'}">`;
-        tbHtml += `<td class="p-2 border-r border-slate-200 align-top">
+        tbHtml += `<td class="p-2 border-r border-slate-200 align-top sticky left-0 z-10 ${isToday ? 'bg-red-50' : 'bg-white'}">
           <div class="font-bold text-slate-900">${formatDisplayDate(row.date)} ${isToday ? '<span class="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded ml-1">TODAY</span>' : ''}</div>
           <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${load.cls}">${load.text}</span>
         </td>`;
@@ -861,19 +975,52 @@
 
           cellData.items.forEach(item => {
             if (statusFlt !== 'ALL' && item.status !== statusFlt) return;
+            if (isPrivileged && ownerFlt !== 'ALL' && !item.masked) {
+              if (ownerFlt === 'ASSOC_DUE' && item.pendingSide !== 'ASSOCIATE') return;
+              if (ownerFlt !== 'ASSOC_DUE' && item.officeOwner !== ownerFlt && item.fieldOwner !== ownerFlt) return;
+            }
+            if (myTasksOnly && !isMyTaskItem(item)) return;
             if (searchQ && !item.masked && item.title.toLowerCase().indexOf(searchQ) === -1) return;
 
             if (item.masked) {
               pillsHtml += `<div class="mb-1 px-2 py-1 rounded border text-[11px] font-medium truncate pill-locked" title="Restricted">${item.title}</div>`;
+            } else if (item.isShifted || item.status === 'blue') {
+              // Minimal Blue Shifted Chip on Old Date (Name only, no clutter)
+              pillsHtml += `<div title="Rescheduled to next target date" class="w-full text-left mb-1 px-2 py-1 rounded border text-[11px] font-bold pill-blue truncate">
+                ${item.title}
+              </div>`;
             } else {
               const pCls = item.status === 'green' ? 'pill-green' : (item.status === 'red' ? 'pill-red' : 'pill-yellow');
               const stgShort = 'S' + (item.stageOrder || 1) + ' • ' + (item.progressPct || 0) + '%';
               const holdIcon = item.isPaymentHold ? ' 🔒' : '';
+              const stampBadge = (item.reschedCount && item.reschedCount > 1)
+                ? `<span class="px-1.5 py-0.2 rounded bg-blue-700 text-white text-[9px] font-black shrink-0">${item.reschedCount}x</span>`
+                : '';
+
+              let roleTags = '';
+              if (isPrivileged) {
+                const oTag = item.officeOwner ? `<span class="px-1 py-0.2 rounded bg-indigo-100 text-indigo-900 text-[9px] font-bold">🏢 ${item.officeOwner === 'ADMIN (Umbrella HQ)' ? 'Admin HQ' : item.officeOwner}</span>` : '';
+                const fTag = item.fieldOwner  ? `<span class="px-1 py-0.2 rounded bg-emerald-100 text-emerald-900 text-[9px] font-bold">🚗 ${item.fieldOwner}</span>` : '';
+                const aTag = item.pendingSide === 'ASSOCIATE'
+                  ? `<span class="px-1 py-0.2 rounded bg-red-600 text-white text-[9px] font-extrabold">⚠️ Assoc Due</span>`
+                  : `<span class="px-1 py-0.2 rounded bg-slate-800 text-white text-[9px] font-bold">🏢 Ops Team</span>`;
+                roleTags = `<div class="flex flex-wrap gap-1 mt-1">${oTag}${fTag}${aTag}</div>`;
+              } else if (currentUser.role === 'FIELD') {
+                roleTags = `<div class="flex flex-wrap gap-1 mt-1"><span class="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-900 text-[9px] font-bold">🏢 Umbrella Ops</span><span class="px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[9px] font-extrabold">🚗 Your Visit</span></div>`;
+              } else {
+                roleTags = item.pendingSide === 'ASSOCIATE'
+                  ? `<div class="mt-1"><span class="px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold">⚠️ Pending on You</span></div>`
+                  : `<div class="mt-1"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-white text-[9px] font-bold">🏢 With Umbrella Ops</span></div>`;
+              }
 
               pillsHtml += `<button onclick='openDetailModal(${JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;")})'
                 class="w-full text-left mb-1 px-2 py-1.5 rounded border text-[11px] font-bold shadow-2xs hover:opacity-90 transition block ${pCls}">
-                <div class="truncate">${item.title}${holdIcon}</div>
+                <div class="flex items-center justify-between gap-1">
+                  <span class="truncate">${item.title}${holdIcon}</span>
+                  ${stampBadge}
+                </div>
                 <div class="text-[9px] font-semibold opacity-80 mt-0.5">${stgShort}</div>
+                ${roleTags}
               </button>`;
 
               mobDayCards += `<button onclick='openDetailModal(${JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;")})'
@@ -887,7 +1034,7 @@
             }
           });
 
-          const quickBtn = canQuickAssign
+          const quickBtn = isPrivileged
             ? `<button onclick="openAssignModal('${row.date}', '${col}')" title="Quick Assign to ${col}" class="w-full mt-0.5 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 hover:text-red-700 hover:border-red-400 text-[10px] font-bold opacity-60 hover:opacity-100 transition">+</button>`
             : '';
 
@@ -912,7 +1059,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // SHARED CHECKLIST HELPERS (SELECT ALL / CLEAR ALL / SEARCH FILTER)
+    // SHARED CHECKLIST HELPERS
     // -----------------------------------------------------------------------
     function toggleAllChecklist(selector, state, countCallback) {
       document.querySelectorAll(selector).forEach(cb => {
@@ -925,15 +1072,13 @@
 
     function filterChecklistRows(containerId, query) {
       const q = String(query || '').trim().toLowerCase();
-      const labels = document.querySelectorAll('#' + containerId + ' label');
-      labels.forEach(lbl => {
-        const txt = lbl.textContent.toLowerCase();
-        lbl.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+      document.querySelectorAll('#' + containerId + ' label').forEach(lbl => {
+        lbl.style.display = (!q || lbl.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
       });
     }
 
     // -----------------------------------------------------------------------
-    // DETAIL MODAL & STAGE 3 AUDIT PREP CHECKLIST MODAL
+    // DETAIL MODAL & STAGE 3 AUDIT PREP
     // -----------------------------------------------------------------------
     function openDetailModal(ctx) {
       activeEditContext = ctx;
@@ -945,6 +1090,29 @@
       document.getElementById('mdlDateText').textContent = formatDisplayDate(ctx.date);
       document.getElementById('mdlStageText').textContent = item.stage + ' — ' + item.progressPct + '%';
       document.getElementById('mdlProgressBar').style.width = (item.progressPct || 0) + '%';
+
+      const assignBox = document.getElementById('mdlTaskAssignBox');
+      const neutralBanner = document.getElementById('mdlNeutralRoleBanner');
+      if (r === 'ADMIN' || r === 'OPERATOR') {
+        assignBox.classList.remove('hidden');
+        neutralBanner.classList.add('hidden');
+        document.getElementById('mdlOfficeOwner').value = item.officeOwner || '';
+        document.getElementById('mdlFieldOwner').value  = item.fieldOwner || '';
+        document.getElementById('mdlPendingSide').value = item.pendingSide || 'UMBRELLA_OPS';
+      } else {
+        assignBox.classList.add('hidden');
+        neutralBanner.classList.remove('hidden');
+        if (r === 'FIELD') {
+          neutralBanner.className = 'p-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-950';
+          neutralBanner.innerHTML = '<p class="font-extrabold">🚗 Field Visit &amp; Document Collection</p><p class="text-[11px] mt-0.5">Coordinated by <strong>Umbrella Ops</strong>. Tap "Mark Visit Completed" once docs/photos are collected.</p>';
+        } else if (item.pendingSide === 'ASSOCIATE') {
+          neutralBanner.className = 'p-3 rounded-xl border border-red-300 bg-red-50 text-red-900';
+          neutralBanner.innerHTML = '<p class="font-extrabold">⚠️ Action Pending on You (Associate)</p><p class="text-[11px] mt-0.5">Please arrange pending documents / payment milestone so Umbrella Ops can proceed.</p>';
+        } else {
+          neutralBanner.className = 'p-3 rounded-xl border border-slate-300 bg-slate-100 text-slate-900';
+          neutralBanner.innerHTML = '<p class="font-extrabold">🏢 Currently With Umbrella Ops Team</p><p class="text-[11px] mt-0.5">Umbrella Operations &amp; Field team is actively executing this stage.</p>';
+        }
+      }
 
       const payBadge = document.getElementById('mdlPayBadge');
       if (item.isPaymentHold) {
@@ -958,8 +1126,10 @@
       const feeRow = document.getElementById('mdlFeeRow');
       if (item.totalFee !== undefined) {
         feeRow.classList.remove('hidden');
+        const paidAmt = Math.round((Number(item.totalFee) || 0) * ((Number(item.paidPct) || 0) / 100));
         document.getElementById('mdlTotalFee').textContent = '₹' + Number(item.totalFee || 0).toLocaleString('en-IN');
-        document.getElementById('mdlPaidPct').textContent = (item.paidPct || 0) + '%';
+        document.getElementById('mdlPaidPct').textContent = '₹' + paidAmt.toLocaleString('en-IN') + ' (' + (item.paidPct || 0) + '%)';
+        document.getElementById('mdlNextDueRow').textContent = 'Next Milestone: ' + (item.nextDueMilestone || 'Next 25% Tranche');
       } else {
         feeRow.classList.add('hidden');
       }
@@ -999,8 +1169,9 @@
         stg3Box.classList.add('hidden');
       }
 
-      document.getElementById('mdlStatusSelect').value = item.status || 'yellow';
+      document.getElementById('mdlStatusSelect').value = item.status === 'blue' ? 'yellow' : (item.status || 'yellow');
       document.getElementById('mdlRemarkInput').value = ctx.remark || '';
+      document.getElementById('mdlReschedStampBadge').textContent = 'Current Stamp: ' + (item.reschedCount || 1) + 'x';
 
       document.getElementById('btnFieldDone').classList.toggle('hidden', r !== 'FIELD');
       document.getElementById('btnAssocFlag').classList.toggle('hidden', r !== 'ASSOCIATE');
@@ -1045,7 +1216,6 @@
       if (!activeEditContext) return;
       const btn = document.getElementById('btnSubmitStage3');
       btn.disabled = true; btn.textContent = 'Submitting...';
-
       const collectedIndices = Array.from(document.querySelectorAll('.stg3-doc-chk:checked')).map(cb => Number(cb.value));
 
       try {
@@ -1082,13 +1252,17 @@
         role: currentUser.role,
         userColumn: currentUser.column,
         userName: currentUser.name,
+        date: activeEditContext.date,
         column: activeEditContext.column,
         rowIndex: activeEditContext.rowIndex,
         hospitalName: activeEditContext.item.title,
         status: newStatus,
         remark: newRemark,
         fieldCompleted: fieldCompleted,
-        flagIssue: flagIssue
+        flagIssue: flagIssue,
+        officeOwner: document.getElementById('mdlOfficeOwner').value,
+        fieldOwner: document.getElementById('mdlFieldOwner').value,
+        pendingSide: document.getElementById('mdlPendingSide').value
       });
       fetchDashboardData(true);
     }
@@ -1120,8 +1294,17 @@
       fetchDashboardData(true);
     }
 
+    async function triggerAutoGreenEOD() {
+      if (!confirm('Mark all un-rescheduled projects on Today & Past dates as Green (Completed)?')) return;
+      const resp = await callApi({ action: 'runAutoGreenEOD', role: currentUser.role });
+      if (resp.success) {
+        alert('✓ Auto-Green completed! Updated ' + (resp.updatedCells || 0) + ' project(s).');
+        fetchDashboardData(true);
+      }
+    }
+
     // -----------------------------------------------------------------------
-    // NEW HOSPITAL LEAD & STAGE 1 KICKOFF DOCS MODAL (ALL ROLES)
+    // NEW HOSPITAL LEAD & STAGE 1 KICKOFF DOCS
     // -----------------------------------------------------------------------
     async function openNewLeadModal() {
       document.getElementById('newLeadForm').classList.remove('hidden');
@@ -1251,7 +1434,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // ADMIN ONLY: APPROVALS GATE MODAL
+    // ADMIN APPROVAL GATE
     // -----------------------------------------------------------------------
     function openApprovalsModal() {
       const list = portalData.pendingApprovals || [];
@@ -1343,14 +1526,14 @@
       const resp = await callApi(payload);
       if (resp.success) {
         if (resp.type === 'NEW_HOSPITAL') {
-          const shareMsg =
+          alert(
             '✅ Authorized & Added to UDCP!\n\n' +
             'Hospital: ' + resp.hospitalName + '\n' +
             'Login ID: ' + resp.hospId + '\n' +
             'Password: ' + resp.password + '\n' +
             'Portal: ' + resp.udcpUrl + '\n' +
-            'Stage 1 Kickoff Docs Created: ' + resp.totalItems + ' (' + resp.collectedCount + ' Submitted)';
-          alert(shareMsg);
+            'Stage 1 Kickoff Docs Created: ' + resp.totalItems + ' (' + resp.collectedCount + ' Submitted)'
+          );
         } else {
           alert('✅ Stage 3 (3. Audit Prep — ' + resp.totalItems + ' items, ' + (resp.collectedCount || 0) + ' Submitted) pushed to UDCP for ' + resp.hospitalName + '!');
         }
@@ -1374,7 +1557,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR
+    // ASSIGN REGISTERED HOSPITAL + 2-WAY TASK OWNERS
     // -----------------------------------------------------------------------
     function openAssignModal(presetDate, presetCol) {
       document.getElementById('assignDateInput').value = presetDate || getTodayIso();
@@ -1413,13 +1596,16 @@
         column: document.getElementById('assignColSelect').value,
         hospId: opt.value,
         hospitalName: opt.getAttribute('data-name'),
+        officeOwner: document.getElementById('assignOfficeSelect').value,
+        fieldOwner: document.getElementById('assignFieldSelect').value,
+        pendingSide: document.getElementById('assignSideSelect').value,
         remark: document.getElementById('assignRemarkInput').value
       });
       fetchDashboardData(true);
     }
 
     // -----------------------------------------------------------------------
-    // DETAILED PERFORMANCE & LINEUP REPORT (ADMIN & ASSOCIATE ONLY)
+    // PERFORMANCE, PAYMENT RECOVERY & LINEUP REPORT (ADMIN & ASSOCIATE ONLY)
     // -----------------------------------------------------------------------
     function openReportModal() {
       const sel = document.getElementById('reportAssocSelect');
@@ -1449,7 +1635,7 @@
           if (!isMatch) return;
           const cell = r.cells[colKey];
           cell.items.forEach(it => {
-            if (!it.masked) records.push({ date: r.date, remark: cell.remark, ...it });
+            if (!it.masked && !it.isShifted) records.push({ date: r.date, remark: cell.remark, ...it });
           });
         });
       });
@@ -1462,29 +1648,52 @@
       const past      = records.filter(x => x.date < todayIso);
       const compRate  = total > 0 ? Math.round((completed.length / total) * 100) : 0;
 
-      const colLogs = (portalData.auditLogs || []).filter(l => l.associate === targetCol);
-      const hospDelays = colLogs.filter(l => l.category.indexOf('Hospital') !== -1).length;
-      const assocDelays= colLogs.filter(l => l.category.indexOf('Associate') !== -1).length;
+      const assocDue  = records.filter(x => x.pendingSide === 'ASSOCIATE');
+      const opsDue    = records.filter(x => x.pendingSide !== 'ASSOCIATE');
+
+      let totalFeeSum = 0;
+      let totalPaidSum = 0;
+      let nextExpectedSum = 0;
+      records.forEach(x => {
+        const fee = Number(x.totalFee) || 0;
+        const paid = Math.round(fee * ((Number(x.paidPct) || 0) / 100));
+        totalFeeSum += fee;
+        totalPaidSum += paid;
+        if ((Number(x.paidPct) || 0) < 100) {
+          nextExpectedSum += Math.round(fee * 0.25);
+        }
+      });
+      const totalBalanceDue = totalFeeSum - totalPaidSum;
 
       document.getElementById('repGeneratedDate').textContent = 'Date: ' + formatDisplayDate(todayIso);
       document.getElementById('repToName').textContent = targetCol;
       document.getElementById('repCompletionBadge').innerHTML = `
-        <p class="text-[10px] font-bold text-red-700 uppercase">Overall Completion Rate</p>
-        <p class="text-xl font-extrabold text-red-800">${compRate}%</p>
+        <div class="px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-center">
+          <p class="text-[9px] font-bold text-red-700 uppercase">Completion Rate</p>
+          <p class="text-lg font-extrabold text-red-800">${compRate}%</p>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-red-600 text-white text-center">
+          <p class="text-[9px] font-bold uppercase">Pending on Associate</p>
+          <p class="text-lg font-extrabold">${assocDue.length}</p>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-800 text-white text-center">
+          <p class="text-[9px] font-bold uppercase">With Umbrella Ops</p>
+          <p class="text-lg font-extrabold">${opsDue.length}</p>
+        </div>
       `;
 
       const kpis = [
-        { label: 'Total Assigned Projects', val: total, sub: 'Active & Historical', cls: 'bg-slate-50 border-slate-200 text-slate-900' },
+        { label: 'Total Assigned Projects', val: total, sub: 'Active Portfolio', cls: 'bg-slate-50 border-slate-200 text-slate-900' },
         { label: 'Completed Projects', val: completed.length, sub: 'Verified Green', cls: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
         { label: 'Running Smoothly', val: running.length, sub: 'On Track Schedule', cls: 'bg-amber-50 border-amber-200 text-amber-800' },
         { label: 'On Hold / Critical', val: onHold.length, sub: 'Immediate Attention', cls: 'bg-red-50 border-red-200 text-red-800' },
-        { label: 'Next 30 Days Lineup', val: upcoming.length, sub: 'Upcoming Targets', cls: 'bg-blue-50 border-blue-200 text-blue-800' },
-        { label: 'Reschedule Split', val: colLogs.length, sub: `Hosp: ${hospDelays} | Assoc: ${assocDelays}`, cls: 'bg-purple-50 border-purple-200 text-purple-800' }
+        { label: 'Next Expected (25%)', val: '₹' + nextExpectedSum.toLocaleString('en-IN'), sub: 'Upcoming Tranches', cls: 'bg-indigo-50 border-indigo-200 text-indigo-900' },
+        { label: 'Total Balance Due', val: '₹' + totalBalanceDue.toLocaleString('en-IN'), sub: 'Out of ₹' + totalFeeSum.toLocaleString('en-IN'), cls: 'bg-purple-50 border-purple-200 text-purple-900' }
       ];
       document.getElementById('repKpiCards').innerHTML = kpis.map(k => `
         <div class="p-3 rounded-xl border ${k.cls}">
           <p class="text-[10px] font-bold opacity-80">${k.label}</p>
-          <p class="text-xl font-extrabold mt-0.5">${k.val}</p>
+          <p class="text-lg font-extrabold mt-0.5">${k.val}</p>
           <p class="text-[10px] opacity-75 mt-0.5">${k.sub}</p>
         </div>
       `).join('');
@@ -1507,17 +1716,56 @@
           }).join('')
         : '<p class="text-slate-400">No stage data available.</p>';
 
-      const payClear = records.filter(x => !x.isPaymentHold && (x.paidPct || 0) > 0).length;
-      const payZero  = records.filter(x => (x.paidPct || 0) === 0).length;
-      const payHold  = records.filter(x => x.isPaymentHold).length;
-      const totalFeeSum = records.reduce((acc, x) => acc + (Number(x.totalFee) || 0), 0);
-      let payHtml = `
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Milestones Active (25%–100% Paid):</span><strong class="text-emerald-700">${payClear} Hospitals</strong></div>
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Pending Initial Milestone (0%):</span><strong class="text-amber-700">${payZero} Hospitals</strong></div>
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Strict Payment Lock Hold:</span><strong class="text-red-700">${payHold} Hospitals</strong></div>
-        <div class="flex justify-between py-1.5 bg-slate-50 px-2 rounded font-extrabold text-slate-900"><span>Portfolio Total Fee Value:</span><span>₹${totalFeeSum.toLocaleString('en-IN')}</span></div>
+      document.getElementById('repPaymentBreakdown').innerHTML = `
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Total Portfolio Deal Value:</span><strong class="text-slate-900">₹${totalFeeSum.toLocaleString('en-IN')}</strong></div>
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Total Amount Received:</span><strong class="text-emerald-700">₹${totalPaidSum.toLocaleString('en-IN')}</strong></div>
+        <div class="flex justify-between py-1 border-b border-slate-100"><span>Total Pending Balance:</span><strong class="text-red-700">₹${totalBalanceDue.toLocaleString('en-IN')}</strong></div>
+        <div class="flex justify-between py-1.5 bg-amber-50 px-2 rounded font-extrabold text-amber-950"><span>Next Expected Installments (25%):</span><span>₹${nextExpectedSum.toLocaleString('en-IN')}</span></div>
       `;
-      document.getElementById('repPaymentBreakdown').innerHTML = payHtml;
+
+      const getPayFlagBadge = (x) => {
+        if (x.payHealth === 'LOW_PACKAGE') return '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-[10px]">⚠️ Low Package Deal</span>';
+        if (x.payHealth === 'DELAYED' || x.isPaymentHold) return '<span class="px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 font-extrabold text-[10px]">🚨 Payment Delayed</span>';
+        return '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-[10px]">✓ Milestone On Track</span>';
+      };
+
+      const paymentAnalysisTable = `
+        <div class="border border-amber-300 rounded-xl overflow-hidden">
+          <div class="px-3.5 py-2.5 font-extrabold text-xs flex justify-between items-center bg-amber-100 text-amber-950">
+            <span>💰 HOSPITAL-WISE PAYMENT ANALYSIS (LOW PACKAGE / DELAYED / NEXT INSTALLMENT DUE)</span>
+            <span>${records.length} Hospitals</span>
+          </div>
+          <table class="w-full border-collapse text-[11px]">
+            <thead class="bg-slate-50 text-slate-700 font-bold">
+              <tr>
+                <th class="p-2 text-left border-b">Hospital Name &amp; Stage</th>
+                <th class="p-2 text-right border-b">Total Fee</th>
+                <th class="p-2 text-right border-b">Received</th>
+                <th class="p-2 text-right border-b">Balance Due</th>
+                <th class="p-2 text-left border-b">Payment Flag</th>
+                <th class="p-2 text-left border-b">Next Expected Installment</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${records.length ? records.map(x => {
+                const fee = Number(x.totalFee) || 0;
+                const paid = Math.round(fee * ((Number(x.paidPct) || 0) / 100));
+                const bal = fee - paid;
+                return `
+                  <tr class="${x.payHealth === 'DELAYED' ? 'bg-red-50/40' : ''}">
+                    <td class="p-2"><div class="font-extrabold text-slate-900">${x.title}</div><div class="text-[10px] text-slate-500">${x.stage} (${x.progressPct}%)</div></td>
+                    <td class="p-2 text-right font-bold">₹${fee.toLocaleString('en-IN')}</td>
+                    <td class="p-2 text-right font-bold text-emerald-700">₹${paid.toLocaleString('en-IN')} (${x.paidPct || 0}%)</td>
+                    <td class="p-2 text-right font-extrabold text-red-700">₹${bal.toLocaleString('en-IN')}</td>
+                    <td class="p-2">${getPayFlagBadge(x)}</td>
+                    <td class="p-2 font-semibold text-slate-800">${x.nextDueMilestone || '-'}</td>
+                  </tr>
+                `;
+              }).join('') : '<tr><td colspan="6" class="p-3 text-center text-slate-400">No payment records found.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
 
       const renderSectionTable = (title, badgeCls, rowsArr) => `
         <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -1530,7 +1778,7 @@
                 <th class="p-2 text-left border-b">Date</th>
                 <th class="p-2 text-left border-b">Hospital Name</th>
                 <th class="p-2 text-left border-b">Current Stage &amp; Live %</th>
-                <th class="p-2 text-left border-b">Fee &amp; Payment Status</th>
+                <th class="p-2 text-left border-b">Accountability</th>
                 <th class="p-2 text-left border-b">Remark / Notes</th>
               </tr>
             </thead>
@@ -1540,7 +1788,7 @@
                   <td class="p-2 font-semibold whitespace-nowrap">${formatDisplayDate(r.date)}</td>
                   <td class="p-2 font-bold text-slate-900">${r.title}</td>
                   <td class="p-2">${r.stage} (<strong>${r.progressPct}%</strong>)</td>
-                  <td class="p-2">₹${Number(r.totalFee || 0).toLocaleString('en-IN')} • ${r.isPaymentHold ? '🔒 Hold' : (r.paidPct + '% Clear')}</td>
+                  <td class="p-2 font-bold ${r.pendingSide === 'ASSOCIATE' ? 'text-red-700' : 'text-slate-700'}">${r.pendingSide === 'ASSOCIATE' ? '⚠️ Pending on Associate' : '🏢 With Umbrella Ops'}</td>
                   <td class="p-2 text-slate-600">${r.remark || '-'}</td>
                 </tr>
               `).join('') : '<tr><td colspan="5" class="p-3 text-center text-slate-400">No records in this category.</td></tr>'}
@@ -1550,10 +1798,44 @@
       `;
 
       document.getElementById('repTablesContainer').innerHTML =
-        renderSectionTable('1. Upcoming Lineup (Today & Next 30 Days)', 'bg-blue-50 text-blue-900', upcoming) +
-        renderSectionTable('2. Critical / On-Hold Hospitals (Action Required)', 'bg-red-50 text-red-900', onHold) +
+        paymentAnalysisTable +
+        renderSectionTable('1. Action Pending on Associate (' + targetCol + ') — Immediate Follow-Up', 'bg-red-50 text-red-900', assocDue) +
+        renderSectionTable('2. Upcoming Lineup (Today & Next 30 Days)', 'bg-blue-50 text-blue-900', upcoming) +
         renderSectionTable('3. Running Smoothly & Completed Projects', 'bg-emerald-50 text-emerald-900', [...running, ...completed]) +
         renderSectionTable('4. Past Scheduled History', 'bg-slate-100 text-slate-800', past);
+    }
+
+    function copyReportWhatsApp() {
+      const targetCol = currentUser.role === 'ADMIN'
+        ? document.getElementById('reportAssocSelect').value
+        : currentUser.column;
+      const records = [];
+      (portalData.rows || []).forEach(r => {
+        Object.keys(r.cells || {}).forEach(colKey => {
+          if (colKey === targetCol) {
+            r.cells[colKey].items.forEach(it => {
+              if (!it.masked && !it.isShifted) records.push({ date: r.date, remark: r.cells[colKey].remark, ...it });
+            });
+          }
+        });
+      });
+
+      const assocDue = records.filter(x => x.pendingSide === 'ASSOCIATE');
+      const msg =
+        '☂️ *UMBRELLA HEALTHCARE CONSULTANCY*\n' +
+        '*Performance & Payment Update — ' + targetCol + '*\n\n' +
+        '*⚠️ PENDING ON YOU (' + assocDue.length + '):*\n' +
+        (assocDue.length ? assocDue.map((x, i) => (i + 1) + '. *' + x.title + '* (' + formatDisplayDate(x.date) + ') — ' + (x.remark || 'Action required')).join('\n') : 'None') +
+        '\n\n*💰 PAYMENT & NEXT INSTALLMENT STATUS:*\n' +
+        (records.length ? records.map((x, i) => (i + 1) + '. *' + x.title + '* — Paid: ' + (x.paidPct || 0) + '% | ' + (x.nextDueMilestone || '')).join('\n') : 'No records');
+
+      const ta = document.createElement('textarea');
+      ta.value = msg;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('WhatsApp summary copied for ' + targetCol + '!');
     }
 
     // -----------------------------------------------------------------------
@@ -1567,8 +1849,8 @@
           <td class="p-2 border font-bold">${l.hospital}</td>
           <td class="p-2 border">${l.associate}</td>
           <td class="p-2 border">${l.oldDate} &rarr; <strong>${l.newDate}</strong></td>
-          <td class="p-2 border font-semibold text-red-700">${l.category}</td>
-          <td class="p-2 border">${l.remark}</td>
+          <td class="p-2 border"><span class="px-2 py-0.5 rounded bg-blue-700 text-white font-black">${l.count}x</span></td>
+          <td class="p-2 border"><strong class="text-red-700">${l.category}:</strong> ${l.remark}</td>
         </tr>
       `).join('') || '<tr><td colspan="6" class="p-4 text-center text-slate-400">No reschedule logs recorded yet.</td></tr>';
       document.getElementById('auditModal').classList.remove('hidden');
