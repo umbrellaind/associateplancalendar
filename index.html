@@ -3,2028 +3,256 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Umbrella Healthcare Consultancy — Operations & Working Targets Portal</title>
+  <title>Working Targets & Operations Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-    .umbrella-gradient { background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); }
-    .pill-yellow  { background-color: #fef9c3; border-color: #fde047; color: #854d0e; }
-    .pill-green   { background-color: #dcfce7; border-color: #86efac; color: #166534; }
-    .pill-red     { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
-    .pill-shifted { background-color: #dbeafe; border-color: #93c5fd; color: #1e40af; }
-    .pill-locked  { background-color: #f1f5f9; border-color: #cbd5e1; color: #64748b; cursor: not-allowed; }
-    @media print {
-      body * { visibility: hidden; }
-      #reportPrintArea, #reportPrintArea * { visibility: visible; }
-      #reportPrintArea { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 12px; }
-      .no-print { display: none !important; }
-    }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- ===================================================================== -->
-  <!-- CONFIGURATION: REPLACE WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL     -->
-  <!-- ===================================================================== -->
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzdPsjzKLEShlSGaH9iGB6W6eOxKyvew3KpAONrNIcE6D3v0kV-1X1PfR6K1ZcbvKkfqA/exec";
-    const DAILY_CAPACITY = 6;      // 6 Projects = 100% Busy
-    const STANDARD_MIN_FEE = 85000; // Threshold for Low Package Deal flag
-  </script>
-
-  <!-- ===================================================================== -->
-  <!-- 1. LOGIN & SIGNUP SCREEN                                              -->
-  <!-- ===================================================================== -->
-  <div id="authScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div class="umbrella-gradient p-6 text-white text-center">
-        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-white/15 border border-amber-300/60 flex items-center justify-center text-2xl">☂️</div>
-        <h1 class="text-xl font-extrabold tracking-tight">UMBRELLA HEALTHCARE</h1>
-        <p class="text-xs text-red-100 tracking-widest uppercase mt-0.5">Always and Anywhere With You</p>
+  <!-- TOP HEADER WITH REFRESH BUTTON -->
+  <header class="bg-red-700 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-base sm:text-lg font-black tracking-tight">Working Targets & Operations Portal</h1>
+        <p class="text-[11px] text-red-100">Live UDCP Hospital Links • Role-Based Access</p>
       </div>
 
-      <div class="p-6">
-        <div class="flex rounded-lg bg-slate-100 p-1 mb-5 text-xs font-semibold">
-          <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-md bg-white shadow text-red-700">Team Login</button>
-          <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="flex-1 py-2 rounded-md text-slate-600">New User Signup</button>
-        </div>
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <select id="roleSelect" onchange="manualRefreshPortal()" class="bg-white text-slate-900 font-bold px-2.5 py-1.5 rounded-lg">
+          <option value="ADMIN">ADMIN</option>
+          <option value="OPERATOR">OPERATOR</option>
+          <option value="FIELD">FIELD</option>
+          <option value="ASSOCIATE">ASSOCIATE</option>
+        </select>
 
-        <div id="authAlert" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
+        <input id="userIdInput" type="text" value="9235268271" placeholder="User ID"
+          onchange="manualRefreshPortal()"
+          class="bg-white text-slate-900 font-semibold px-2.5 py-1.5 rounded-lg w-28" />
 
-        <!-- Login Form -->
-        <form id="loginForm" onsubmit="submitLogin(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Registered Mobile Number</label>
-            <input id="loginId" type="text" required placeholder="Enter Mobile Number" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-            <input id="loginPw" type="password" required placeholder="Enter Password" class="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <button type="submit" id="loginBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Sign In to Portal</button>
-        </form>
+        <input id="sheetColInput" type="text" value="ABHISEK" placeholder="Sheet Col"
+          onchange="manualRefreshPortal()"
+          class="bg-white text-slate-900 font-semibold px-2.5 py-1.5 rounded-lg w-24" />
 
-        <!-- Signup Form -->
-        <form id="signupForm" onsubmit="submitSignup(event)" class="hidden space-y-3.5">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
-            <input id="regName" type="text" required placeholder="Enter Full Name" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Number</label>
-            <input id="regId" type="text" required placeholder="Enter 10-Digit Mobile Number" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Create Password</label>
-            <input id="regPw" type="password" required placeholder="Create Password" class="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Team Role</label>
-            <select id="regRole" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
-              <option value="ASSOCIATE">Associate</option>
-              <option value="FIELD">Field Team</option>
-              <option value="OPERATOR">Ops Operator</option>
-            </select>
-          </div>
-          <button type="submit" id="signupBtn" class="w-full py-2.5 umbrella-gradient text-white font-semibold text-sm rounded-lg shadow hover:opacity-95 transition">Request Access</button>
-        </form>
-      </div>
-    </div>
-  </div>
+        <input id="dateInput" type="date" onchange="manualRefreshPortal()"
+          class="bg-white text-slate-900 font-semibold px-2.5 py-1.5 rounded-lg" />
 
-  <!-- ===================================================================== -->
-  <!-- 2. MAIN OPERATIONS DASHBOARD                                          -->
-  <!-- ===================================================================== -->
-  <div id="appShell" class="hidden flex-1 flex flex-col">
-
-    <!-- Top Brand Header -->
-    <header class="umbrella-gradient text-white shadow-md sticky top-0 z-30">
-      <div class="max-w-[1600px] mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-lg bg-white/15 border border-amber-300/60 flex items-center justify-center text-lg">☂️</div>
-          <div>
-            <h1 class="text-sm sm:text-base font-extrabold leading-tight tracking-tight">UMBRELLA HEALTHCARE CONSULTANCY</h1>
-            <p class="text-[11px] text-red-100">Operations &amp; Working Targets Calendar</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap">
-          <div id="todayLoadBadge" class="px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-bold">
-            Today's Ops Load: 0% Busy
-          </div>
-
-          <!-- One-Click My Tasks / Pending on Me Filter -->
-          <button id="btnMyTasks" onclick="toggleMyTasksFilter()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-sm transition">
-            📌 My Tasks (0)
-          </button>
-
-          <!-- New Hospital & Kickoff Docs Checklist (Available to ALL Team Roles) -->
-          <button id="btnNewLead" onclick="openNewLeadModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition">
-            + New Hospital &amp; Docs
-          </button>
-
-          <!-- Admin & Ops Operator: Assign Registered Hospital to Calendar -->
-          <button id="btnAssignHosp" onclick="openAssignModal('', '')" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
-            + Assign Hospital
-          </button>
-
-          <!-- Performance & Accountability Report (Admin & Associate Only) -->
-          <button id="btnOpenReport" onclick="openReportModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-sm transition">
-            📊 Performance Report
-          </button>
-
-          <!-- Admin Only: Pending UDCP Approvals Gate -->
-          <button id="btnPendingApprovals" onclick="openApprovalsModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-300 hover:bg-amber-200 text-red-950 font-extrabold text-xs shadow-sm transition">
-            🔔 Pending Approvals (0)
-          </button>
-
-          <!-- Admin Only: Audit Log, User Access & End-of-Day Auto-Green -->
-          <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
-            📜 Old Records
-          </button>
-          <button id="btnUsersAuth" onclick="openUsersModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
-            🔐 Users
-          </button>
-          <button id="btnAutoGreen" onclick="triggerAutoGreenEOD()" title="Turn un-shifted Today/Past targets Green" class="hidden px-2.5 py-1.5 rounded-lg bg-emerald-700/80 hover:bg-emerald-600 text-white font-bold text-xs border border-emerald-400/40 transition">
-            ✓ Auto-Green
-          </button>
-
-          <!-- User Badge + Refresh + Logout -->
-          <div class="flex items-center gap-1.5 pl-2 border-l border-white/20">
-            <span id="userBadge" class="text-xs font-semibold text-red-50 hidden sm:inline"></span>
-            <button onclick="fetchDashboardData(true)" title="Sync Now" class="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold">↻</button>
-            <button onclick="logoutUser()" class="px-2.5 py-1.5 rounded-lg bg-black/25 hover:bg-black/40 text-xs font-semibold">Logout</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Filter & Role Info Bar -->
-    <div class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5">
-      <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-semibold">
-            <button id="flt30Btn" onclick="setDateFilter('next30')" class="px-3 py-1.5 rounded-md bg-white shadow text-red-700">Today + 30 Days</button>
-            <button id="fltAllBtn" onclick="setDateFilter('all')" class="px-3 py-1.5 rounded-md text-slate-600">All Dates</button>
-            <button id="fltPastBtn" onclick="setDateFilter('past')" class="px-3 py-1.5 rounded-md text-slate-600">Past Dates</button>
-          </div>
-
-          <select id="statusFilter" onchange="renderCalendar()" class="px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg bg-white text-slate-700">
-            <option value="ALL">All Statuses</option>
-            <option value="yellow">Running Smoothly</option>
-            <option value="green">Completed</option>
-            <option value="red">On Hold / Issue</option>
-          </select>
-
-          <!-- Accountability & Staff Owner Filter -->
-          <select id="ownerFilter" onchange="renderCalendar()" class="px-2.5 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg bg-white text-slate-700">
-            <option value="ALL">All Accountability / Owners</option>
-            <option value="ASSOC_PENDING">⚠️ Pending on Associate</option>
-            <option value="OPS_PENDING">🏢 With Umbrella Ops</option>
-          </select>
-
-          <input id="searchBox" oninput="renderCalendar()" type="text" placeholder="Search hospital..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg w-44 sm:w-56 focus:outline-none focus:border-red-600" />
-        </div>
-
-        <div class="flex items-center gap-3 text-[11px] font-medium text-slate-600">
-          <span id="roleGuideBanner" class="hidden text-red-700 font-semibold">Your schedule is highlighted in red.</span>
-          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-300 inline-block"></span> Running</span>
-          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> Done</span>
-          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span> Hold</span>
-          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span> Shifted</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Error / Status Alert Bar (Never fails silently) -->
-    <div id="portalErrorBanner" class="hidden max-w-[1600px] w-full mx-auto px-3 sm:px-5 pt-3">
-      <div class="p-3 rounded-xl bg-red-50 border border-red-300 text-red-800 text-xs font-semibold flex items-center justify-between">
-        <span id="portalErrorText"></span>
-        <button onclick="fetchDashboardData(true)" class="px-3 py-1 rounded bg-red-700 text-white font-bold">Retry Sync</button>
-      </div>
-    </div>
-
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-3">
-      <div id="loadingIndicator" class="hidden text-center py-12 text-sm font-semibold text-slate-500">Loading schedule...</div>
-
-      <!-- Desktop Sticky Freeze Header Table -->
-      <div id="desktopTableWrap" class="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm max-h-[calc(100vh-145px)] overflow-auto">
-        <table class="w-full table-fixed border-collapse text-xs">
-          <thead id="calendarThead" class="bg-slate-900 text-white sticky top-0 z-20 shadow-sm"></thead>
-          <tbody id="calendarTbody" class="divide-y divide-slate-200"></tbody>
-        </table>
-      </div>
-
-      <!-- Mobile Day-by-Day Cards -->
-      <div id="mobileCardsWrap" class="md:hidden space-y-3"></div>
-    </main>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 3. PROJECT DETAIL, 2-WAY TASK ASSIGNMENT & ACCOUNTABILITY MODAL       -->
-  <!-- ===================================================================== -->
-  <div id="detailModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <div>
-          <div class="flex items-center gap-1.5">
-            <span id="mdlColBadge" class="text-[10px] uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded font-bold"></span>
-            <span id="mdlStampBadge" class="hidden text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded font-extrabold"></span>
-          </div>
-          <h3 id="mdlHospTitle" class="text-base font-extrabold mt-0.5"></h3>
-        </div>
-        <button onclick="closeModal('detailModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-
-      <div class="p-5 space-y-4 text-xs max-h-[84vh] overflow-y-auto">
-        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <div>
-            <p class="text-slate-500 font-medium">Scheduled Date</p>
-            <p id="mdlDateText" class="text-sm font-bold text-slate-900 mt-0.5"></p>
-          </div>
-          <div>
-            <p class="text-slate-500 font-medium">Current Stage &amp; Progress</p>
-            <p id="mdlStageText" class="text-sm font-bold text-red-700 mt-0.5"></p>
-            <div class="w-full bg-slate-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
-              <div id="mdlProgressBar" class="bg-emerald-600 h-full transition-all" style="width:0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Admin & Operator Only: 2-Way Task Assignment & Accountability Split -->
-        <div id="mdlAssignStaffBox" class="hidden p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/70 space-y-3">
-          <div class="grid grid-cols-2 gap-2.5">
-            <div>
-              <label class="block text-[11px] font-extrabold text-indigo-950 mb-1">🏢 Office NC / Form Owner</label>
-              <select id="mdlOfficeOwnerSel" class="w-full px-2.5 py-1.5 border border-indigo-200 rounded-lg bg-white font-semibold text-xs"></select>
-            </div>
-            <div>
-              <label class="block text-[11px] font-extrabold text-indigo-950 mb-1">🚗 Field Visit / Doc Collection</label>
-              <select id="mdlFieldOwnerSel" class="w-full px-2.5 py-1.5 border border-indigo-200 rounded-lg bg-white font-semibold text-xs"></select>
-            </div>
-          </div>
-          <div>
-            <label class="block text-[11px] font-extrabold text-indigo-950 mb-1">⚖️ Action Accountability (Visible to Associate)</label>
-            <select id="mdlAccountabilitySel" class="w-full px-2.5 py-1.5 border border-indigo-200 rounded-lg bg-white font-bold text-xs">
-              <option value="UMBRELLA_OPS_PENDING">🏢 With Umbrella Ops Team</option>
-              <option value="ASSOCIATE_PENDING">⚠️ Pending on Associate (Docs / Fee / Coordination)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Associate & Field View: Accountability & Masked Ops Status -->
-        <div id="mdlExternalAcctBox" class="hidden p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span class="font-bold text-slate-700">Current Action Owner:</span>
-          <span id="mdlExternalAcctBadge" class="px-2.5 py-1 rounded-lg font-extrabold text-xs"></span>
-        </div>
-
-        <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-700">Payment Milestone Status</span>
-            <span id="mdlPayBadge" class="px-2 py-0.5 rounded font-bold text-[11px]"></span>
-          </div>
-          <div id="mdlFeeRow" class="hidden mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-slate-800">
-            <span>Total Consultancy Fee: <strong id="mdlTotalFee" class="text-sm text-slate-900"></strong></span>
-            <span>Paid: <strong id="mdlPaidPct" class="text-emerald-700"></strong></span>
-          </div>
-        </div>
-
-        <div id="mdlExternalLinks" class="hidden grid grid-cols-2 gap-2.5">
-          <a id="mdlUdcpBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-center shadow-xs transition">
-            🔗 Open UDCP Tracker
-          </a>
-          <a id="mdlDriveBtn" href="#" target="_blank" class="py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-center shadow-xs transition">
-            📁 Open Drive Folder
-          </a>
-        </div>
-
-        <!-- Stage 3 Audit Prep Trigger -->
-        <div id="mdlStage3Box" class="hidden p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 flex items-center justify-between gap-2">
-          <div>
-            <p class="font-extrabold text-indigo-950">Stage 3: Audit Preparation Checklist</p>
-            <p id="mdlStage3Sub" class="text-[11px] text-indigo-800">Select pre-collected items &amp; send for Admin authorization</p>
-          </div>
-          <button id="btnTriggerStage3" onclick="openStage3ChecklistModal()" class="px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs">
-            📋 Setup Audit Prep
-          </button>
-        </div>
-
-        <div class="space-y-2.5">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Project Status</label>
-            <select id="mdlStatusSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold bg-white">
-              <option value="yellow">🟡 Running Smoothly</option>
-              <option value="green">🟢 Completed</option>
-              <option value="red">🔴 On Hold / Issue</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Remark / Coordination Notes</label>
-            <textarea id="mdlRemarkInput" rows="2" placeholder="Enter update or hospital note..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600"></textarea>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-1">
-            <button id="btnSaveDetailUpdate" onclick="saveProjectUpdate(false, false)" class="flex-1 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold">
-              Save Update
-            </button>
-            <button id="btnFieldDone" onclick="saveProjectUpdate(true, false)" class="hidden py-2.5 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-              ✓ Mark Visit Completed
-            </button>
-            <button id="btnAssocFlag" onclick="saveProjectUpdate(false, true)" class="hidden py-2.5 px-3.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold">
-              ☎ Flag Hospital Issue
-            </button>
-          </div>
-        </div>
-
-        <div id="mdlRescheduleBox" class="hidden pt-3 border-t border-slate-200 space-y-2.5">
-          <p class="font-extrabold text-red-800">Reschedule Target Date (Leaves Blue Trail + 2x/3x Stamp)</p>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">New Target Date</label>
-              <input id="mdlNewDate" type="date" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Delay Accountability</label>
-              <select id="mdlDelayCat" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white">
-                <option value="Hospital End">Hospital End</option>
-                <option value="Associate End">Associate End</option>
-                <option value="Ops / Technical">Ops / Technical</option>
-              </select>
-            </div>
-          </div>
-          <input id="mdlReschedReason" type="text" placeholder="Mandatory proof / reason for shifting date..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-          <button onclick="submitReschedule()" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
-            Confirm Reschedule &amp; Stamp Next Date
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 4. STAGE 3 AUDIT PREP CHECKLIST MODAL (WITH SELECT ALL / CLEAR ALL)   -->
-  <!-- ===================================================================== -->
-  <div id="stage3Modal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <div>
-          <h3 id="stg3ModalTitle" class="text-sm sm:text-base font-extrabold">Stage 3: Audit Preparation Checklist (34 Items)</h3>
-          <p class="text-[11px] text-red-100">Tick items already completed/available; goes to Admin Approval Gate before UDCP</p>
-        </div>
-        <button onclick="closeModal('stage3Modal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-
-      <div class="p-5 overflow-y-auto space-y-3 text-xs">
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2">
-            <span class="font-extrabold text-slate-800">Audit Preparation Items</span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleAllChecklist('.stg3-doc-chk', true, updateStage3Count)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px]">
-                ☑️ Select All
-              </button>
-              <button type="button" onclick="toggleAllChecklist('.stg3-doc-chk', false, updateStage3Count)" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-[11px]">
-                ☐ Clear All
-              </button>
-              <span id="stg3CollectedCounter" class="px-2.5 py-1 rounded bg-indigo-100 text-indigo-900 font-extrabold text-[11px]">0 / 34 Selected</span>
-            </div>
-          </div>
-          <div class="p-2 bg-slate-50 border-b border-slate-200">
-            <input id="stg3SearchInput" oninput="filterChecklistRows('stg3ChecklistContainer', this.value)" type="text" placeholder="Filter audit prep item..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" />
-          </div>
-          <div id="stg3ChecklistContainer" class="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2 bg-white">
-            <p class="p-4 text-center text-slate-400">Loading Audit Preparation checklist...</p>
-          </div>
-        </div>
-
-        <button type="button" id="btnSubmitStage3" onclick="submitStage3AuditPrep()" class="w-full py-3 umbrella-gradient text-white font-extrabold rounded-xl shadow hover:opacity-95 transition">
-          📤 Submit Stage 3 Audit Prep for Admin Authorization
+        <!-- MANUAL REFRESH BUTTON -->
+        <button id="refreshBtn" type="button" onclick="manualRefreshPortal()"
+          class="bg-amber-400 hover:bg-amber-300 text-red-950 font-extrabold px-3 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1">
+          <span id="refreshBtnIcon">↻</span>
+          <span>Refresh</span>
         </button>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- ===================================================================== -->
-  <!-- 5. NEW HOSPITAL LEAD & STAGE 1 KICKOFF DOCS MODAL (ALL ROLES)         -->
-  <!-- ===================================================================== -->
-  <div id="newLeadModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+  <!-- MAIN CONTENT -->
+  <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-1 space-y-4">
+    <div class="flex items-center justify-between text-xs text-slate-600">
+      <span id="statusSummaryText">Ready</span>
+      <span id="lastSyncedText" class="font-mono text-[11px] text-slate-500"></span>
+    </div>
+
+    <div id="chipsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+  </main>
+
+  <!-- DETAIL MODAL WITH 🔗 OPEN UDCP TRACKER -->
+  <div id="detailModal" class="hidden fixed inset-0 bg-slate-900/70 z-40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex items-start justify-between border-b pb-3">
         <div>
-          <h3 class="text-sm sm:text-base font-extrabold">New Hospital Lead &amp; Stage 1 Kickoff Documents</h3>
-          <p class="text-[11px] text-red-100">Sent to Admin Approval Gate before adding to UDCP</p>
+          <span id="mdlHospIdBadge" class="text-[11px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded"></span>
+          <h2 id="mdlHospitalName" class="text-lg font-black text-slate-900 mt-1"></h2>
+          <p id="mdlMetaText" class="text-xs text-slate-500"></p>
         </div>
-        <button onclick="closeModal('newLeadModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold leading-none">&times;</button>
       </div>
 
-      <form id="newLeadForm" onsubmit="submitNewHospitalLead(event)" class="p-5 overflow-y-auto space-y-4 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Hospital Name *</label>
-            <input id="leadHospName" type="text" required placeholder="Enter Hospital Name" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">City / District *</label>
-            <input id="leadCity" type="text" required placeholder="Enter City" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-red-600" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Hospital Contact Mobile</label>
-            <input id="leadMobile" type="text" placeholder="Director / Coordinator Number" class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-          </div>
-          <div id="leadAssocWrap">
-            <label class="block font-bold text-slate-700 mb-1">Assigned Associate</label>
-            <select id="leadAssocCol" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
-            <input id="leadAssocReadonly" type="text" readonly class="hidden w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-100 text-slate-700 font-bold cursor-not-allowed" />
-          </div>
-        </div>
+      <div id="mdlRemarkBox" class="text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700"></div>
 
-        <div id="leadFinancialBox" class="hidden p-3.5 rounded-xl bg-amber-50 border border-amber-200 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block font-bold text-amber-950 mb-1">Total Consultancy Fee (₹)</label>
-            <input id="leadTotalFee" type="number" min="0" placeholder="0" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-bold" />
-          </div>
-          <div>
-            <label class="block font-bold text-amber-950 mb-1">Advance Milestone (P1 - 25%)</label>
-            <select id="leadP1Paid" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-semibold">
-              <option value="NO">Not Received Yet (0%)</option>
-              <option value="YES">Received (25% Paid)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-amber-950 mb-1">Payment Lock Mode</label>
-            <select id="leadLockMode" class="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-semibold">
-              <option value="SOFT">SOFT (Reminder Mode)</option>
-              <option value="STRICT">STRICT (Payment Lock)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2">
-            <span class="font-extrabold text-slate-800">Stage 1: Kickoff Documents Checklist</span>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleAllChecklist('.lead-doc-chk', true, updateCollectedCount)" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px]">
-                ☑️ Select All
-              </button>
-              <button type="button" onclick="toggleAllChecklist('.lead-doc-chk', false, updateCollectedCount)" class="px-2.5 py-1 rounded bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-[11px]">
-                ☐ Clear All
-              </button>
-              <span id="leadCollectedCounter" class="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[11px]">0 / 37 Collected</span>
-            </div>
-          </div>
-          <div class="p-2 bg-slate-50 border-b border-slate-200">
-            <input id="leadDocSearchInput" oninput="filterChecklistRows('leadChecklistContainer', this.value)" type="text" placeholder="Filter document item..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs" />
-          </div>
-          <div id="leadChecklistContainer" class="max-h-64 overflow-y-auto divide-y divide-slate-100 p-2 bg-white">
-            <p class="p-4 text-center text-slate-400">Loading master checklist...</p>
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Additional Visit / Deal Notes</label>
-          <input id="leadNotes" type="text" placeholder="Any special scope, bed count, or payment note..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-        </div>
-
-        <button type="submit" id="btnSubmitLead" class="w-full py-3 umbrella-gradient text-white font-extrabold rounded-xl shadow hover:opacity-95 transition">
-          Submit for Admin Authorization &amp; Generate Client Checklist
-        </button>
-      </form>
-
-      <div id="leadReceiptView" class="hidden p-5 overflow-y-auto space-y-4 text-xs">
-        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-          <p class="font-extrabold text-sm">✓ Lead Submitted to Admin Approval Gate!</p>
-          <p class="mt-0.5">Below is the Collected vs. Pending Documents summary to share with the hospital right now:</p>
-        </div>
-        <textarea id="leadWhatsAppSummary" rows="11" readonly class="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 font-mono text-[11px]"></textarea>
-        <div class="flex gap-2.5">
-          <button onclick="copyLeadSummary()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">
-            📋 Copy Checklist for WhatsApp
-          </button>
-          <button onclick="closeModal('newLeadModal')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-bold">
-            Done
-          </button>
-        </div>
+      <div id="mdlExternalLinks" class="hidden flex flex-wrap items-center gap-2 pt-1">
+        <a id="mdlUdcpBtn" href="#" target="_blank" rel="noopener noreferrer"
+          class="hidden bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow inline-flex items-center gap-1.5 transition">
+          🔗 Open UDCP Tracker ↗
+        </a>
+        <a id="mdlDriveBtn" href="#" target="_blank" rel="noopener noreferrer"
+          class="hidden bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow inline-flex items-center gap-1.5 transition">
+          📁 Open Drive Folder ↗
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- 6. ADMIN ONLY: PENDING UDCP AUTHORIZATIONS MODAL                      -->
-  <!-- ===================================================================== -->
-  <div id="approvalsModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <div>
-          <h3 class="text-sm sm:text-base font-extrabold">Admin Authorization Gate (Push to UDCP_MASTER_DB)</h3>
-          <p class="text-[11px] text-red-100">Verify fee, associate &amp; stage before authorizing into UDCP</p>
-        </div>
-        <button onclick="closeModal('approvalsModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-
-      <div id="approvalsListWrap" class="p-5 overflow-y-auto space-y-4 text-xs"></div>
-    </div>
+  <!-- CORNER SPINNER (SILENT BACKGROUND SYNC INDICATOR) -->
+  <div id="cornerSyncSpinner"
+       title="Syncing in background..."
+       class="hidden fixed bottom-4 right-4 z-50 w-9 h-9 rounded-full bg-white border border-slate-300 shadow-lg flex items-center justify-center pointer-events-none">
+    <span class="w-4 h-4 rounded-full border-2 border-slate-200 border-t-red-600 animate-spin"></span>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- 7. ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR           -->
-  <!-- ===================================================================== -->
-  <div id="assignModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
-        <h3 class="text-sm font-extrabold">Assign Registered Hospital to Calendar</h3>
-        <button onclick="closeModal('assignModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-      <form onsubmit="submitAssignHospital(event)" class="p-5 space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Search Registered Hospital</label>
-          <input id="assignSearchInput" oninput="filterRegisteredHospitals()" type="text" placeholder="Type hospital name or HOSP-ID..." class="w-full px-3 py-2 border border-slate-300 rounded-lg mb-1.5 focus:outline-none focus:border-red-600" />
-          <select id="assignHospSelect" required size="4" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 font-medium"></select>
-        </div>
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Target Date</label>
-            <input id="assignDateInput" type="date" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg" />
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Associate Column</label>
-            <select id="assignColSelect" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2.5">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">🏢 Office NC / Form Owner</label>
-            <select id="assignOfficeSel" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">🚗 Field Visit Owner</label>
-            <select id="assignFieldSel" class="w-full px-2.5 py-2 border border-slate-300 rounded-lg bg-white font-semibold"></select>
-          </div>
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Initial Remark / Visit Purpose (Optional)</label>
-          <input id="assignRemarkInput" type="text" placeholder="Enter remark..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
-        </div>
-        <button type="submit" class="w-full py-2.5 umbrella-gradient text-white font-bold rounded-lg shadow">Add to Schedule</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 8. DETAILED PERFORMANCE, ACCOUNTABILITY & PAYMENT REPORT (PDF)        -->
-  <!-- ===================================================================== -->
-  <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
-    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
-      <div class="umbrella-gradient px-5 py-3 text-white flex flex-wrap items-center justify-between gap-2 no-print">
-        <div class="flex items-center gap-3">
-          <h3 class="text-sm font-extrabold">Associate Performance, Accountability &amp; Payment Report</h3>
-          <select id="reportAssocSelect" onchange="buildPerformanceReport()" class="hidden px-2.5 py-1 rounded bg-white text-slate-900 text-xs font-bold"></select>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="copyAssociateWhatsAppReport()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs">📋 Copy WhatsApp Summary</button>
-          <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold text-xs">🖨️ Download / Print PDF</button>
-          <button onclick="closeModal('reportModal')" class="text-white/80 hover:text-white text-xl font-bold ml-1">&times;</button>
-        </div>
-      </div>
-
-      <div id="reportPrintArea" class="p-6 overflow-y-auto space-y-5 text-xs">
-        <div class="border-b-2 border-red-700 pb-3 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 class="text-lg font-extrabold text-red-800 tracking-tight">UMBRELLA HEALTHCARE CONSULTANCY</h2>
-            <p class="text-[11px] font-semibold text-amber-700">Always and Anywhere With You • Quality &amp; Accreditation Operations</p>
-            <p class="text-[10px] text-slate-500">105 SMCT Building, Ghurvakhera, Kanpur Nagar, UP 208021 | umbrellagroup.one</p>
-          </div>
-          <div class="text-right">
-            <p class="text-xs font-extrabold text-slate-800">PERFORMANCE &amp; ACCOUNTABILITY STATEMENT</p>
-            <p id="repGeneratedDate" class="text-[11px] text-slate-500"></p>
-          </div>
-        </div>
-
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <p class="text-[11px] text-slate-500 font-semibold">To,</p>
-            <p id="repToName" class="text-base font-extrabold text-slate-900"></p>
-            <p class="text-[11px] text-slate-600 mt-0.5">Subject: Comprehensive Project Lineup, Pending Action Split &amp; Payment Milestone Analysis</p>
-          </div>
-          <div id="repCompletionBadge" class="px-3.5 py-2 rounded-xl bg-red-50 border border-red-200 text-right"></div>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5" id="repKpiCards"></div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="border border-slate-200 rounded-xl p-3.5">
-            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Stage-Wise Distribution Analysis</h4>
-            <div id="repStageBreakdown" class="space-y-2"></div>
-          </div>
-          <div class="border border-slate-200 rounded-xl p-3.5">
-            <h4 class="font-extrabold text-slate-800 mb-2.5 uppercase text-[11px] tracking-wider">Payment Milestone &amp; Hold Health</h4>
-            <div id="repPaymentBreakdown" class="space-y-2"></div>
-          </div>
-        </div>
-
-        <!-- Dedicated Hospital-Wise Payment Analysis Table -->
-        <div id="repPaymentAnalysisTableWrap"></div>
-
-        <!-- Detailed Lineup & Pending Action Split Tables -->
-        <div id="repTablesContainer" class="space-y-4"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 9. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
-  <!-- ===================================================================== -->
-  <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
-        <h3 class="text-sm font-extrabold">Old Records &amp; Date Shift Proof Log</h3>
-        <button onclick="closeModal('auditModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-      <div class="p-4 overflow-y-auto text-xs">
-        <table class="w-full border-collapse">
-          <thead class="bg-slate-100 text-slate-700 font-bold">
-            <tr>
-              <th class="p-2 text-left border">Log ID</th>
-              <th class="p-2 text-left border">Hospital</th>
-              <th class="p-2 text-left border">Associate</th>
-              <th class="p-2 text-left border">Old Date &rarr; New Date</th>
-              <th class="p-2 text-left border">Stamp</th>
-              <th class="p-2 text-left border">Fault Side</th>
-              <th class="p-2 text-left border">Proof / Reason</th>
-            </tr>
-          </thead>
-          <tbody id="auditTableBody" class="divide-y"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="usersModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-      <div class="umbrella-gradient px-5 py-3 text-white flex items-center justify-between">
-        <h3 class="text-sm font-extrabold">Team Access &amp; Role Management</h3>
-        <button onclick="closeModal('usersModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-      <div class="p-4 overflow-y-auto text-xs">
-        <table class="w-full border-collapse">
-          <thead class="bg-slate-100 text-slate-700 font-bold">
-            <tr>
-              <th class="p-2 text-left border">Name</th>
-              <th class="p-2 text-left border">Mobile ID</th>
-              <th class="p-2 text-left border">Role</th>
-              <th class="p-2 text-left border">Sheet Column</th>
-              <th class="p-2 text-center border">Authorized</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody" class="divide-y"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 10. FRONTEND APPLICATION LOGIC                                        -->
-  <!-- ===================================================================== -->
   <script>
-    let currentUser = null;
-    let portalData  = { columns: [], rows: [], directory: [], staffDirectory: [], auditLogs: [], usersList: [], pendingApprovals: [] };
-    let kickoffTemplateCache   = [];
-    let auditPrepTemplateCache = [];
-    let dateFilterMode = 'next30';
-    let myTasksOnly = false;
-    let activeEditContext = null;
+    // Replace with your Working Targets Web App Exec URL
+    const WORKING_TARGETS_API_URL = "https://script.google.com/macros/s/YOUR_WORKING_TARGETS_DEPLOYMENT_ID/exec";
+    const BACKGROUND_SYNC_MS = 45000;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('umbrella_ops_user');
-      if (savedUser) {
-        try {
-          currentUser = JSON.parse(savedUser);
-          enterAppShell();
-          const cacheKey = 'umbrella_ops_cache_v4_' + currentUser.role + '_' + currentUser.userId;
-          const cachedPayload = localStorage.getItem(cacheKey);
-          if (cachedPayload) {
-            portalData = JSON.parse(cachedPayload);
-            populateOwnerFilterOptions();
-            renderCalendar();
-          }
-          fetchDashboardData(false);
-        } catch (e) {
-          localStorage.removeItem('umbrella_ops_user');
-        }
+    let currentItems = [];
+    let isSyncing = false;
+
+    function setCornerSpinner(visible) {
+      const spinner = document.getElementById("cornerSyncSpinner");
+      if (!spinner) return;
+      spinner.classList.toggle("hidden", !visible);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function getFilterParams() {
+      return {
+        role: document.getElementById("roleSelect").value,
+        userId: document.getElementById("userIdInput").value.trim(),
+        sheetColumn: document.getElementById("sheetColInput").value.trim().toUpperCase(),
+        date: document.getElementById("dateInput").value
+      };
+    }
+
+    async function fetchPortalData({ silent = false } = {}) {
+      if (isSyncing) return;
+      isSyncing = true;
+
+      const btn = document.getElementById("refreshBtn");
+      const icon = document.getElementById("refreshBtnIcon");
+
+      if (silent) {
+        setCornerSpinner(true);
+      } else {
+        if (btn) btn.disabled = true;
+        if (icon) icon.classList.add("inline-block", "animate-spin");
+        document.getElementById("statusSummaryText").innerText = "Refreshing...";
       }
-    });
 
-    function switchAuthTab(mode) {
-      document.getElementById('loginForm').classList.toggle('hidden', mode !== 'login');
-      document.getElementById('signupForm').classList.toggle('hidden', mode !== 'signup');
-      document.getElementById('tabLoginBtn').className = mode === 'login'
-        ? 'flex-1 py-2 rounded-md bg-white shadow text-red-700'
-        : 'flex-1 py-2 rounded-md text-slate-600';
-      document.getElementById('tabSignupBtn').className = mode === 'signup'
-        ? 'flex-1 py-2 rounded-md bg-white shadow text-red-700'
-        : 'flex-1 py-2 rounded-md text-slate-600';
-      document.getElementById('authAlert').classList.add('hidden');
-    }
-
-    function showAuthAlert(msg, isSuccess) {
-      const el = document.getElementById('authAlert');
-      el.textContent = msg;
-      el.className = 'mb-4 p-3 rounded-lg text-xs font-semibold ' + (isSuccess ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200');
-      el.classList.remove('hidden');
-    }
-
-    async function callApi(payload) {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-      return await res.json();
-    }
-
-    async function submitLogin(e) {
-      e.preventDefault();
-      const btn = document.getElementById('loginBtn');
-      btn.disabled = true; btn.textContent = 'Signing in...';
       try {
-        const resp = await callApi({
-          action: 'login',
-          userId: document.getElementById('loginId').value,
-          password: document.getElementById('loginPw').value
-        });
-        if (resp.success) {
-          currentUser = resp.user;
-          localStorage.setItem('umbrella_ops_user', JSON.stringify(currentUser));
-          enterAppShell();
-          fetchDashboardData(false);
-        } else {
-          showAuthAlert(resp.message || 'Login failed', false);
+        const p = getFilterParams();
+        const qs = new URLSearchParams({
+          action: "getPortalData",
+          role: p.role,
+          userId: p.userId,
+          sheetColumn: p.sheetColumn,
+          date: p.date
+        }).toString();
+
+        const res = await fetch(`${WORKING_TARGETS_API_URL}?${qs}`, { method: "GET" });
+        const json = await res.json();
+
+        if (json && json.status === "ok" && json.data) {
+          currentItems = Array.isArray(json.data.items) ? json.data.items : [];
+          renderChips();
+          document.getElementById("statusSummaryText").innerText = `Showing ${currentItems.length} item(s)`;
+          document.getElementById("lastSyncedText").innerText = "Synced: " + new Date().toLocaleTimeString();
+        } else if (!silent) {
+          document.getElementById("statusSummaryText").innerText = (json && json.message) || "Unable to load data.";
         }
       } catch (err) {
-        showAuthAlert('Connection error. Please check Web App URL.', false);
+        if (!silent) {
+          document.getElementById("statusSummaryText").innerText = "Sync error: " + err.message;
+        }
       } finally {
-        btn.disabled = false; btn.textContent = 'Sign In to Portal';
-      }
-    }
-
-    async function submitSignup(e) {
-      e.preventDefault();
-      const btn = document.getElementById('signupBtn');
-      btn.disabled = true; btn.textContent = 'Submitting...';
-      try {
-        const resp = await callApi({
-          action: 'signup',
-          name: document.getElementById('regName').value,
-          userId: document.getElementById('regId').value,
-          password: document.getElementById('regPw').value,
-          role: document.getElementById('regRole').value
-        });
-        showAuthAlert(resp.message, resp.success);
-        if (resp.success) document.getElementById('signupForm').reset();
-      } catch (err) {
-        showAuthAlert('Registration failed. Please try again.', false);
-      } finally {
-        btn.disabled = false; btn.textContent = 'Request Access';
-      }
-    }
-
-    function logoutUser() {
-      localStorage.removeItem('umbrella_ops_user');
-      location.reload();
-    }
-
-    function enterAppShell() {
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appShell').classList.remove('hidden');
-
-      const r = currentUser.role;
-      document.getElementById('userBadge').textContent = currentUser.name + ' (' + r + ')';
-
-      document.getElementById('btnAssignHosp').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
-      document.getElementById('btnPendingApprovals').classList.toggle('hidden', r !== 'ADMIN');
-      document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
-      document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
-      document.getElementById('btnAutoGreen').classList.toggle('hidden', r !== 'ADMIN');
-      document.getElementById('btnOpenReport').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
-      document.getElementById('roleGuideBanner').classList.toggle('hidden', !(r === 'ASSOCIATE' || r === 'FIELD'));
-    }
-
-    async function fetchDashboardData(forceRefresh) {
-      document.getElementById('portalErrorBanner').classList.add('hidden');
-      if (!portalData.rows || !portalData.rows.length) {
-        document.getElementById('loadingIndicator').classList.remove('hidden');
-      }
-      try {
-        const resp = await callApi({
-          action: 'getDashboard',
-          role: currentUser.role,
-          userId: currentUser.userId,
-          column: currentUser.column,
-          forceRefresh: !!forceRefresh
-        });
-        if (resp && resp.success) {
-          portalData = resp;
-          const cacheKey = 'umbrella_ops_cache_v4_' + currentUser.role + '_' + currentUser.userId;
-          localStorage.setItem(cacheKey, JSON.stringify(resp));
-          if (currentUser.role === 'ADMIN') {
-            const cnt = (resp.pendingApprovals || []).length;
-            document.getElementById('btnPendingApprovals').textContent = '🔔 Pending Approvals (' + cnt + ')';
-          }
-          populateOwnerFilterOptions();
-          renderCalendar();
+        isSyncing = false;
+        if (silent) {
+          setCornerSpinner(false);
         } else {
-          document.getElementById('portalErrorText').textContent = 'Sync warning: ' + ((resp && resp.message) || 'Could not load dashboard rows.');
-          document.getElementById('portalErrorBanner').classList.remove('hidden');
-        }
-      } catch (e) {
-        document.getElementById('portalErrorText').textContent = 'Network error while connecting to Apps Script. Click Retry Sync.';
-        document.getElementById('portalErrorBanner').classList.remove('hidden');
-      } finally {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-      }
-    }
-
-    function populateOwnerFilterOptions() {
-      const sel = document.getElementById('ownerFilter');
-      const curVal = sel.value;
-      let html = `
-        <option value="ALL">All Accountability / Owners</option>
-        <option value="ASSOC_PENDING">⚠️ Pending on Associate</option>
-        <option value="OPS_PENDING">🏢 With Umbrella Ops</option>
-      `;
-      if (currentUser && (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR')) {
-        (portalData.staffDirectory || []).forEach(st => {
-          if (st.role === 'OPERATOR' || st.role === 'FIELD' || st.role === 'ADMIN') {
-            html += `<option value="STAFF:${st.userId}">👤 Assigned: ${st.name} (${st.role})</option>`;
-          }
-        });
-      }
-      sel.innerHTML = html;
-      if (Array.from(sel.options).some(o => o.value === curVal)) sel.value = curVal;
-    }
-
-    function toggleMyTasksFilter() {
-      myTasksOnly = !myTasksOnly;
-      const btn = document.getElementById('btnMyTasks');
-      btn.className = myTasksOnly
-        ? 'px-3 py-1.5 rounded-lg bg-amber-300 text-slate-950 font-extrabold text-xs shadow-sm ring-2 ring-white transition'
-        : 'px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-sm transition';
-      renderCalendar();
-    }
-
-    function setDateFilter(mode) {
-      dateFilterMode = mode;
-      ['next30', 'all', 'past'].forEach(m => {
-        const btn = document.getElementById(m === 'next30' ? 'flt30Btn' : (m === 'all' ? 'fltAllBtn' : 'fltPastBtn'));
-        btn.className = (m === mode) ? 'px-3 py-1.5 rounded-md bg-white shadow text-red-700' : 'px-3 py-1.5 rounded-md text-slate-600';
-      });
-      renderCalendar();
-    }
-
-    function getTodayIso() {
-      const d = new Date();
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-
-    function formatDisplayDate(iso) {
-      if (!iso || iso.length < 10) return iso;
-      const p = iso.split('-');
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return p[2] + '-' + (months[parseInt(p[1], 10) - 1] || p[1]) + '-' + p[0];
-    }
-
-    function computeLoadBadge(count) {
-      const pct = Math.round((count / DAILY_CAPACITY) * 100);
-      if (count === 0) return { text: '0% Free', cls: 'bg-slate-100 text-slate-600' };
-      if (count < DAILY_CAPACITY) return { text: pct + '% Busy', cls: pct >= 80 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700' };
-      if (count === DAILY_CAPACITY) return { text: '100% FULL', cls: 'bg-red-100 text-red-800' };
-      return { text: pct + '% OVERLOAD', cls: 'bg-red-700 text-white' };
-    }
-
-    function isItemMine(item, col) {
-      if (!currentUser || item.masked) return false;
-      const r = currentUser.role;
-      if (r === 'OPERATOR' || r === 'FIELD') {
-        return !!item.isAssignedToMe;
-      }
-      if (r === 'ASSOCIATE') {
-        const isOwnCol = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
-        return isOwnCol && item.accountability === 'ASSOCIATE_PENDING';
-      }
-      return item.accountability === 'ASSOCIATE_PENDING';
-    }
-
-    function renderCalendar() {
-      const cols = portalData.columns || [];
-      const todayIso = getTodayIso();
-      const plus30 = new Date();
-      plus30.setDate(plus30.getDate() + 30);
-      const max30Iso = plus30.getFullYear() + '-' + String(plus30.getMonth() + 1).padStart(2, '0') + '-' + String(plus30.getDate()).padStart(2, '0');
-
-      const statusFlt = document.getElementById('statusFilter').value;
-      const ownerFlt  = document.getElementById('ownerFilter').value;
-      const searchQ   = document.getElementById('searchBox').value.trim().toLowerCase();
-      const canQuickAssign = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
-      const isPrivileged   = (currentUser.role === 'ADMIN' || currentUser.role === 'OPERATOR');
-
-      // Update My Tasks Counter
-      let myCount = 0;
-      (portalData.rows || []).forEach(r => {
-        cols.forEach(c => {
-          const cd = r.cells[c];
-          if (!cd) return;
-          (cd.items || []).forEach(it => { if (isItemMine(it, c)) myCount++; });
-        });
-      });
-      const myLabel = currentUser.role === 'ASSOCIATE' ? '⚠️ Pending on You' : '📌 My Tasks';
-      document.getElementById('btnMyTasks').textContent = myLabel + ' (' + myCount + ')';
-
-      const todayRow = (portalData.rows || []).find(r => r.date === todayIso);
-      const todayCount = todayRow ? todayRow.totalProjects : 0;
-      const todayPct = Math.round((todayCount / DAILY_CAPACITY) * 100);
-      document.getElementById('todayLoadBadge').textContent = "Today's Ops Load: " + (todayCount === DAILY_CAPACITY ? '100% FULL' : todayPct + '% Busy');
-
-      const filteredRows = (portalData.rows || []).filter(row => {
-        if (dateFilterMode === 'next30' && (row.date < todayIso || row.date > max30Iso)) return false;
-        if (dateFilterMode === 'past' && row.date >= todayIso) return false;
-        return true;
-      });
-
-      const colDisplayMap = {};
-      let teamCounter = 1;
-      cols.forEach(col => {
-        const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
-        if (isPrivileged || isOwn) {
-          colDisplayMap[col] = col;
-        } else {
-          colDisplayMap[col] = 'Team-' + teamCounter++;
-        }
-      });
-
-      // Sticky Freeze Header Row
-      const thead = document.getElementById('calendarThead');
-      let thHtml = '<tr><th class="w-32 p-2.5 text-left border-r border-slate-700 sticky left-0 z-30 bg-slate-900">Date &amp; Ops Load</th>';
-      cols.forEach(col => {
-        const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
-        thHtml += `<th class="p-2 text-center border-r border-slate-700 truncate ${isOwn ? 'bg-red-700 text-white' : 'bg-slate-900 text-slate-300'}">${colDisplayMap[col]}</th>`;
-      });
-      thHtml += '</tr>';
-      thead.innerHTML = thHtml;
-
-      const tbody = document.getElementById('calendarTbody');
-      const mobileWrap = document.getElementById('mobileCardsWrap');
-      let tbHtml = '';
-      let mobHtml = '';
-
-      filteredRows.forEach(row => {
-        const load = computeLoadBadge(row.totalProjects);
-        const isToday = (row.date === todayIso);
-
-        tbHtml += `<tr class="${isToday ? 'bg-red-50/40' : 'hover:bg-slate-50/80'}">`;
-        tbHtml += `<td class="p-2 border-r border-slate-200 align-top sticky left-0 z-10 ${isToday ? 'bg-red-50' : 'bg-white'}">
-          <div class="font-bold text-slate-900">${formatDisplayDate(row.date)} ${isToday ? '<span class="text-[9px] bg-red-600 text-white px-1.5 py-0.5 rounded ml-1">TODAY</span>' : ''}</div>
-          <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${load.cls}">${load.text}</span>
-        </td>`;
-
-        let mobDayCards = '';
-
-        cols.forEach(col => {
-          const isOwn = (col === currentUser.column) || (currentUser.column && col.indexOf(currentUser.column) === 0);
-          const cellData = row.cells[col] || { items: [], shiftedTrails: [], remark: '' };
-          let pillsHtml = '';
-
-          // 1. Minimal Blue Shifted Trail Chips (Hospital name only on old rescheduled dates)
-          (cellData.shiftedTrails || []).forEach(st => {
-            if (myTasksOnly) return;
-            if (searchQ && !st.masked && st.title.toLowerCase().indexOf(searchQ) === -1) return;
-            pillsHtml += `<div class="mb-1 px-2 py-1 rounded border text-[10px] font-bold truncate pill-shifted" title="Rescheduled to ${formatDisplayDate(st.shiftedTo)}">
-              ↪ ${st.title}
-            </div>`;
-          });
-
-          // 2. Active Hospital Targets
-          (cellData.items || []).forEach(item => {
-            if (statusFlt !== 'ALL' && item.status !== statusFlt) return;
-            if (myTasksOnly && !isItemMine(item, col)) return;
-            if (searchQ && !item.masked && item.title.toLowerCase().indexOf(searchQ) === -1) return;
-
-            if (!item.masked && ownerFlt !== 'ALL') {
-              if (ownerFlt === 'ASSOC_PENDING' && item.accountability !== 'ASSOCIATE_PENDING') return;
-              if (ownerFlt === 'OPS_PENDING' && item.accountability === 'ASSOCIATE_PENDING') return;
-              if (ownerFlt.startsWith('STAFF:')) {
-                const targetStaffId = ownerFlt.split(':')[1];
-                if (item.officeUserId !== targetStaffId && item.fieldUserId !== targetStaffId) return;
-              }
-            }
-
-            if (item.masked) {
-              pillsHtml += `<div class="mb-1 px-2 py-1 rounded border text-[11px] font-medium truncate pill-locked" title="Restricted">${item.title}</div>`;
-            } else {
-              const pCls = item.status === 'green' ? 'pill-green' : (item.status === 'red' ? 'pill-red' : 'pill-yellow');
-              const stgShort = 'S' + (item.stageOrder || 1) + ' • ' + (item.progressPct || 0) + '%';
-              const holdIcon = item.isPaymentHold ? ' 🔒' : '';
-              const stampBadge = (item.rescheduleCount && item.rescheduleCount > 1)
-                ? `<span class="ml-1 px-1 py-0.2 rounded bg-blue-600 text-white text-[9px] font-extrabold">${item.rescheduleCount}x</span>`
-                : '';
-
-              // Role-aware accountability / staff badge
-              let tagHtml = '';
-              if (item.accountability === 'ASSOCIATE_PENDING') {
-                tagHtml = `<div class="mt-0.5 px-1.5 py-0.5 rounded bg-orange-600 text-white text-[9px] font-extrabold truncate">⚠️ ${currentUser.role === 'ASSOCIATE' ? 'Pending on You' : 'Assoc Pending'}</div>`;
-              } else if (isPrivileged) {
-                const owners = [];
-                if (item.officeUserName) owners.push('🏢 ' + item.officeUserName.split(' ')[0]);
-                if (item.fieldUserName) owners.push('🚗 ' + item.fieldUserName.split(' ')[0]);
-                tagHtml = `<div class="mt-0.5 px-1.5 py-0.5 rounded bg-slate-800/85 text-white text-[9px] font-semibold truncate">${owners.length ? owners.join(' | ') : '🏢 Ops Team'}</div>`;
-              } else {
-                tagHtml = `<div class="mt-0.5 px-1.5 py-0.5 rounded bg-slate-700/80 text-white text-[9px] font-semibold truncate">🏢 Umbrella Ops</div>`;
-              }
-
-              const ctxPayload = JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;");
-
-              pillsHtml += `<button onclick='openDetailModal(${ctxPayload})'
-                class="w-full text-left mb-1 px-2 py-1.5 rounded border text-[11px] font-bold shadow-2xs hover:opacity-90 transition block ${pCls}">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="truncate">${item.title}${holdIcon}</span>${stampBadge}
-                </div>
-                <div class="text-[9px] font-semibold opacity-80 mt-0.5">${stgShort}</div>
-                ${tagHtml}
-              </button>`;
-
-              mobDayCards += `<button onclick='openDetailModal(${ctxPayload})'
-                class="w-full text-left p-2.5 rounded-lg border text-xs font-bold flex items-center justify-between gap-2 ${pCls}">
-                <div class="min-w-0 flex-1">
-                  <span class="text-[10px] uppercase opacity-75 block">${colDisplayMap[col]}</span>
-                  <span class="truncate block">${item.title}${holdIcon}</span>
-                  ${tagHtml}
-                </div>
-                <div class="text-right shrink-0">
-                  <span class="text-[11px] px-2 py-0.5 rounded bg-white/70 block">${stgShort}</span>
-                  ${stampBadge}
-                </div>
-              </button>`;
-            }
-          });
-
-          const quickBtn = canQuickAssign
-            ? `<button onclick="openAssignModal('${row.date}', '${col}')" title="Quick Assign to ${col}" class="w-full mt-0.5 py-0.5 rounded border border-dashed border-slate-300 text-slate-400 hover:text-red-700 hover:border-red-400 text-[10px] font-bold opacity-60 hover:opacity-100 transition">+</button>`
-            : '';
-
-          tbHtml += `<td class="p-1.5 border-r border-slate-200 align-top ${isOwn ? 'bg-red-50/30' : ''}">${pillsHtml}${quickBtn}</td>`;
-        });
-
-        tbHtml += '</tr>';
-
-        if (mobDayCards || isToday) {
-          mobHtml += `<div class="bg-white rounded-xl border border-slate-200 p-3 shadow-xs">
-            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
-              <span class="font-extrabold text-xs text-slate-900">${formatDisplayDate(row.date)}</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${load.cls}">${load.text}</span>
-            </div>
-            <div class="space-y-1.5">${mobDayCards || '<p class="text-[11px] text-slate-400">No visible items</p>'}</div>
-          </div>`;
-        }
-      });
-
-      tbody.innerHTML = tbHtml || `<tr><td colspan="${cols.length + 1}" class="p-8 text-center text-slate-400">No targets found for selected filter.</td></tr>`;
-      mobileWrap.innerHTML = mobHtml || '<div class="p-6 text-center text-xs text-slate-400 bg-white rounded-xl border">No targets found.</div>';
-    }
-
-    // -----------------------------------------------------------------------
-    // SHARED CHECKLIST HELPERS (SELECT ALL / CLEAR ALL / SEARCH FILTER)
-    // -----------------------------------------------------------------------
-    function toggleAllChecklist(selector, state, countCallback) {
-      document.querySelectorAll(selector).forEach(cb => {
-        if (cb.closest('label') && cb.closest('label').style.display !== 'none') {
-          cb.checked = state;
-        }
-      });
-      if (typeof countCallback === 'function') countCallback();
-    }
-
-    function filterChecklistRows(containerId, query) {
-      const q = String(query || '').trim().toLowerCase();
-      const labels = document.querySelectorAll('#' + containerId + ' label');
-      labels.forEach(lbl => {
-        const txt = lbl.textContent.toLowerCase();
-        lbl.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
-      });
-    }
-
-    // -----------------------------------------------------------------------
-    // DETAIL MODAL, 2-WAY TASK ASSIGNMENT & STAGE 3 AUDIT PREP
-    // -----------------------------------------------------------------------
-    function openDetailModal(ctx) {
-      activeEditContext = ctx;
-      const item = ctx.item;
-      const r = currentUser.role;
-      const isPrivileged = (r === 'ADMIN' || r === 'OPERATOR');
-
-      document.getElementById('mdlColBadge').textContent = ctx.column;
-      const stampEl = document.getElementById('mdlStampBadge');
-      if (item.rescheduleCount && item.rescheduleCount > 1) {
-        stampEl.textContent = item.rescheduleCount + 'x Rescheduled';
-        stampEl.classList.remove('hidden');
-      } else {
-        stampEl.classList.add('hidden');
-      }
-
-      document.getElementById('mdlHospTitle').textContent = item.title + (item.hospId ? ' (' + item.hospId + ')' : '');
-      document.getElementById('mdlDateText').textContent = formatDisplayDate(ctx.date);
-      document.getElementById('mdlStageText').textContent = item.stage + ' — ' + item.progressPct + '%';
-      document.getElementById('mdlProgressBar').style.width = (item.progressPct || 0) + '%';
-
-      // Populate 2-Way Task Assignment & Accountability Controls for Admin & Operator
-      const staffBox = document.getElementById('mdlAssignStaffBox');
-      const extAcctBox = document.getElementById('mdlExternalAcctBox');
-
-      if (isPrivileged) {
-        staffBox.classList.remove('hidden');
-        extAcctBox.classList.add('hidden');
-
-        const staffList = portalData.staffDirectory || [];
-        const offSel = document.getElementById('mdlOfficeOwnerSel');
-        const fldSel = document.getElementById('mdlFieldOwnerSel');
-
-        offSel.innerHTML = '<option value="">-- Unassigned --</option>' +
-          staffList.filter(s => s.role === 'OPERATOR' || s.role === 'ADMIN').map(s =>
-            `<option value="${s.userId}" data-name="${s.name}" ${s.userId === item.officeUserId ? 'selected' : ''}>${s.name} (${s.role})</option>`
-          ).join('');
-
-        fldSel.innerHTML = '<option value="">-- Unassigned --</option>' +
-          staffList.filter(s => s.role === 'FIELD').map(s =>
-            `<option value="${s.userId}" data-name="${s.name}" ${s.userId === item.fieldUserId ? 'selected' : ''}>${s.name} (FIELD)</option>`
-          ).join('');
-
-        document.getElementById('mdlAccountabilitySel').value = item.accountability || 'UMBRELLA_OPS_PENDING';
-      } else {
-        staffBox.classList.add('hidden');
-        extAcctBox.classList.remove('hidden');
-        const badge = document.getElementById('mdlExternalAcctBadge');
-        if (item.accountability === 'ASSOCIATE_PENDING') {
-          badge.textContent = r === 'ASSOCIATE' ? '⚠️ Pending on You (Associate)' : '⚠️ Pending on Associate';
-          badge.className = 'px-2.5 py-1 rounded-lg font-extrabold text-xs bg-orange-100 text-orange-800';
-        } else {
-          badge.textContent = '🏢 With Umbrella Ops';
-          badge.className = 'px-2.5 py-1 rounded-lg font-extrabold text-xs bg-slate-200 text-slate-800';
+          if (btn) btn.disabled = false;
+          if (icon) icon.classList.remove("animate-spin");
         }
       }
-
-      const payBadge = document.getElementById('mdlPayBadge');
-      if (item.isPaymentHold) {
-        payBadge.textContent = '🔒 Payment Hold (' + item.lockMode + ')';
-        payBadge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-red-100 text-red-800';
-      } else {
-        payBadge.textContent = (item.paidPct || 0) + '% Milestones Clear (' + item.lockMode + ')';
-        payBadge.className = 'px-2 py-0.5 rounded font-bold text-[11px] bg-emerald-100 text-emerald-800';
-      }
-
-      const feeRow = document.getElementById('mdlFeeRow');
-      if (item.totalFee !== undefined) {
-        feeRow.classList.remove('hidden');
-        document.getElementById('mdlTotalFee').textContent = '₹' + Number(item.totalFee || 0).toLocaleString('en-IN');
-        document.getElementById('mdlPaidPct').textContent = (item.paidPct || 0) + '%';
-      } else {
-        feeRow.classList.add('hidden');
-      }
-
-const extBox = document.getElementById('mdlExternalLinks');
-      const drvBtn = document.getElementById('mdlDriveBtn');
-      if (isPrivileged) {
-        extBox.classList.remove('hidden');
-        drvBtn.classList.remove('hidden');
-        document.getElementById('mdlUdcpBtn').href = item.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/';
-        if (item.driveUrl) {
-          drvBtn.href = item.driveUrl;
-          drvBtn.classList.remove('opacity-40', 'pointer-events-none');
-        } else {
-          drvBtn.href = '#';
-          drvBtn.classList.add('opacity-40', 'pointer-events-none');
-        }
-      } else if (r === 'FIELD' && item.udcpUrl) {
-        extBox.classList.remove('hidden');
-        drvBtn.classList.add('hidden');
-        document.getElementById('mdlUdcpBtn').href = item.udcpUrl;
-      } else {
-        extBox.classList.add('hidden');
-      }
-
-      const stg3Box = document.getElementById('mdlStage3Box');
-      const btnStg3 = document.getElementById('btnTriggerStage3');
-      if ((r === 'ADMIN' || r === 'OPERATOR' || r === 'ASSOCIATE') && item.hospId) {
-        stg3Box.classList.remove('hidden');
-        if (item.hasStage3) {
-          document.getElementById('mdlStage3Sub').textContent = 'Stage 3 (3. Audit Prep) is already active in UDCP.';
-          btnStg3.textContent = '✓ Audit Prep Active';
-          btnStg3.disabled = true;
-          btnStg3.className = 'px-3 py-2 rounded-lg bg-emerald-600 text-white font-bold opacity-80 cursor-default';
-        } else {
-          document.getElementById('mdlStage3Sub').textContent = 'Select pre-collected items & queue for Admin approval';
-          btnStg3.textContent = '📋 Setup Audit Prep';
-          btnStg3.disabled = false;
-          btnStg3.className = 'px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white font-bold whitespace-nowrap shadow-xs';
-        }
-      } else {
-        stg3Box.classList.add('hidden');
-      }
-
-      document.getElementById('mdlStatusSelect').value = item.status || 'yellow';
-      document.getElementById('mdlRemarkInput').value = ctx.remark || '';
-
-      document.getElementById('btnFieldDone').classList.toggle('hidden', r !== 'FIELD');
-      document.getElementById('btnAssocFlag').classList.toggle('hidden', r !== 'ASSOCIATE');
-      document.getElementById('mdlRescheduleBox').classList.toggle('hidden', !isPrivileged);
-      document.getElementById('mdlNewDate').value = '';
-      document.getElementById('mdlReschedReason').value = '';
-
-      document.getElementById('detailModal').classList.remove('hidden');
     }
 
-    async function saveProjectUpdate(fieldCompleted, flagIssue) {
-      if (!activeEditContext) return;
-      const btn = document.getElementById('btnSaveDetailUpdate');
-      btn.disabled = true; btn.textContent = 'Saving...';
-
-      const r = currentUser.role;
-      const isPrivileged = (r === 'ADMIN' || r === 'OPERATOR');
-      const newStatus = fieldCompleted ? 'green' : (flagIssue ? 'red' : document.getElementById('mdlStatusSelect').value);
-      const newRemark = document.getElementById('mdlRemarkInput').value;
-
-      let officeUserId = activeEditContext.item.officeUserId || '';
-      let officeUserName = activeEditContext.item.officeUserName || '';
-      let fieldUserId = activeEditContext.item.fieldUserId || '';
-      let fieldUserName = activeEditContext.item.fieldUserName || '';
-      let accountability = activeEditContext.item.accountability || 'UMBRELLA_OPS_PENDING';
-
-      if (isPrivileged) {
-        const offSel = document.getElementById('mdlOfficeOwnerSel');
-        const fldSel = document.getElementById('mdlFieldOwnerSel');
-        officeUserId   = offSel.value;
-        officeUserName = offSel.value ? (offSel.options[offSel.selectedIndex].getAttribute('data-name') || '') : '';
-        fieldUserId    = fldSel.value;
-        fieldUserName  = fldSel.value ? (fldSel.options[fldSel.selectedIndex].getAttribute('data-name') || '') : '';
-        accountability = document.getElementById('mdlAccountabilitySel').value;
-      }
-
-      // Instant optimistic UI update on calendar pill
-      activeEditContext.item.status = newStatus;
-      activeEditContext.item.officeUserId = officeUserId;
-      activeEditContext.item.officeUserName = officeUserName;
-      activeEditContext.item.fieldUserId = fieldUserId;
-      activeEditContext.item.fieldUserName = fieldUserName;
-      activeEditContext.item.accountability = accountability;
-
-      closeModal('detailModal');
-      renderCalendar();
-
-      try {
-        const resp = await callApi({
-          action: 'updateRemarkStatus',
-          role: currentUser.role,
-          userColumn: currentUser.column,
-          userName: currentUser.name,
-          date: activeEditContext.date,
-          column: activeEditContext.column,
-          rowIndex: activeEditContext.rowIndex,
-          hospitalName: activeEditContext.item.title,
-          status: newStatus,
-          remark: newRemark,
-          fieldCompleted: fieldCompleted,
-          flagIssue: flagIssue,
-          officeUserId: officeUserId,
-          officeUserName: officeUserName,
-          fieldUserId: fieldUserId,
-          fieldUserName: fieldUserName,
-          accountability: accountability
-        });
-        if (!resp.success) {
-          alert(resp.message || 'Could not save update.');
-        }
-        await fetchDashboardData(true);
-      } catch (e) {
-        alert('Error saving update. Please check connection.');
-      } finally {
-        btn.disabled = false; btn.textContent = 'Save Update';
-      }
+    function manualRefreshPortal() {
+      fetchPortalData({ silent: false });
     }
 
-    async function submitReschedule() {
-      if (!activeEditContext) return;
-      const newDate = document.getElementById('mdlNewDate').value;
-      const reason  = document.getElementById('mdlReschedReason').value.trim();
-      const cat     = document.getElementById('mdlDelayCat').value;
-
-      if (!newDate || !reason) {
-        alert('Please enter both New Target Date and Mandatory Reschedule Reason.');
+    function renderChips() {
+      const container = document.getElementById("chipsContainer");
+      if (!currentItems.length) {
+        container.innerHTML = `<div class="col-span-full bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-400">No entries found for selected filter.</div>`;
         return;
       }
 
-      closeModal('detailModal');
-      await callApi({
-        action: 'rescheduleTarget',
-        role: currentUser.role,
-        userName: currentUser.name,
-        column: activeEditContext.column,
-        rowIndex: activeEditContext.rowIndex,
-        oldDate: activeEditContext.date,
-        newDate: newDate,
-        hospitalName: activeEditContext.item.rawLine || activeEditContext.item.title,
-        cleanTitle: activeEditContext.item.title,
-        reasonCategory: cat,
-        reasonRemark: reason
-      });
-      fetchDashboardData(true);
-    }
+      container.innerHTML = currentItems.map((item, idx) => {
+        const maskBadge = item.isMasked
+          ? `<span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">MASKED</span>`
+          : `<span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">${escapeHtml(item.hospId || "UDCP")}</span>`;
 
-    async function triggerAutoGreenEOD() {
-      if (!confirm('Mark all un-shifted Today & Past targets as Completed (Green)?')) return;
-      const resp = await callApi({
-        action: 'runAutoGreenEOD',
-        role: currentUser.role
-      });
-      alert(resp.message || 'Auto-Green updated!');
-      fetchDashboardData(true);
-    }
-
-    // -----------------------------------------------------------------------
-    // STAGE 3 AUDIT PREP CHECKLIST MODAL
-    // -----------------------------------------------------------------------
-    async function openStage3ChecklistModal() {
-      if (!activeEditContext) return;
-      document.getElementById('stg3ModalTitle').textContent = 'Stage 3: Audit Prep — ' + activeEditContext.item.title;
-      document.getElementById('stg3SearchInput').value = '';
-      closeModal('detailModal');
-      document.getElementById('stage3Modal').classList.remove('hidden');
-
-      if (!auditPrepTemplateCache.length) {
-        const resp = await callApi({ action: 'getAuditPrepTemplate' });
-        if (resp.success) auditPrepTemplateCache = resp.items || [];
-      }
-      renderStage3Checklist();
-    }
-
-    function renderStage3Checklist() {
-      const wrap = document.getElementById('stg3ChecklistContainer');
-      document.getElementById('stg3CollectedCounter').textContent = '0 / ' + auditPrepTemplateCache.length + ' Selected';
-      wrap.innerHTML = auditPrepTemplateCache.map(it => `
-        <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
-          <input type="checkbox" value="${it.index}" onchange="updateStage3Count()" class="stg3-doc-chk mt-0.5 w-4 h-4 accent-indigo-600" />
-          <span class="text-[11px] text-slate-800 leading-snug"><strong class="text-slate-500 mr-1">${it.srNo}.</strong>${it.text}</span>
-        </label>
-      `).join('');
-    }
-
-    function updateStage3Count() {
-      const checked = document.querySelectorAll('.stg3-doc-chk:checked').length;
-      document.getElementById('stg3CollectedCounter').textContent = checked + ' / ' + auditPrepTemplateCache.length + ' Selected';
-    }
-
-    async function submitStage3AuditPrep() {
-      if (!activeEditContext) return;
-      const btn = document.getElementById('btnSubmitStage3');
-      btn.disabled = true; btn.textContent = 'Submitting...';
-
-      const collectedIndices = Array.from(document.querySelectorAll('.stg3-doc-chk:checked')).map(cb => Number(cb.value));
-
-      try {
-        const resp = await callApi({
-          action: 'requestStage3AuditPrep',
-          role: currentUser.role,
-          userName: currentUser.name,
-          hospId: activeEditContext.item.hospId,
-          hospitalName: activeEditContext.item.title,
-          associateCol: activeEditContext.column,
-          collectedIndices: collectedIndices
-        });
-        alert(resp.message || 'Queued for Admin authorization!');
-        closeModal('stage3Modal');
-        fetchDashboardData(true);
-      } catch (e) {
-        alert('Error submitting Audit Prep checklist.');
-      } finally {
-        btn.disabled = false; btn.textContent = '📤 Submit Stage 3 Audit Prep for Admin Authorization';
-      }
-    }
-
-    // -----------------------------------------------------------------------
-    // NEW HOSPITAL LEAD & STAGE 1 KICKOFF DOCS MODAL (ALL ROLES)
-    // -----------------------------------------------------------------------
-    async function openNewLeadModal() {
-      document.getElementById('newLeadForm').classList.remove('hidden');
-      document.getElementById('leadReceiptView').classList.add('hidden');
-      document.getElementById('newLeadForm').reset();
-      document.getElementById('leadDocSearchInput').value = '';
-
-      const r = currentUser.role;
-      document.getElementById('leadFinancialBox').classList.toggle('hidden', !(r === 'ADMIN' || r === 'ASSOCIATE'));
-
-      const assocWrap = document.getElementById('leadAssocWrap');
-      const assocSel  = document.getElementById('leadAssocCol');
-      const assocRo   = document.getElementById('leadAssocReadonly');
-      const cols = portalData.columns || [];
-
-      if (r === 'ADMIN' || r === 'OPERATOR') {
-        assocWrap.classList.remove('hidden');
-        assocSel.classList.remove('hidden');
-        assocRo.classList.add('hidden');
-        assocSel.innerHTML = cols.map(c => `<option value="${c}" ${c === currentUser.column ? 'selected' : ''}>${c}</option>`).join('');
-      } else if (r === 'ASSOCIATE') {
-        assocWrap.classList.remove('hidden');
-        assocSel.classList.add('hidden');
-        assocRo.classList.remove('hidden');
-        const ownCol = currentUser.column || currentUser.name.toUpperCase();
-        assocSel.innerHTML = `<option value="${ownCol}" selected>${ownCol}</option>`;
-        assocRo.value = ownCol + ' (Auto-Linked to Your ID)';
-      } else {
-        assocWrap.classList.add('hidden');
-        assocSel.innerHTML = '<option value="" selected></option>';
-      }
-
-      document.getElementById('newLeadModal').classList.remove('hidden');
-
-      if (!kickoffTemplateCache.length) {
-        const resp = await callApi({ action: 'getKickoffTemplate' });
-        if (resp.success) kickoffTemplateCache = resp.items || [];
-      }
-      renderKickoffChecklist();
-    }
-
-    function renderKickoffChecklist() {
-      const wrap = document.getElementById('leadChecklistContainer');
-      document.getElementById('leadCollectedCounter').textContent = '0 / ' + kickoffTemplateCache.length + ' Collected';
-      wrap.innerHTML = kickoffTemplateCache.map(it => `
-        <label class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer">
-          <input type="checkbox" value="${it.index}" onchange="updateCollectedCount()" class="lead-doc-chk mt-0.5 w-4 h-4 accent-emerald-600" />
-          <span class="text-[11px] text-slate-800 leading-snug"><strong class="text-slate-500 mr-1">${it.srNo}.</strong>${it.text}</span>
-        </label>
-      `).join('');
-    }
-
-    function updateCollectedCount() {
-      const checked = document.querySelectorAll('.lead-doc-chk:checked').length;
-      document.getElementById('leadCollectedCounter').textContent = checked + ' / ' + kickoffTemplateCache.length + ' Collected';
-    }
-
-    async function submitNewHospitalLead(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmitLead');
-      btn.disabled = true; btn.textContent = 'Submitting...';
-
-      const hospName = document.getElementById('leadHospName').value.trim();
-      const city     = document.getElementById('leadCity').value.trim();
-      const mobile   = document.getElementById('leadMobile').value.trim();
-      const assocCol = document.getElementById('leadAssocCol').value;
-      const notes    = document.getElementById('leadNotes').value.trim();
-
-      const checkedBoxes = Array.from(document.querySelectorAll('.lead-doc-chk:checked'));
-      const collectedIndices = checkedBoxes.map(cb => Number(cb.value));
-      const collectedSet = new Set(collectedIndices);
-
-      const payload = {
-        action: 'submitNewHospitalLead',
-        role: currentUser.role,
-        userName: currentUser.name,
-        hospitalName: hospName,
-        city: city,
-        mobile: mobile,
-        associateCol: assocCol,
-        totalFee: document.getElementById('leadTotalFee').value,
-        p1Paid: document.getElementById('leadP1Paid').value,
-        lockMode: document.getElementById('leadLockMode').value,
-        collectedIndices: collectedIndices,
-        notes: notes
-      };
-
-      try {
-        const resp = await callApi(payload);
-        if (resp.success) {
-          const collectedLines = [];
-          const pendingLines   = [];
-          kickoffTemplateCache.forEach(it => {
-            if (collectedSet.has(it.index)) collectedLines.push('✅ ' + it.srNo + '. ' + it.text);
-            else pendingLines.push('⏳ ' + it.srNo + '. ' + it.text);
-          });
-
-          const summaryTxt =
-            '☂️ *UMBRELLA HEALTHCARE CONSULTANCY*\n' +
-            '*Initial Kickoff Documents Status*\n' +
-            'Hospital: *' + hospName + '* (' + city + ')\n' +
-            'Collected: ' + collectedLines.length + ' | Pending: ' + pendingLines.length + '\n\n' +
-            '*--- COLLECTED DOCUMENTS ---*\n' +
-            (collectedLines.length ? collectedLines.join('\n') : 'None yet') + '\n\n' +
-            '*--- PENDING DOCUMENTS TO ARRANGE ---*\n' +
-            (pendingLines.length ? pendingLines.join('\n') : 'All documents collected!');
-
-          document.getElementById('leadWhatsAppSummary').value = summaryTxt;
-          document.getElementById('newLeadForm').classList.add('hidden');
-          document.getElementById('leadReceiptView').classList.remove('hidden');
-          fetchDashboardData(true);
-        } else {
-          alert(resp.message || 'Submission failed.');
-        }
-      } catch (err) {
-        alert('Error submitting hospital lead.');
-      } finally {
-        btn.disabled = false; btn.textContent = 'Submit for Admin Authorization & Generate Client Checklist';
-      }
-    }
-
-    function copyLeadSummary() {
-      const ta = document.getElementById('leadWhatsAppSummary');
-      ta.select();
-      navigator.clipboard.writeText(ta.value);
-      alert('Checklist copied! You can paste it directly in WhatsApp.');
-    }
-
-    // -----------------------------------------------------------------------
-    // ADMIN ONLY: APPROVALS GATE MODAL
-    // -----------------------------------------------------------------------
-    function openApprovalsModal() {
-      const list = portalData.pendingApprovals || [];
-      const wrap = document.getElementById('approvalsListWrap');
-
-      if (!list.length) {
-        wrap.innerHTML = '<div class="p-8 text-center text-slate-400 font-semibold">No pending hospital or Stage 3 requests right now.</div>';
-      } else {
-        wrap.innerHTML = list.map(req => {
-          const isNewHosp = req.requestType === 'NEW_HOSPITAL';
-          return `
-            <div class="border border-slate-200 rounded-xl p-4 bg-slate-50 space-y-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
-                <div>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${isNewHosp ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">
-                    ${isNewHosp ? 'NEW HOSPITAL (STAGE 1: 37 DOCS)' : 'STAGE 3: AUDIT PREP (34 ITEMS)'}
-                  </span>
-                  <h4 class="text-sm font-extrabold text-slate-900 mt-1">${req.hospitalName} <span class="font-normal text-slate-500">(${req.city})</span></h4>
-                </div>
-                <div class="text-right text-[11px] text-slate-600">
-                  <p>Submitted by: <strong>${req.submittedBy}</strong> (${req.submittedRole})</p>
-                  ${isNewHosp
-                    ? `<p>Initial Docs Collected: <strong>${req.collectedCount} / 37</strong></p>`
-                    : `<p>Existing ID: <strong>${req.existingHospId}</strong> • Pre-Checked: <strong>${req.collectedCount} / 34</strong></p>`}
-                </div>
-              </div>
-
-              ${isNewHosp ? `
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Total Fee (₹)</label>
-                    <input id="apr_fee_${req.requestId}" type="number" value="${req.totalFee}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-bold" />
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">P1 Advance (25%)</label>
-                    <select id="apr_p1_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
-                      <option value="NO" ${req.p1Paid === 'NO' ? 'selected' : ''}>NO (0%)</option>
-                      <option value="YES" ${req.p1Paid === 'YES' ? 'selected' : ''}>YES (25% Paid)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Lock Mode</label>
-                    <select id="apr_lock_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
-                      <option value="SOFT" ${req.lockMode === 'SOFT' ? 'selected' : ''}>SOFT</option>
-                      <option value="STRICT" ${req.lockMode === 'STRICT' ? 'selected' : ''}>STRICT</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Associate Column</label>
-                    <select id="apr_assoc_${req.requestId}" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-semibold">
-                      ${(portalData.columns || []).map(c => `<option value="${c}" ${c === req.associateCol ? 'selected' : ''}>${c}</option>`).join('')}
-                    </select>
-                  </div>
-                </div>
-              ` : ''}
-
-              ${req.notes ? `<p class="text-[11px] text-slate-600 bg-white p-2 rounded border">Note: ${req.notes}</p>` : ''}
-
-              <div class="flex items-center justify-end gap-2 pt-1">
-                <button onclick="rejectRequest('${req.requestId}')" class="px-3.5 py-2 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 font-bold">
-                  Reject
-                </button>
-                <button onclick="authorizeRequest('${req.requestId}', '${req.requestType}')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs">
-                  ✓ Authorize &amp; Push to UDCP
-                </button>
-              </div>
+        return `
+          <button type="button" onclick="openChipModal(${idx})"
+            class="text-left bg-white hover:bg-red-50/40 border border-slate-200 hover:border-red-300 rounded-2xl p-4 shadow-sm transition space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-mono text-slate-500">${escapeHtml(item.date || "")}</span>
+              ${maskBadge}
             </div>
-          `;
-        }).join('');
-      }
-
-      document.getElementById('approvalsModal').classList.remove('hidden');
+            <div class="font-black text-sm text-slate-900">${escapeHtml(item.hospitalName)}</div>
+            ${item.status ? `<div class="text-xs font-semibold text-slate-600">${escapeHtml(item.status)}</div>` : ""}
+          </button>
+        `;
+      }).join("");
     }
 
-    async function authorizeRequest(reqId, reqType) {
-      const payload = {
-        action: 'approvePendingRequest',
-        role: currentUser.role,
-        userName: currentUser.name,
-        requestId: reqId
-      };
-      if (reqType === 'NEW_HOSPITAL') {
-        payload.overrideFee   = document.getElementById('apr_fee_' + reqId).value;
-        payload.overrideP1    = document.getElementById('apr_p1_' + reqId).value;
-        payload.overrideLock  = document.getElementById('apr_lock_' + reqId).value;
-        payload.overrideAssoc = document.getElementById('apr_assoc_' + reqId).value;
+    function openChipModal(idx) {
+      const item = currentItems[idx];
+      if (!item) return;
+
+      document.getElementById("mdlHospIdBadge").innerText = item.isMasked ? "RESTRICTED" : (item.hospId || "HOSPITAL");
+      document.getElementById("mdlHospitalName").innerText = item.hospitalName || "";
+      document.getElementById("mdlMetaText").innerText = [item.date, item.status].filter(Boolean).join(" • ");
+      document.getElementById("mdlRemarkBox").innerText = item.remark || "No additional remark.";
+
+      const extBox = document.getElementById("mdlExternalLinks");
+      const udcpBtn = document.getElementById("mdlUdcpBtn");
+      const drvBtn = document.getElementById("mdlDriveBtn");
+
+      let hasAnyLink = false;
+
+      if (!item.isMasked && item.udcpUrl) {
+        udcpBtn.href = item.udcpUrl;
+        udcpBtn.classList.remove("hidden");
+        hasAnyLink = true;
+      } else {
+        udcpBtn.href = "#";
+        udcpBtn.classList.add("hidden");
       }
 
-      const resp = await callApi(payload);
-      if (resp.success) {
-        if (resp.type === 'NEW_HOSPITAL') {
-          const shareMsg =
-            '✅ Authorized & Added to UDCP!\n\n' +
-            'Hospital: ' + resp.hospitalName + '\n' +
-            'Login ID: ' + resp.hospId + '\n' +
-            'Password: ' + resp.password + '\n' +
-            'Portal: ' + resp.udcpUrl + '\n' +
-            'Stage 1 Kickoff Docs Created: ' + resp.totalItems + ' (' + resp.collectedCount + ' Submitted)';
-          alert(shareMsg);
-        } else {
-          alert('✅ Stage 3 (3. Audit Prep — ' + resp.totalItems + ' items, ' + (resp.collectedCount || 0) + ' Submitted) pushed to UDCP for ' + resp.hospitalName + '!');
+      if (!item.isMasked && item.driveUrl) {
+        drvBtn.href = item.driveUrl;
+        drvBtn.classList.remove("hidden");
+        hasAnyLink = true;
+      } else {
+        drvBtn.href = "#";
+        drvBtn.classList.add("hidden");
+      }
+
+      extBox.classList.toggle("hidden", !hasAnyLink);
+      document.getElementById("detailModal").classList.remove("hidden");
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detailModal").classList.add("hidden");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchPortalData({ silent: false });
+      setInterval(() => {
+        if (document.visibilityState === "visible") {
+          fetchPortalData({ silent: true });
         }
-        closeModal('approvalsModal');
-        fetchDashboardData(true);
-      } else {
-        alert(resp.message || 'Authorization failed.');
-      }
-    }
-
-    async function rejectRequest(reqId) {
-      if (!confirm('Are you sure you want to reject this request?')) return;
-      await callApi({
-        action: 'rejectPendingRequest',
-        role: currentUser.role,
-        userName: currentUser.name,
-        requestId: reqId
-      });
-      closeModal('approvalsModal');
-      fetchDashboardData(true);
-    }
-
-    // -----------------------------------------------------------------------
-    // ADMIN & OPS TEAM: ASSIGN REGISTERED HOSPITAL TO CALENDAR
-    // -----------------------------------------------------------------------
-    function openAssignModal(presetDate, presetCol) {
-      document.getElementById('assignDateInput').value = presetDate || getTodayIso();
-      document.getElementById('assignSearchInput').value = '';
-      document.getElementById('assignRemarkInput').value = '';
-      const colSel = document.getElementById('assignColSelect');
-      colSel.innerHTML = (portalData.columns || []).map(c =>
-        `<option value="${c}" ${c === presetCol ? 'selected' : ''}>${c}</option>`
-      ).join('');
-
-      const staffList = portalData.staffDirectory || [];
-      document.getElementById('assignOfficeSel').innerHTML = '<option value="">-- Optional --</option>' +
-        staffList.filter(s => s.role === 'OPERATOR' || s.role === 'ADMIN').map(s => `<option value="${s.userId}" data-name="${s.name}">${s.name}</option>`).join('');
-      document.getElementById('assignFieldSel').innerHTML = '<option value="">-- Optional --</option>' +
-        staffList.filter(s => s.role === 'FIELD').map(s => `<option value="${s.userId}" data-name="${s.name}">${s.name}</option>`).join('');
-
-      filterRegisteredHospitals();
-      document.getElementById('assignModal').classList.remove('hidden');
-    }
-
-    function filterRegisteredHospitals() {
-      const q = document.getElementById('assignSearchInput').value.trim().toLowerCase();
-      const sel = document.getElementById('assignHospSelect');
-      const list = (portalData.directory || []).filter(h =>
-        !q || h.name.toLowerCase().includes(q) || h.userId.toLowerCase().includes(q)
-      );
-      sel.innerHTML = list.map(h =>
-        `<option value="${h.userId}" data-name="${h.name}">${h.userId} — ${h.name} (${h.stage})</option>`
-      ).join('');
-    }
-
-    async function submitAssignHospital(e) {
-      e.preventDefault();
-      const sel = document.getElementById('assignHospSelect');
-      const opt = sel.options[sel.selectedIndex];
-      if (!opt) return;
-
-      const offSel = document.getElementById('assignOfficeSel');
-      const fldSel = document.getElementById('assignFieldSel');
-
-      closeModal('assignModal');
-      await callApi({
-        action: 'assignHospital',
-        role: currentUser.role,
-        userName: currentUser.name,
-        date: document.getElementById('assignDateInput').value,
-        column: document.getElementById('assignColSelect').value,
-        hospId: opt.value,
-        hospitalName: opt.getAttribute('data-name'),
-        remark: document.getElementById('assignRemarkInput').value,
-        officeUserId: offSel.value,
-        officeUserName: offSel.value ? (offSel.options[offSel.selectedIndex].getAttribute('data-name') || '') : '',
-        fieldUserId: fldSel.value,
-        fieldUserName: fldSel.value ? (fldSel.options[fldSel.selectedIndex].getAttribute('data-name') || '') : ''
-      });
-      fetchDashboardData(true);
-    }
-
-    // -----------------------------------------------------------------------
-    // DETAILED PERFORMANCE, ACCOUNTABILITY & PAYMENT REPORT (PDF + WHATSAPP)
-    // -----------------------------------------------------------------------
-    function openReportModal() {
-      const sel = document.getElementById('reportAssocSelect');
-      if (currentUser.role === 'ADMIN') {
-        sel.classList.remove('hidden');
-        sel.innerHTML = (portalData.columns || []).map(c => `<option value="${c}">${c}</option>`).join('');
-      } else {
-        sel.classList.add('hidden');
-      }
-      buildPerformanceReport();
-      document.getElementById('reportModal').classList.remove('hidden');
-    }
-
-    function getAssociatePortfolioRecords(targetCol) {
-      const records = [];
-      (portalData.rows || []).forEach(r => {
-        Object.keys(r.cells || {}).forEach(colKey => {
-          const isMatch = (colKey === targetCol) || (targetCol && colKey.indexOf(targetCol) === 0);
-          if (!isMatch) return;
-          const cell = r.cells[colKey];
-          (cell.items || []).forEach(it => {
-            if (!it.masked) records.push({ date: r.date, remark: cell.remark, ...it });
-          });
-        });
-      });
-      return records;
-    }
-
-    function analyzePaymentStatus(rec) {
-      const fee     = Number(rec.totalFee) || 0;
-      const paidPct = Number(rec.paidPct) || 0;
-      const paidAmt = Math.round((fee * paidPct) / 100);
-      const dueAmt  = Math.max(0, fee - paidAmt);
-      const nextTranche = paidPct < 100 ? Math.round(fee * 0.25) : 0;
-      const nextMilestoneLabel = paidPct === 0 ? 'P1 (25% Advance)' : (paidPct === 25 ? 'P2 (25%)' : (paidPct === 50 ? 'P3 (25%)' : (paidPct === 75 ? 'P4 Final (25%)' : 'Fully Paid')));
-
-      const isLow = (fee > 0 && fee < STANDARD_MIN_FEE);
-      const expectedMinPctByStage = (rec.stageOrder || 1) >= 3 ? 50 : ((rec.stageOrder || 1) === 2 ? 25 : 0);
-      const isDelayed = rec.isPaymentHold || (fee > 0 && paidPct < expectedMinPctByStage);
-
-      let flagText = '✓ Milestone On Track';
-      let flagCls  = 'bg-emerald-50 text-emerald-800 border-emerald-200';
-      if (isDelayed && isLow) {
-        flagText = '🚨 Delayed + Low Fee';
-        flagCls  = 'bg-red-100 text-red-900 border-red-300';
-      } else if (isDelayed) {
-        flagText = '🚨 Payment Delayed';
-        flagCls  = 'bg-red-50 text-red-800 border-red-200';
-      } else if (isLow) {
-        flagText = '⚠️ Low Package Deal';
-        flagCls  = 'bg-amber-50 text-amber-800 border-amber-200';
-      }
-
-      return { fee, paidPct, paidAmt, dueAmt, nextTranche, nextMilestoneLabel, isLow, isDelayed, flagText, flagCls };
-    }
-
-    function buildPerformanceReport() {
-      const targetCol = currentUser.role === 'ADMIN'
-        ? document.getElementById('reportAssocSelect').value
-        : currentUser.column;
-
-      const todayIso = getTodayIso();
-      const plus30 = new Date(); plus30.setDate(plus30.getDate() + 30);
-      const max30Iso = plus30.getFullYear() + '-' + String(plus30.getMonth() + 1).padStart(2, '0') + '-' + String(plus30.getDate()).padStart(2, '0');
-
-      const records = getAssociatePortfolioRecords(targetCol);
-
-      const total     = records.length;
-      const completed = records.filter(x => x.status === 'green');
-      const running   = records.filter(x => x.status === 'yellow');
-      const onHold    = records.filter(x => x.status === 'red');
-      const assocPend = records.filter(x => x.accountability === 'ASSOCIATE_PENDING');
-      const opsPend   = records.filter(x => x.accountability !== 'ASSOCIATE_PENDING');
-      const upcoming  = records.filter(x => x.date >= todayIso && x.date <= max30Iso);
-      const past      = records.filter(x => x.date < todayIso);
-      const compRate  = total > 0 ? Math.round((completed.length / total) * 100) : 0;
-
-      const colLogs = (portalData.auditLogs || []).filter(l => l.associate === targetCol);
-      const hospDelays = colLogs.filter(l => l.category.indexOf('Hospital') !== -1).length;
-      const assocDelays= colLogs.filter(l => l.category.indexOf('Associate') !== -1).length;
-
-      document.getElementById('repGeneratedDate').textContent = 'Date: ' + formatDisplayDate(todayIso);
-      document.getElementById('repToName').textContent = targetCol;
-      document.getElementById('repCompletionBadge').innerHTML = `
-        <p class="text-[10px] font-bold text-red-700 uppercase">Overall Completion Rate</p>
-        <p class="text-xl font-extrabold text-red-800">${compRate}%</p>
-      `;
-
-      const kpis = [
-        { label: 'Total Assigned Projects', val: total, sub: 'Active & Historical', cls: 'bg-slate-50 border-slate-200 text-slate-900' },
-        { label: 'Pending on Associate', val: assocPend.length, sub: 'Action Required by You', cls: 'bg-orange-50 border-orange-200 text-orange-800' },
-        { label: 'With Umbrella Ops', val: opsPend.length, sub: 'Office & Field Execution', cls: 'bg-indigo-50 border-indigo-200 text-indigo-800' },
-        { label: 'Completed Projects', val: completed.length, sub: 'Verified Green', cls: 'bg-emerald-50 border-emerald-200 text-emerald-800' },
-        { label: 'On Hold / Critical', val: onHold.length, sub: 'Immediate Attention', cls: 'bg-red-50 border-red-200 text-red-800' },
-        { label: 'Reschedule Split', val: colLogs.length, sub: `Hosp: ${hospDelays} | Assoc: ${assocDelays}`, cls: 'bg-purple-50 border-purple-200 text-purple-800' }
-      ];
-      document.getElementById('repKpiCards').innerHTML = kpis.map(k => `
-        <div class="p-3 rounded-xl border ${k.cls}">
-          <p class="text-[10px] font-bold opacity-80">${k.label}</p>
-          <p class="text-xl font-extrabold mt-0.5">${k.val}</p>
-          <p class="text-[10px] opacity-75 mt-0.5">${k.sub}</p>
-        </div>
-      `).join('');
-
-      const stageMap = {};
-      records.forEach(rec => {
-        const s = rec.stage || '1. Kickoff Docs';
-        if (!stageMap[s]) stageMap[s] = { count: 0, sumPct: 0 };
-        stageMap[s].count += 1;
-        stageMap[s].sumPct += (rec.progressPct || 0);
-      });
-      const stageKeys = Object.keys(stageMap).sort();
-      document.getElementById('repStageBreakdown').innerHTML = stageKeys.length
-        ? stageKeys.map(s => {
-            const avg = Math.round(stageMap[s].sumPct / stageMap[s].count);
-            return `<div class="flex items-center justify-between text-xs py-1 border-b border-slate-100">
-              <span class="font-semibold text-slate-700">${s}</span>
-              <span class="font-bold text-slate-900">${stageMap[s].count} Hospitals <span class="text-emerald-700 ml-1">(Avg ${avg}%)</span></span>
-            </div>`;
-          }).join('')
-        : '<p class="text-slate-400">No stage data available.</p>';
-
-      let totalFeeSum = 0, totalPaidSum = 0, totalDueSum = 0, nextTrancheSum = 0, delayedCount = 0, lowCount = 0;
-      records.forEach(rec => {
-        const p = analyzePaymentStatus(rec);
-        totalFeeSum += p.fee;
-        totalPaidSum += p.paidAmt;
-        totalDueSum += p.dueAmt;
-        nextTrancheSum += p.nextTranche;
-        if (p.isDelayed) delayedCount++;
-        if (p.isLow) lowCount++;
-      });
-
-      document.getElementById('repPaymentBreakdown').innerHTML = `
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Received Amount:</span><strong class="text-emerald-700">₹${totalPaidSum.toLocaleString('en-IN')}</strong></div>
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Total Balance Due:</span><strong class="text-slate-900">₹${totalDueSum.toLocaleString('en-IN')}</strong></div>
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Next Expected Installments (25%):</span><strong class="text-indigo-700">₹${nextTrancheSum.toLocaleString('en-IN')}</strong></div>
-        <div class="flex justify-between py-1 border-b border-slate-100"><span>Delayed / Low Package Alerts:</span><strong class="text-red-700">${delayedCount} Delayed • ${lowCount} Low Deal</strong></div>
-        <div class="flex justify-between py-1.5 bg-slate-50 px-2 rounded font-extrabold text-slate-900"><span>Portfolio Total Fee Value:</span><span>₹${totalFeeSum.toLocaleString('en-IN')}</span></div>
-      `;
-
-      // Dedicated Hospital-Wise Payment Analysis Table
-      document.getElementById('repPaymentAnalysisTableWrap').innerHTML = `
-        <div class="border border-amber-300 rounded-xl overflow-hidden">
-          <div class="px-3.5 py-2 font-extrabold text-xs flex justify-between items-center bg-amber-100 text-amber-950">
-            <span>💰 Hospital-Wise Payment Analysis (Low Deal, Delayed &amp; Next Installment Due)</span>
-            <span>${records.length} Hospitals</span>
-          </div>
-          <table class="w-full border-collapse text-[11px]">
-            <thead class="bg-amber-50/70 text-slate-700 font-bold">
-              <tr>
-                <th class="p-2 text-left border-b">Hospital Name</th>
-                <th class="p-2 text-right border-b">Total Fee</th>
-                <th class="p-2 text-right border-b">Paid</th>
-                <th class="p-2 text-right border-b">Balance Due</th>
-                <th class="p-2 text-left border-b">Next Expected Installment</th>
-                <th class="p-2 text-left border-b">Payment Health Flag</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              ${records.length ? records.map(r => {
-                const p = analyzePaymentStatus(r);
-                return `<tr>
-                  <td class="p-2 font-bold text-slate-900">${r.title} <span class="text-[10px] font-normal text-slate-500">(${r.stage})</span></td>
-                  <td class="p-2 text-right font-semibold">₹${p.fee.toLocaleString('en-IN')}</td>
-                  <td class="p-2 text-right text-emerald-700 font-bold">₹${p.paidAmt.toLocaleString('en-IN')} (${p.paidPct}%)</td>
-                  <td class="p-2 text-right font-extrabold text-slate-900">₹${p.dueAmt.toLocaleString('en-IN')}</td>
-                  <td class="p-2 font-semibold text-indigo-800">${p.nextTranche > 0 ? ('₹' + p.nextTranche.toLocaleString('en-IN') + ' — ' + p.nextMilestoneLabel) : 'All Milestones Cleared'}</td>
-                  <td class="p-2"><span class="px-2 py-0.5 rounded border text-[10px] font-extrabold ${p.flagCls}">${p.flagText}</span></td>
-                </tr>`;
-              }).join('') : '<tr><td colspan="6" class="p-3 text-center text-slate-400">No hospitals assigned.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      const renderSectionTable = (title, badgeCls, rowsArr) => `
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="px-3.5 py-2 font-extrabold text-xs flex justify-between items-center ${badgeCls}">
-            <span>${title}</span><span>${rowsArr.length} Projects</span>
-          </div>
-          <table class="w-full border-collapse text-[11px]">
-            <thead class="bg-slate-50 text-slate-600 font-bold">
-              <tr>
-                <th class="p-2 text-left border-b">Date</th>
-                <th class="p-2 text-left border-b">Hospital Name</th>
-                <th class="p-2 text-left border-b">Action Owner</th>
-                <th class="p-2 text-left border-b">Current Stage &amp; Live %</th>
-                <th class="p-2 text-left border-b">Remark / Notes</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              ${rowsArr.length ? rowsArr.map(r => `
-                <tr>
-                  <td class="p-2 font-semibold whitespace-nowrap">${formatDisplayDate(r.date)}</td>
-                  <td class="p-2 font-bold text-slate-900">${r.title} ${r.rescheduleCount > 1 ? '<span class="px-1 rounded bg-blue-600 text-white text-[9px]">' + r.rescheduleCount + 'x</span>' : ''}</td>
-                  <td class="p-2">${r.accountability === 'ASSOCIATE_PENDING'
-                    ? '<span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-extrabold text-[10px]">⚠️ Pending on Associate</span>'
-                    : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">🏢 Umbrella Ops</span>'}</td>
-                  <td class="p-2">${r.stage} (<strong>${r.progressPct}%</strong>)</td>
-                  <td class="p-2 text-slate-600">${r.remark || '-'}</td>
-                </tr>
-              `).join('') : '<tr><td colspan="5" class="p-3 text-center text-slate-400">No records in this category.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      document.getElementById('repTablesContainer').innerHTML =
-        renderSectionTable('1. Action Pending on Associate (Immediate Follow-Up Required)', 'bg-orange-100 text-orange-950', assocPend) +
-        renderSectionTable('2. Upcoming Lineup (Today & Next 30 Days)', 'bg-blue-50 text-blue-900', upcoming) +
-        renderSectionTable('3. Critical / On-Hold Hospitals', 'bg-red-50 text-red-900', onHold) +
-        renderSectionTable('4. Running Smoothly & Completed Projects', 'bg-emerald-50 text-emerald-900', [...running, ...completed]) +
-        renderSectionTable('5. Past Scheduled History', 'bg-slate-100 text-slate-800', past);
-    }
-
-    function copyAssociateWhatsAppReport() {
-      const targetCol = currentUser.role === 'ADMIN'
-        ? document.getElementById('reportAssocSelect').value
-        : currentUser.column;
-      const records = getAssociatePortfolioRecords(targetCol);
-      const assocPend = records.filter(x => x.accountability === 'ASSOCIATE_PENDING');
-      const opsPend   = records.filter(x => x.accountability !== 'ASSOCIATE_PENDING');
-
-      let msg = `☂️ *UMBRELLA HEALTHCARE CONSULTANCY*\n*Associate Status & Payment Update: ${targetCol}*\n\n`;
-      msg += `*⚠️ PENDING ON YOU (ASSOCIATE END — ${assocPend.length}):*\n`;
-      msg += assocPend.length
-        ? assocPend.map((r, idx) => `${idx + 1}. *${r.title}* (${formatDisplayDate(r.date)}) — ${r.stage}${r.remark ? ' | ' + r.remark : ''}`).join('\n')
-        : 'None right now';
-      msg += `\n\n*🏢 WITH UMBRELLA OPS TEAM (${opsPend.length}):*\n`;
-      msg += opsPend.length
-        ? opsPend.map((r, idx) => `${idx + 1}. ${r.title} (${formatDisplayDate(r.date)}) — ${r.stage} (${r.progressPct}%)`).join('\n')
-        : 'None';
-
-      const payLines = records.map(r => {
-        const p = analyzePaymentStatus(r);
-        if (p.nextTranche <= 0 && !p.isDelayed) return null;
-        return `• *${r.title}*: Paid ₹${p.paidAmt.toLocaleString('en-IN')} | Due ₹${p.dueAmt.toLocaleString('en-IN')} | Next: ₹${p.nextTranche.toLocaleString('en-IN')} (${p.flagText})`;
-      }).filter(Boolean);
-
-      if (payLines.length) {
-        msg += `\n\n*💰 PAYMENT MILESTONE SUMMARY:*\n` + payLines.join('\n');
-      }
-
-      navigator.clipboard.writeText(msg);
-      alert('WhatsApp Accountability & Payment Summary copied!');
-    }
-
-    // -----------------------------------------------------------------------
-    // ADMIN MODALS: AUDIT LOG & USERS AUTH
-    // -----------------------------------------------------------------------
-    function openAuditModal() {
-      const tbody = document.getElementById('auditTableBody');
-      tbody.innerHTML = (portalData.auditLogs || []).map(l => `
-        <tr>
-          <td class="p-2 border font-semibold">${l.logId}</td>
-          <td class="p-2 border font-bold">${l.hospital}</td>
-          <td class="p-2 border">${l.associate}</td>
-          <td class="p-2 border">${l.oldDate} &rarr; <strong>${l.newDate}</strong></td>
-          <td class="p-2 border"><span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">${l.count}x</span></td>
-          <td class="p-2 border font-semibold text-red-700">${l.category}</td>
-          <td class="p-2 border">${l.remark}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400">No reschedule logs recorded yet.</td></tr>';
-      document.getElementById('auditModal').classList.remove('hidden');
-    }
-
-    function openUsersModal() {
-      const tbody = document.getElementById('usersTableBody');
-      tbody.innerHTML = (portalData.usersList || []).map(u => `
-        <tr>
-          <td class="p-2 border font-bold">${u.name}</td>
-          <td class="p-2 border">${u.userId}</td>
-          <td class="p-2 border">
-            <select onchange="updateUserRow('${u.userId}', this.value, null, null)" class="border rounded px-1.5 py-0.5">
-              ${['ADMIN','OPERATOR','ASSOCIATE','FIELD'].map(rl => `<option value="${rl}" ${u.role === rl ? 'selected' : ''}>${rl}</option>`).join('')}
-            </select>
-          </td>
-          <td class="p-2 border">
-            <input type="text" value="${u.column}" onblur="updateUserRow('${u.userId}', null, this.value, null)" class="border rounded px-1.5 py-0.5 w-24 uppercase" />
-          </td>
-          <td class="p-2 border text-center">
-            <input type="checkbox" ${u.approved ? 'checked' : ''} onchange="updateUserRow('${u.userId}', null, null, this.checked)" />
-          </td>
-        </tr>
-      `).join('');
-      document.getElementById('usersModal').classList.remove('hidden');
-    }
-
-    async function updateUserRow(targetUserId, newRole, newColumn, approved) {
-      await callApi({
-        action: 'updateUserAuth',
-        role: currentUser.role,
-        targetUserId: targetUserId,
-        newRole: newRole,
-        newColumn: newColumn,
-        approved: approved
-      });
-      fetchDashboardData(true);
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
+      }, BACKGROUND_SYNC_MS);
+    });
   </script>
 </body>
 </html>
