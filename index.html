@@ -115,27 +115,22 @@
             Today's Ops Load: 0% Busy
           </div>
 
-          <!-- One-Click My Tasks / Pending on Me Filter -->
           <button id="btnMyTasks" onclick="toggleMyTasksFilter()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-sm transition">
             📌 My Tasks (0)
           </button>
 
-          <!-- New Hospital & Kickoff Docs Checklist -->
           <button id="btnNewLead" onclick="openNewLeadModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow-sm transition">
             + New Hospital &amp; Docs
           </button>
 
-          <!-- Admin & Ops Operator: Assign Registered Hospital to Calendar -->
           <button id="btnAssignHosp" onclick="openAssignModal('', '')" class="hidden px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-xs shadow-sm transition">
             + Assign Hospital
           </button>
 
-          <!-- Performance & Accountability Report (Admin & Associate Only) -->
           <button id="btnOpenReport" onclick="openReportModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-sm transition">
             📊 Performance Report
           </button>
 
-          <!-- Admin Only: Pending UDCP Approvals Gate -->
           <button id="btnPendingApprovals" onclick="openApprovalsModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-300 hover:bg-amber-200 text-red-950 font-extrabold text-xs shadow-sm transition">
             🔔 Pending Approvals (0)
           </button>
@@ -143,7 +138,6 @@
             ⚠️ Mismatch (0)
           </button>
 
-          <!-- Admin Only: Audit Log, User Access & End-of-Day Auto-Green -->
           <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
             📜 Old Records
           </button>
@@ -154,7 +148,6 @@
             ✓ Auto-Green
           </button>
 
-          <!-- User Badge + Manual Refresh + Logout -->
           <div class="flex items-center gap-1.5 pl-2 border-l border-white/20">
             <span id="userBadge" class="text-xs font-semibold text-red-50 hidden sm:inline"></span>
             <button id="manualSyncBtn" onclick="fetchDashboardData(true, false)" title="Refresh Now" class="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-bold inline-flex items-center gap-1">
@@ -203,7 +196,6 @@
       </div>
     </div>
 
-    <!-- Error / Status Alert Bar -->
     <div id="portalErrorBanner" class="hidden max-w-[1600px] w-full mx-auto px-3 sm:px-5 pt-3">
       <div class="p-3 rounded-xl bg-red-50 border border-red-300 text-red-800 text-xs font-semibold flex items-center justify-between">
         <span id="portalErrorText"></span>
@@ -211,11 +203,9 @@
       </div>
     </div>
 
-    <!-- Main Content Container -->
     <main class="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-3">
       <div id="loadingIndicator" class="hidden text-center py-12 text-sm font-semibold text-slate-500">Loading schedule...</div>
 
-      <!-- Desktop Sticky Freeze Header Table -->
       <div id="desktopTableWrap" class="hidden md:block bg-white rounded-xl border border-slate-200 shadow-sm max-h-[calc(100vh-145px)] overflow-auto">
         <table class="w-full table-fixed border-collapse text-xs">
           <thead id="calendarThead" class="bg-slate-900 text-white sticky top-0 z-20 shadow-sm"></thead>
@@ -223,14 +213,11 @@
         </table>
       </div>
 
-      <!-- Mobile Day-by-Day Cards -->
       <div id="mobileCardsWrap" class="md:hidden space-y-3"></div>
     </main>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- CORNER SILENT BACKGROUND-SYNC SPINNER (SMALL ROTATING CIRCLE)         -->
-  <!-- ===================================================================== -->
+  <!-- CORNER SILENT BACKGROUND-SYNC SPINNER -->
   <div id="cornerBgSpinner"
        title="Syncing live UDCP & Calendar status..."
        class="hidden fixed bottom-4 right-4 z-50 w-9 h-9 rounded-full bg-white/95 border border-slate-300 shadow-lg flex items-center justify-center pointer-events-none">
@@ -268,7 +255,6 @@
           </div>
         </div>
 
-        <!-- Admin & Operator Only: 2-Way Task Assignment & Accountability Split -->
         <div id="mdlAssignStaffBox" class="hidden p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/70 space-y-3">
           <div class="grid grid-cols-2 gap-2.5">
             <div>
@@ -289,13 +275,11 @@
           </div>
         </div>
 
-        <!-- Associate & Field View: Accountability Status -->
         <div id="mdlExternalAcctBox" class="hidden p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
           <span class="font-bold text-slate-700">Current Action Owner:</span>
           <span id="mdlExternalAcctBadge" class="px-2.5 py-1 rounded-lg font-extrabold text-xs"></span>
         </div>
 
-        <!-- Payment Milestone Box (Strictly Hidden for OPERATOR and FIELD) -->
         <div id="mdlPaymentBox" class="p-3 rounded-xl border border-slate-200 bg-amber-50/50">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Payment Milestone Status</span>
@@ -307,7 +291,6 @@
           </div>
         </div>
 
-        <!-- UDCP Tracker (?hosp=HOSP-xxx) & Drive Links -->
         <div id="mdlExternalLinks" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <a id="mdlUdcpBtn" href="#" target="_blank" rel="noopener noreferrer"
              class="py-2.5 px-3 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-center shadow-xs transition">
@@ -319,7 +302,6 @@
           </a>
         </div>
 
-        <!-- Stage 3 Audit Prep Trigger (Admin & Operator Only) -->
         <div id="mdlStage3Box" class="hidden p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 flex items-center justify-between gap-2">
           <div>
             <p class="font-extrabold text-indigo-950">Stage 3: Audit Preparation Checklist</p>
@@ -330,7 +312,6 @@
           </button>
         </div>
 
-        <!-- Status & Message / Remark Update -->
         <div class="space-y-2.5">
           <div id="mdlStatusGroup">
             <label class="block font-bold text-slate-700 mb-1">Project Status</label>
@@ -359,7 +340,6 @@
           </div>
         </div>
 
-        <!-- Admin & Operator Only: Reschedule Target Date -->
         <div id="mdlRescheduleBox" class="hidden pt-3 border-t border-slate-200 space-y-2.5">
           <p class="font-extrabold text-red-800">Reschedule Target Date (Leaves Blue Trail + 2x/3x Stamp)</p>
           <div class="grid grid-cols-2 gap-2">
@@ -384,7 +364,7 @@
 
         <div id="mdlAdminDeleteBox" class="hidden pt-3 border-t border-red-200">
           <button type="button" id="btnDeleteTarget" onclick="deleteActiveTarget()" class="w-full py-2 rounded-lg bg-red-50 hover:bg-red-100 border border-red-300 text-red-800 font-extrabold transition">
-            🗑️ Delete Target from Calendar (Admin Only)
+            🗑️ Delete This Target from Calendar (Admin Only)
           </button>
         </div>
       </div>
@@ -657,20 +637,32 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 8B. ADMIN ONLY: MISMATCH TAB MODAL (DIRECT UDCP LINK TO FIX)         -->
+  <!-- 8B. ADMIN ONLY: MISMATCH TAB MODAL (SEARCH + LIVE REFRESH + UDCP)    -->
   <!-- ===================================================================== -->
   <div id="mismatchModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+    <div class="bg-white w-full max-w-6xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 class="text-sm sm:text-base font-extrabold">⚠️ UDCP &amp; Calendar Mismatch Tab (Admin Only)</h3>
-          <p class="text-[11px] text-red-100">UDCP sheet is read-only here — open UDCP tracker in a new tab to fix targets directly</p>
+          <p id="mismatchStatusBar" class="text-[11px] text-red-100">UDCP sheet is read-only here — fix in UDCP or Calendar &amp; click Refresh to re-check real-time status</p>
         </div>
-        <button onclick="closeModal('mismatchModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnMismatchRefresh" onclick="refreshAndRecheckMismatches()" class="px-3 py-1.5 rounded-lg bg-white text-red-800 hover:bg-red-50 font-extrabold text-xs inline-flex items-center gap-1 shadow-xs">
+            <span id="mismatchSyncIcon">↻</span>
+            <span>Refresh &amp; Re-check</span>
+          </button>
+          <button onclick="closeModal('mismatchModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+        </div>
       </div>
+
+      <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <input id="mismatchSearchInput" oninput="renderMismatchTable()" type="text" placeholder="Search hospital name, HOSP-ID, date, agent or mismatch type..." class="w-full sm:w-96 px-3 py-1.5 border border-slate-300 rounded-lg bg-white focus:outline-none focus:border-red-600" />
+        <span id="mismatchCountSummary" class="font-bold text-slate-600"></span>
+      </div>
+
       <div class="p-4 overflow-y-auto text-xs">
         <table class="w-full border-collapse">
-          <thead class="bg-rose-50 text-rose-950 font-bold">
+          <thead class="bg-rose-50 text-rose-950 font-bold sticky top-0">
             <tr>
               <th class="p-2 text-left border">Hospital / ID</th>
               <th class="p-2 text-left border">Mismatch Type</th>
@@ -742,7 +734,7 @@
   <!-- ===================================================================== -->
   <script>
     let currentUser = null;
-    let portalData  = { columns: [], rows: [], directory: [], staffDirectory: [], auditLogs: [], usersList: [], pendingApprovals: [] };
+    let portalData  = { columns: [], rows: [], directory: [], staffDirectory: [], auditLogs: [], usersList: [], pendingApprovals: [], mismatches: [] };
     let kickoffTemplateCache   = [];
     let auditPrepTemplateCache = [];
     let dateFilterMode = 'next30';
@@ -761,14 +753,14 @@
         try {
           currentUser = JSON.parse(savedUser);
           enterAppShell();
-          const cacheKey = 'umbrella_ops_cache_v5_' + currentUser.role + '_' + currentUser.userId;
+          const cacheKey = 'umbrella_ops_cache_v8_' + currentUser.role + '_' + currentUser.userId;
           const cachedPayload = localStorage.getItem(cacheKey);
           if (cachedPayload) {
             portalData = JSON.parse(cachedPayload);
             populateOwnerFilterOptions();
             renderCalendar();
           }
-          fetchDashboardData(false, false);
+          fetchDashboardData(true, false);
         } catch (e) {
           localStorage.removeItem('umbrella_ops_user');
         }
@@ -822,7 +814,7 @@
           currentUser = resp.user;
           localStorage.setItem('umbrella_ops_user', JSON.stringify(currentUser));
           enterAppShell();
-          fetchDashboardData(false, false);
+          fetchDashboardData(true, false);
         } else {
           showAuthAlert(resp.message || 'Login failed', false);
         }
@@ -901,16 +893,22 @@
         });
         if (resp && resp.success) {
           portalData = resp;
-          const cacheKey = 'umbrella_ops_cache_v5_' + currentUser.role + '_' + currentUser.userId;
-          localStorage.setItem(cacheKey, JSON.stringify(resp));
+          const cacheKey = 'umbrella_ops_cache_v8_' + currentUser.role + '_' + currentUser.userId;
+          try { localStorage.setItem(cacheKey, JSON.stringify(resp)); } catch (err) {}
           if (currentUser.role === 'ADMIN') {
             const cnt = (resp.pendingApprovals || []).length;
             document.getElementById('btnPendingApprovals').textContent = '🔔 Pending Approvals (' + cnt + ')';
             const mCnt = (resp.mismatches || []).length;
             document.getElementById('btnMismatchTab').textContent = '⚠️ Mismatch (' + mCnt + ')';
+            if (!document.getElementById('mismatchModal').classList.contains('hidden')) {
+              renderMismatchTable();
+              const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              document.getElementById('mismatchStatusBar').textContent = 'Last checked: ' + nowTime + ' • Live UDCP & Calendar status updated';
+            }
           }
           populateOwnerFilterOptions();
           renderCalendar();
+          return true;
         } else if (!silent) {
           document.getElementById('portalErrorText').textContent = 'Sync warning: ' + ((resp && resp.message) || 'Could not load dashboard rows.');
           document.getElementById('portalErrorBanner').classList.remove('hidden');
@@ -929,6 +927,7 @@
           document.getElementById('loadingIndicator').classList.add('hidden');
         }
       }
+      return false;
     }
 
     function populateOwnerFilterOptions() {
@@ -1047,7 +1046,6 @@
         }
       });
 
-      // Sticky Freeze Header Row
       const thead = document.getElementById('calendarThead');
       let thHtml = '<tr><th class="w-32 p-2.5 text-left border-r border-slate-700 sticky left-0 z-30 bg-slate-900">Date &amp; Ops Load</th>';
       cols.forEach(col => {
@@ -1087,7 +1085,7 @@
             </div>`;
           });
 
-          (cellData.items || []).forEach(item => {
+          (cellData.items || []).forEach((item, itemIdx) => {
             if (statusFlt !== 'ALL' && item.status !== statusFlt) return;
             if (myTasksOnly && !isItemMine(item, col)) return;
             if (searchQ && !item.masked && item.title.toLowerCase().indexOf(searchQ) === -1) return;
@@ -1123,7 +1121,7 @@
                 tagHtml = `<div class="mt-0.5 px-1.5 py-0.5 rounded bg-slate-700/80 text-white text-[9px] font-semibold truncate">🏢 Umbrella Ops</div>`;
               }
 
-              const ctxPayload = JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, item: item }).replace(/'/g, "&#39;");
+              const ctxPayload = JSON.stringify({ rowIndex: row.rowIndex, date: row.date, column: col, remark: cellData.remark, chipIndex: itemIdx, item: item }).replace(/'/g, "&#39;");
 
               pillsHtml += `<button onclick='openDetailModal(${ctxPayload})'
                 class="w-full text-left mb-1 px-2 py-1.5 rounded border text-[11px] font-bold shadow-2xs hover:opacity-90 transition block ${pCls}">
@@ -1191,9 +1189,6 @@
       });
     }
 
-    // -----------------------------------------------------------------------
-    // DETAIL MODAL (STRICT ROLE PERMISSIONS + UDCP LINK FOR ALL VALID CHIPS)
-    // -----------------------------------------------------------------------
     function openDetailModal(ctx) {
       activeEditContext = ctx;
       const item = ctx.item;
@@ -1250,7 +1245,6 @@
         }
       }
 
-      // Payment Box: Strictly visible ONLY to ADMIN & ASSOCIATE (hidden for OPERATOR & FIELD)
       const payBox = document.getElementById('mdlPaymentBox');
       if (canSeeFees) {
         payBox.classList.remove('hidden');
@@ -1275,7 +1269,6 @@
         payBox.classList.add('hidden');
       }
 
-      // UDCP Tracker Link (?hosp=HOSP-xxx): Visible to ADMIN, OPERATOR, ASSOCIATE (own), and FIELD (assigned)
       const extBox  = document.getElementById('mdlExternalLinks');
       const udcpBtn = document.getElementById('mdlUdcpBtn');
       const drvBtn  = document.getElementById('mdlDriveBtn');
@@ -1301,7 +1294,6 @@
         extBox.classList.add('hidden');
       }
 
-      // Stage 3 Audit Prep: Admin & Operator only
       const stg3Box = document.getElementById('mdlStage3Box');
       const btnStg3 = document.getElementById('btnTriggerStage3');
       if (isPrivileged && item.hospId) {
@@ -1321,7 +1313,6 @@
         stg3Box.classList.add('hidden');
       }
 
-      // Status dropdown editable only by ADMIN & OPERATOR; Associate & Field can send message/remark or flag/complete
       const statusSel = document.getElementById('mdlStatusSelect');
       statusSel.value = item.status || 'yellow';
       statusSel.disabled = !isPrivileged;
@@ -1402,9 +1393,9 @@
         if (!resp.success) {
           alert(resp.message || 'Could not save update.');
         }
-        const cacheKey = 'umbrella_ops_cache_v5_' + currentUser.role + '_' + currentUser.userId;
-          try { localStorage.setItem(cacheKey, JSON.stringify(portalData)); } catch (err) {}
-          fetchDashboardData(false, true);
+        const cacheKey = 'umbrella_ops_cache_v8_' + currentUser.role + '_' + currentUser.userId;
+        try { localStorage.setItem(cacheKey, JSON.stringify(portalData)); } catch (err) {}
+        fetchDashboardData(false, true);
       } catch (e) {
         alert('Error saving update. Please check connection.');
       } finally {
@@ -2107,20 +2098,23 @@
       fetchDashboardData(true, false);
     }
 
-
     async function deleteActiveTarget() {
       if (!activeEditContext || currentUser.role !== 'ADMIN') return;
       const item = activeEditContext.item;
-      if (!confirm('Delete "' + item.title + '" from ' + formatDisplayDate(activeEditContext.date) + ' (' + activeEditContext.column + ') in Working Targets calendar?')) return;
+      if (!confirm('Remove "' + item.title + '" from ' + formatDisplayDate(activeEditContext.date) + ' (' + activeEditContext.column + ') in Working Targets calendar?')) return;
 
       const btn = document.getElementById('btnDeleteTarget');
-      if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Removing...'; }
 
-      // Instant optimistic removal from local view
       const rowObj = (portalData.rows || []).find(r => r.date === activeEditContext.date);
       if (rowObj && rowObj.cells && rowObj.cells[activeEditContext.column]) {
-        rowObj.cells[activeEditContext.column].items = (rowObj.cells[activeEditContext.column].items || [])
-          .filter(x => x.title !== item.title);
+        const arr = rowObj.cells[activeEditContext.column].items || [];
+        if (typeof activeEditContext.chipIndex === 'number' && activeEditContext.chipIndex >= 0 && activeEditContext.chipIndex < arr.length) {
+          arr.splice(activeEditContext.chipIndex, 1);
+        } else {
+          const idx = arr.findIndex(x => x.title === item.title && (x.rawLine || '') === (item.rawLine || ''));
+          if (idx !== -1) arr.splice(idx, 1);
+        }
       }
       closeModal('detailModal');
       renderCalendar();
@@ -2132,47 +2126,98 @@
           date: activeEditContext.date,
           column: activeEditContext.column,
           rowIndex: activeEditContext.rowIndex,
+          chipIndex: activeEditContext.chipIndex,
           rawLine: item.rawLine || '',
           hospitalName: item.title,
           hospId: item.hospId || ''
         });
         if (!resp || !resp.success) {
-          alert((resp && resp.message) || 'Could not delete target.');
+          alert((resp && resp.message) || 'Could not remove target.');
           await fetchDashboardData(true, false);
         } else {
+          const cacheKey = 'umbrella_ops_cache_v8_' + currentUser.role + '_' + currentUser.userId;
+          try { localStorage.setItem(cacheKey, JSON.stringify(portalData)); } catch (err) {}
           fetchDashboardData(false, true);
         }
       } catch (e) {
-        alert('Error deleting target.');
+        alert('Error removing target.');
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = '🗑️ Delete Target from Calendar (Admin Only)'; }
+        if (btn) { btn.disabled = false; btn.textContent = '🗑️ Delete This Target from Calendar (Admin Only)'; }
       }
     }
 
     function openMismatchModal() {
       if (!currentUser || currentUser.role !== 'ADMIN') return;
-      const list = portalData.mismatches || [];
-      const tbody = document.getElementById('mismatchTableBody');
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 font-semibold">No mismatches detected between UDCP and Working Targets calendar.</td></tr>';
-      } else {
-        tbody.innerHTML = list.map(m => `
-          <tr class="hover:bg-rose-50/40">
-            <td class="p-2 border font-bold text-slate-900">${m.hospitalName} ${m.hospId ? '<span class="block text-[10px] font-mono text-slate-500">' + m.hospId + '</span>' : ''}</td>
-            <td class="p-2 border"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-900 font-extrabold text-[10px]">${m.type}</span></td>
-            <td class="p-2 border text-[11px]">Date: <strong>${m.udcpDeadline}</strong><br/>Agent: <strong>${m.udcpAgent}</strong></td>
-            <td class="p-2 border text-[11px]">Date: <strong>${m.calDate}</strong><br/>Col: <strong>${m.calAgent}</strong></td>
-            <td class="p-2 border text-slate-700">${m.detail}</td>
-            <td class="p-2 border text-center">
-              <a href="${m.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/'}" target="_blank" rel="noopener noreferrer"
-                 class="inline-block px-2.5 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-[11px]">
-                🔗 Open UDCP
-              </a>
-            </td>
-          </tr>
-        `).join('');
-      }
+      document.getElementById('mismatchSearchInput').value = '';
+      renderMismatchTable();
       document.getElementById('mismatchModal').classList.remove('hidden');
+    }
+
+    async function refreshAndRecheckMismatches() {
+      if (!currentUser || currentUser.role !== 'ADMIN') return;
+      const icon = document.getElementById('mismatchSyncIcon');
+      const btn  = document.getElementById('btnMismatchRefresh');
+      if (icon) icon.classList.add('inline-block', 'animate-spin');
+      if (btn) btn.disabled = true;
+      document.getElementById('mismatchStatusBar').textContent = 'Fetching fresh UDCP & Calendar records and re-checking mismatches...';
+
+      try {
+        await fetchDashboardData(true, false);
+        renderMismatchTable();
+        const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const rem = (portalData.mismatches || []).length;
+        document.getElementById('mismatchStatusBar').textContent = 'Re-checked at ' + nowTime + ' • ' + rem + ' mismatch item(s) found';
+      } finally {
+        if (icon) icon.classList.remove('animate-spin');
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderMismatchTable() {
+      const list = portalData.mismatches || [];
+      const q = String((document.getElementById('mismatchSearchInput') && document.getElementById('mismatchSearchInput').value) || '').trim().toLowerCase();
+
+      const filtered = list.filter(m => {
+        if (!q) return true;
+        const hay = [
+          m.hospitalName || '',
+          m.hospId || '',
+          m.type || '',
+          m.udcpDeadline || '',
+          m.calDate || '',
+          m.udcpAgent || '',
+          m.calAgent || '',
+          m.detail || ''
+        ].join(' ').toLowerCase();
+        return hay.indexOf(q) !== -1;
+      });
+
+      const countEl = document.getElementById('mismatchCountSummary');
+      if (countEl) {
+        countEl.textContent = 'Showing ' + filtered.length + ' of ' + list.length + ' mismatches';
+      }
+
+      const tbody = document.getElementById('mismatchTableBody');
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 font-semibold">No matching mismatches found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(m => `
+        <tr class="hover:bg-rose-50/40">
+          <td class="p-2 border font-bold text-slate-900">${m.hospitalName} ${m.hospId ? '<span class="block text-[10px] font-mono text-slate-500">' + m.hospId + '</span>' : ''}</td>
+          <td class="p-2 border"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-900 font-extrabold text-[10px]">${m.type}</span></td>
+          <td class="p-2 border text-[11px]">Date: <strong>${m.udcpDeadline}</strong><br/>Agent: <strong>${m.udcpAgent}</strong></td>
+          <td class="p-2 border text-[11px]">Date: <strong>${m.calDate}</strong><br/>Col: <strong>${m.calAgent}</strong></td>
+          <td class="p-2 border text-slate-700">${m.detail}</td>
+          <td class="p-2 border text-center">
+            <a href="${m.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/'}" target="_blank" rel="noopener noreferrer"
+               class="inline-block px-2.5 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-[11px]">
+              🔗 Open UDCP
+            </a>
+          </td>
+        </tr>
+      `).join('');
     }
 
     function closeModal(id) {
