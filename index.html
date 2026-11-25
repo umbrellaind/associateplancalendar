@@ -139,6 +139,9 @@
           <button id="btnPendingApprovals" onclick="openApprovalsModal()" class="hidden px-3 py-1.5 rounded-lg bg-amber-300 hover:bg-amber-200 text-red-950 font-extrabold text-xs shadow-sm transition">
             🔔 Pending Approvals (0)
           </button>
+          <button id="btnMismatchTab" onclick="openMismatchModal()" class="hidden px-3 py-1.5 rounded-lg bg-rose-200 hover:bg-rose-100 text-rose-950 font-extrabold text-xs shadow-sm transition">
+            ⚠️ Mismatch (0)
+          </button>
 
           <!-- Admin Only: Audit Log, User Access & End-of-Day Auto-Green -->
           <button id="btnAuditLog" onclick="openAuditModal()" class="hidden px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition">
@@ -376,6 +379,12 @@
           <input id="mdlReschedReason" type="text" placeholder="Mandatory proof / reason for shifting date..." class="w-full px-3 py-2 border border-slate-300 rounded-lg" />
           <button onclick="submitReschedule()" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold">
             Confirm Reschedule &amp; Stamp Next Date
+          </button>
+        </div>
+
+        <div id="mdlAdminDeleteBox" class="hidden pt-3 border-t border-red-200">
+          <button type="button" id="btnDeleteTarget" onclick="deleteActiveTarget()" class="w-full py-2 rounded-lg bg-red-50 hover:bg-red-100 border border-red-300 text-red-800 font-extrabold transition">
+            🗑️ Delete Target from Calendar (Admin Only)
           </button>
         </div>
       </div>
@@ -648,6 +657,36 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- 8B. ADMIN ONLY: MISMATCH TAB MODAL (DIRECT UDCP LINK TO FIX)         -->
+  <!-- ===================================================================== -->
+  <div id="mismatchModal" class="hidden fixed inset-0 z-50 bg-black/55 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="umbrella-gradient px-5 py-3.5 text-white flex items-center justify-between">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold">⚠️ UDCP &amp; Calendar Mismatch Tab (Admin Only)</h3>
+          <p class="text-[11px] text-red-100">UDCP sheet is read-only here — open UDCP tracker in a new tab to fix targets directly</p>
+        </div>
+        <button onclick="closeModal('mismatchModal')" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <div class="p-4 overflow-y-auto text-xs">
+        <table class="w-full border-collapse">
+          <thead class="bg-rose-50 text-rose-950 font-bold">
+            <tr>
+              <th class="p-2 text-left border">Hospital / ID</th>
+              <th class="p-2 text-left border">Mismatch Type</th>
+              <th class="p-2 text-left border">UDCP (Date / Agent)</th>
+              <th class="p-2 text-left border">Calendar (Date / Col)</th>
+              <th class="p-2 text-left border">Details</th>
+              <th class="p-2 text-center border">Action</th>
+            </tr>
+          </thead>
+          <tbody id="mismatchTableBody" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- 9. OLD RECORDS & USER ACCESS MODALS — ADMIN ONLY                      -->
   <!-- ===================================================================== -->
   <div id="auditModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
@@ -829,6 +868,7 @@
 
       document.getElementById('btnAssignHosp').classList.toggle('hidden', !(r === 'ADMIN' || r === 'OPERATOR'));
       document.getElementById('btnPendingApprovals').classList.toggle('hidden', r !== 'ADMIN');
+      document.getElementById('btnMismatchTab').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnAuditLog').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnUsersAuth').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('btnAutoGreen').classList.toggle('hidden', r !== 'ADMIN');
@@ -866,6 +906,8 @@
           if (currentUser.role === 'ADMIN') {
             const cnt = (resp.pendingApprovals || []).length;
             document.getElementById('btnPendingApprovals').textContent = '🔔 Pending Approvals (' + cnt + ')';
+            const mCnt = (resp.mismatches || []).length;
+            document.getElementById('btnMismatchTab').textContent = '⚠️ Mismatch (' + mCnt + ')';
           }
           populateOwnerFilterOptions();
           renderCalendar();
@@ -1290,6 +1332,7 @@
       document.getElementById('btnFieldDone').classList.toggle('hidden', r !== 'FIELD');
       document.getElementById('btnAssocFlag').classList.toggle('hidden', r !== 'ASSOCIATE');
       document.getElementById('mdlRescheduleBox').classList.toggle('hidden', !isPrivileged);
+      document.getElementById('mdlAdminDeleteBox').classList.toggle('hidden', r !== 'ADMIN');
       document.getElementById('mdlNewDate').value = '';
       document.getElementById('mdlReschedReason').value = '';
 
@@ -1359,7 +1402,9 @@
         if (!resp.success) {
           alert(resp.message || 'Could not save update.');
         }
-        await fetchDashboardData(true, false);
+        const cacheKey = 'umbrella_ops_cache_v5_' + currentUser.role + '_' + currentUser.userId;
+          try { localStorage.setItem(cacheKey, JSON.stringify(portalData)); } catch (err) {}
+          fetchDashboardData(false, true);
       } catch (e) {
         alert('Error saving update. Please check connection.');
       } finally {
@@ -2060,6 +2105,74 @@
         approved: approved
       });
       fetchDashboardData(true, false);
+    }
+
+
+    async function deleteActiveTarget() {
+      if (!activeEditContext || currentUser.role !== 'ADMIN') return;
+      const item = activeEditContext.item;
+      if (!confirm('Delete "' + item.title + '" from ' + formatDisplayDate(activeEditContext.date) + ' (' + activeEditContext.column + ') in Working Targets calendar?')) return;
+
+      const btn = document.getElementById('btnDeleteTarget');
+      if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+
+      // Instant optimistic removal from local view
+      const rowObj = (portalData.rows || []).find(r => r.date === activeEditContext.date);
+      if (rowObj && rowObj.cells && rowObj.cells[activeEditContext.column]) {
+        rowObj.cells[activeEditContext.column].items = (rowObj.cells[activeEditContext.column].items || [])
+          .filter(x => x.title !== item.title);
+      }
+      closeModal('detailModal');
+      renderCalendar();
+
+      try {
+        const resp = await callApi({
+          action: 'deleteCalendarTarget',
+          role: currentUser.role,
+          date: activeEditContext.date,
+          column: activeEditContext.column,
+          rowIndex: activeEditContext.rowIndex,
+          rawLine: item.rawLine || '',
+          hospitalName: item.title,
+          hospId: item.hospId || ''
+        });
+        if (!resp || !resp.success) {
+          alert((resp && resp.message) || 'Could not delete target.');
+          await fetchDashboardData(true, false);
+        } else {
+          fetchDashboardData(false, true);
+        }
+      } catch (e) {
+        alert('Error deleting target.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🗑️ Delete Target from Calendar (Admin Only)'; }
+      }
+    }
+
+    function openMismatchModal() {
+      if (!currentUser || currentUser.role !== 'ADMIN') return;
+      const list = portalData.mismatches || [];
+      const tbody = document.getElementById('mismatchTableBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 font-semibold">No mismatches detected between UDCP and Working Targets calendar.</td></tr>';
+      } else {
+        tbody.innerHTML = list.map(m => `
+          <tr class="hover:bg-rose-50/40">
+            <td class="p-2 border font-bold text-slate-900">${m.hospitalName} ${m.hospId ? '<span class="block text-[10px] font-mono text-slate-500">' + m.hospId + '</span>' : ''}</td>
+            <td class="p-2 border"><span class="px-2 py-0.5 rounded bg-rose-100 text-rose-900 font-extrabold text-[10px]">${m.type}</span></td>
+            <td class="p-2 border text-[11px]">Date: <strong>${m.udcpDeadline}</strong><br/>Agent: <strong>${m.udcpAgent}</strong></td>
+            <td class="p-2 border text-[11px]">Date: <strong>${m.calDate}</strong><br/>Col: <strong>${m.calAgent}</strong></td>
+            <td class="p-2 border text-slate-700">${m.detail}</td>
+            <td class="p-2 border text-center">
+              <a href="${m.udcpUrl || 'https://umbrellaind.github.io/nccloserportal/'}" target="_blank" rel="noopener noreferrer"
+                 class="inline-block px-2.5 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-[11px]">
+                🔗 Open UDCP
+              </a>
+            </td>
+          </tr>
+        `).join('');
+      }
+      document.getElementById('mismatchModal').classList.remove('hidden');
     }
 
     function closeModal(id) {
